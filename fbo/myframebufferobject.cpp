@@ -229,7 +229,7 @@ MyFrameBufferObject::MyFrameBufferObject(QQuickItem *parent)
     setMirrorVertically(true);
     setAcceptedMouseButtons(Qt::AllButtons);  // Need this to make sure mousePressEvent is called
 
-    // Trigger a redraw every 10 ms no matter what
+    // // Trigger a redraw every 10 ms no matter what
     // QTimer *redrawTimer = new QTimer(this);
     // QObject::connect(redrawTimer, &QTimer::timeout, this, &MyFrameBufferObject::trigger_redraw);
     // redrawTimer->start(10);
@@ -260,19 +260,40 @@ float MyFrameBufferObject::elevation() const
     return m_elevation;
 }
 
-float MyFrameBufferObject::delta_x() const
+float MyFrameBufferObject::delta_x()
 {
-    return delta_x_pos_;
+    float delta_x_return = delta_x_pos_;
+
+    if (delta_x_pos_ > 0 || delta_x_pos_ < 0)
+    {
+        delta_x_pos_ = 0;  // reset delta x after triggered
+    }
+
+    return delta_x_return;
 }
 
-float MyFrameBufferObject::delta_y() const
+float MyFrameBufferObject::delta_y()
 {
-    return delta_y_pos_;
+    float delta_y_return = delta_y_pos_;
+
+    if (delta_y_pos_ > 0 || delta_y_pos_ < 0)
+    {
+        delta_y_pos_ = 0;  // reset delta y after triggered
+    }
+
+    return delta_y_return;
 }
 
-int MyFrameBufferObject::mouse_angle() const 
+int MyFrameBufferObject::mouse_angle()  
 {
-    return mouse_angle_delta_;
+    int mouse_return = mouse_angle_delta_;
+
+    if (mouse_angle_delta_ > 0 || mouse_angle_delta_ < 0)
+    {
+        mouse_angle_delta_ = 0;  // reset mouse zoom after triggered
+    }
+
+    return mouse_return;
 }
 
 void MyFrameBufferObject::setAzimuth(float azimuth)

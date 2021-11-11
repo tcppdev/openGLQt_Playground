@@ -42,9 +42,9 @@ public:
     float azimuth() const;
     float distance() const;
     float elevation() const;
-    float delta_x() const;
-    float delta_y() const;
-    int mouse_angle() const;
+    float delta_x();
+    float delta_y();
+    int mouse_angle();
     void trigger_redraw();
 
 signals:
@@ -95,6 +95,7 @@ protected:
     }
 
     void wheelEvent(QWheelEvent *event) override {
+        mouse_wheel_activated_ = true;
         mouse_angle_delta_ = event->angleDelta().y();  // Update rendering
         update();
     }
@@ -104,6 +105,7 @@ private:
     float m_elevation;
     float m_distance;
 
+    bool mouse_wheel_activated_ = false;
     bool mouse_pressed_ = false;
     int mouse_x_ = 0;  // Current mouse x coordinate (relative to widget)
     int mouse_y_ = 0;  // Current mouse x coordinate (relative to widget)
