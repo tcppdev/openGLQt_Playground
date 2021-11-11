@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     format.setSamples(4);
     QSurfaceFormat::setDefaultFormat(format);
 
-    qmlRegisterType<MyFrameBufferObject>("MyRenderLibrary", 42, 0, "MeshRenderer");
+    qmlRegisterType<MyFrameBufferObject>("MyRenderLibrary", 42, 0, "MyFrame");
 
     QQuickView view;
     view.setResizeMode(QQuickView::SizeRootObjectToView);

@@ -29,15 +29,15 @@ Rectangle {
 
     color: "white" //  "lightblue"
 
-    // MeshRenderer {
-    //     id: renderer0
-    //     x: 600
-    //     width: 600
-    //     height: 600
-    //     smooth: true
-    // }
+    MyFrame {
+        id: renderer0
+        x: 600
+        width: 600
+        height: 600
+        smooth: true
+    }
 
-    MeshRenderer {
+    MyFrame {
         id: renderer
         width: 600
         height: 600
@@ -49,13 +49,12 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        MouseArea { 
-            anchors.fill: parent
-            enabled: false // set to true and it blocks events from FBO
-            acceptedButtons: Qt.LeftButton
-
-            //onClicked: flashyThing.flash()
-        }
+        // MouseArea { 
+        //     anchors.fill: parent
+        //     enabled: false // set to true and it blocks events from FBO
+        //     acceptedButtons: Qt.LeftButton
+        //     //onClicked: flashyThing.flash()
+        // }
 
         // Rectangle {
         //     id: flashyThing
@@ -107,9 +106,17 @@ Rectangle {
         // }
     }
 
-    CameraControls {
-        camera: renderer
+    Timer {
+        id: render_control  // control refresh rate of our scene
+        interval: 5 // [ms]
+        running: true
+        repeat: true
+        onTriggered: { renderer.request_redraw() } 
+    }
 
+
+    CameraControls {
+        camera: renderer  // sets camera property (property var camera) using  MyFrame instance with id renderer
         anchors.bottom: root.bottom
         anchors.horizontalCenter: root.horizontalCenter
     }

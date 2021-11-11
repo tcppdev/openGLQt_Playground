@@ -24,8 +24,10 @@
 
 #include <cmath>
 #include <Eigen/Core>
+#include <QElapsedTimer>
+#include <QTimer>
 
-#include <meshrenderer.h>
+// #include <meshrenderer.h>
 #include <model.h>
 #include <camera_two.h>
 #include <orbital_camera.h>
@@ -58,7 +60,7 @@ public:
     MyFrameBufferObjectRenderer()
     {
         initializeOpenGLFunctions();   // Initialises current context
-        m_render.initialize();
+        // m_render.initialize();
 
         // Create shaders
         const char* vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/1.model_loading.vs";
@@ -73,12 +75,19 @@ public:
         // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
         stbi_set_flip_vertically_on_load(true);
         
-        // Create model
+        // Create models
         std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/backpack/backpack.obj";
         m_model = new Model(model_path);
 
+        // Get our rocket
+        std::string rocket_path = "/home/t.clar/Repos/openGLQt/resources/objects/rocket_v1/12217_rocket_v1_l1.obj";
+        m_rocket = new Model(rocket_path);
+
         // Camera 
         m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f));  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
+        
+        // start timer
+        timer_.start();
         
         // m_window->resetOpenGLState();
     }
@@ -94,13 +103,13 @@ public:
         m_window = item->window();
 
         MyFrameBufferObject *i = static_cast<MyFrameBufferObject *>(item);
-        m_render.setAzimuth(i->azimuth());
-        m_render.setElevation(i->elevation());
-        m_render.setDistance(i->distance());
+        // m_render.setAzimuth(i->azimuth());
+        // m_render.setElevation(i->elevation());
+        // m_render.setDistance(i->distance());
 
         // 
         m_delta_x = i->delta_x();
-        m_delta_y = i->delta_y(); 
+        m_delta_y = -i->delta_y(); 
         m_mouse_delta_angle = i->mouse_angle();
 
         m_current_azimuth = i->azimuth(); // m_current_azimuth + i->delta_x();//
@@ -134,7 +143,6 @@ public:
         // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
-        
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
@@ -144,7 +152,6 @@ public:
         // Define coordinates
         std::vector<Eigen::Vector3f> the_coordinates;
         float radius = 3;  // [m]
-        float theta = 0;  //  aol [deg]
         float inc = 45;  // inclination angle [deg]
         
         // the_coordinates.push_back(Eigen::Vector3f(0,0,0));
@@ -160,6 +167,26 @@ public:
         Line my_circular_line(the_coordinates, view, projection, 10); 
         my_circular_line.draw();
 
+        // Draw rocket
+
+        float nMilliseconds = static_cast<float>(timer_.elapsed());
+        float theta = nMilliseconds/100;  //  aol [deg]
+        // std::cout << theta << std::endl;
+
+        glm::mat4 model_rocket = glm::mat4(1.0f);
+        Eigen::Vector3f cord_r = sph_to_cart(radius, theta, inc);
+        model_rocket = glm::translate(model_rocket, glm::vec3(cord_r[0], cord_r[1], cord_r[2]));  // translate it
+        model_rocket = glm::scale(model_rocket, glm::vec3(0.001f));	// scale it down
+        // rotations
+        model_rocket = glm::rotate(model_rocket, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
+        model_rocket = glm::rotate(model_rocket, glm::radians(-inc), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
+        model_rocket = glm::rotate(model_rocket, glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f));  // theta-rotation
+
+        // Set shader properties
+        m_shader->use();  
+        m_shader->setMat4("model", model_rocket);
+        m_rocket->Draw(*m_shader);
+        
         m_window->resetOpenGLState();
     }
 
@@ -172,11 +199,12 @@ public:
     }
 
 private:
-    MeshRenderer m_render;
+    // MeshRenderer m_render;
     QQuickWindow *m_window;    
     Shader* m_shader;
     // Shader* m_line_shader;
     Model* m_model;
+    Model* m_rocket;
     OrbitalCamera* m_camera;
 
     // Transforms 
@@ -186,6 +214,8 @@ private:
     float m_delta_x; 
     float m_delta_y;
     int m_mouse_delta_angle;
+
+    QElapsedTimer timer_;
 };
 
 // MyFrameBufferObject implementation
@@ -198,11 +228,21 @@ MyFrameBufferObject::MyFrameBufferObject(QQuickItem *parent)
 {
     setMirrorVertically(true);
     setAcceptedMouseButtons(Qt::AllButtons);  // Need this to make sure mousePressEvent is called
+
+    // Trigger a redraw every 10 ms no matter what
+    // QTimer *redrawTimer = new QTimer(this);
+    // QObject::connect(redrawTimer, &QTimer::timeout, this, &MyFrameBufferObject::trigger_redraw);
+    // redrawTimer->start(10);
 }
 
 QQuickFramebufferObject::Renderer *MyFrameBufferObject::createRenderer() const
 {
     return new MyFrameBufferObjectRenderer;
+}
+
+void MyFrameBufferObject::trigger_redraw()
+{
+    update();
 }
 
 float MyFrameBufferObject::azimuth() const

@@ -21,7 +21,7 @@ public:
 
     void process_mouse_movements(float delta_x, float delta_y, bool constrain_pitch = true)
     {
-        phi_ -= ORBITAL_MOUSE_SENSITIVITY*delta_y;
+        phi_ += ORBITAL_MOUSE_SENSITIVITY*delta_y;
         theta_ += ORBITAL_MOUSE_SENSITIVITY*delta_x;
 
         if (constrain_pitch) {

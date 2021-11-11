@@ -45,6 +45,7 @@ public:
     float delta_x() const;
     float delta_y() const;
     int mouse_angle() const;
+    void trigger_redraw();
 
 signals:
     void azimuthChanged(float azimuth);
@@ -55,6 +56,7 @@ public slots:
     void setAzimuth(float azimuth);
     void setDistance(float distance);
     void setElevation(float elevation);
+    void request_redraw() { update(); }
 
 protected:
     void mousePressEvent(QMouseEvent *e) override {
