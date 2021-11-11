@@ -61,8 +61,8 @@ public:
         m_render.initialize();
 
         // Create shaders
-        const char* vertex_shader_path = "/home/t.clar/Repos/integrating-qq2-with-opengl/shaders/1.model_loading.vs";
-        const char* fragment_shader_path = "/home/t.clar/Repos/integrating-qq2-with-opengl/shaders/1.model_loading.fs";
+        const char* vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/1.model_loading.vs";
+        const char* fragment_shader_path = "/home/t.clar/Repos/openGLQt/shaders/1.model_loading.fs";
         m_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         // Line shader
@@ -74,7 +74,7 @@ public:
         stbi_set_flip_vertically_on_load(true);
         
         // Create model
-        std::string model_path = "/home/t.clar/Repos/integrating-qq2-with-opengl/resources/objects/backpack/backpack.obj";
+        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/backpack/backpack.obj";
         m_model = new Model(model_path);
 
         // Camera 

@@ -45,8 +45,8 @@ public:
         projection_matrix_ = projection_matrix;
 
         // Line shader
-        const char* vertex_line_path = "/home/t.clar/Repos/integrating-qq2-with-opengl/shaders/line_shader.vs";
-        const char* fragment_line_path = "/home/t.clar/Repos/integrating-qq2-with-opengl/shaders/line_shader.fs";
+        const char* vertex_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.vs";
+        const char* fragment_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.fs";
         m_line_shader = new Shader(vertex_line_path, fragment_line_path);
 
         SimpleVertex vertex;
