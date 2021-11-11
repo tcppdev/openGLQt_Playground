@@ -9,7 +9,10 @@
 
 #include <general_inc/shader.h>
 
-constexpr float DEFAULT_LINE_WIDTH = 1;
+constexpr float DEFAULT_LINE_WIDTH = 5;
+constexpr float LINEWIDTH_SCALING_FACTOR = 0.0005; 
+constexpr float MIN_LINE_WIDTH = 1;
+constexpr float MAX_LINE_WIDTH = 20;
 
 struct SimpleVertex {   // just want to make sure 
     // position
@@ -47,7 +50,8 @@ public:
         // Line shader
         const char* vertex_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.vs";
         const char* fragment_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.fs";
-        m_line_shader = new Shader(vertex_line_path, fragment_line_path);
+        const char* geometry_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.gs";
+        m_line_shader = new Shader(vertex_line_path, fragment_line_path, geometry_line_path);
 
         SimpleVertex vertex;
 
@@ -102,17 +106,17 @@ public:
         m_line_shader->setMat4("view", view_matrix_);
         m_line_shader->setMat4("projection", projection_matrix_);
         
-        GLint range[2];
-        glGetIntegerv(GL_ALIASED_LINE_WIDTH_RANGE, range);
-        glGetIntegerv(GL_SMOOTH_LINE_WIDTH_RANGE, range);
+        // Set linewidth uniform
+         
+        if (linewidth_ > MAX_LINE_WIDTH) {linewidth_ = MAX_LINE_WIDTH;}  // Clamping the value
+        else if (linewidth_ < MIN_LINE_WIDTH) {linewidth_ = MIN_LINE_WIDTH;}
+        m_line_shader->setFloat("thickness", linewidth_*LINEWIDTH_SCALING_FACTOR);
 
         // Draw line
-        glLineWidth(linewidth_);   // set linewidth
+        glEnable(GL_MULTISAMPLE);  
         glBindVertexArray(vao_);
         glDrawArrays(GL_LINE_STRIP, 0, vertices_.size()); 
         glBindVertexArray(0);  // Unbind vao
-        
-        glLineWidth(DEFAULT_LINE_WIDTH); // reset linewidth state
     }
 
 private:

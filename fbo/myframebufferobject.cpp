@@ -147,6 +147,11 @@ public:
         float theta = 0;  //  aol [deg]
         float inc = 45;  // inclination angle [deg]
         
+        // the_coordinates.push_back(Eigen::Vector3f(0,0,0));
+        // the_coordinates.push_back(Eigen::Vector3f(4,0,0));
+        // the_coordinates.push_back(Eigen::Vector3f(4,4,0));
+        // the_coordinates.push_back(Eigen::Vector3f(0,0,0));
+
         for (std::size_t i_theta = 0; i_theta <= 360; ++i_theta) {
             Eigen::Vector3f coordinate = sph_to_cart(radius, i_theta, inc);
             the_coordinates.push_back(coordinate);
