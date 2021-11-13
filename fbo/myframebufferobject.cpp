@@ -97,7 +97,7 @@ public:
         m_circular_line = new Line(the_coordinates, 10); 
 
         // My text
-        m_text = new Text("The hacks have begun", 0.0f, 0.0f, 1.0f/600.0f); 
+        m_text = new Text3D("Le rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
 
         // start timer
         timer_.start();
@@ -144,7 +144,7 @@ public:
         // view/projection transformations
         m_camera->process_mouse_scroll(m_mouse_delta_angle);
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, 0.1f, 100.0f);
-        //glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -50.0f, 50.0f);
+        // glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -50.0f, 50.0f);
         // for othographic projection zoom to work, scale the object using mouse scroll rather and 
         // changing the distance of the camera to the object (using the mouse scroll)
 
@@ -161,13 +161,11 @@ public:
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
-        // m_model->Draw(*m_shader);
+        m_model->Draw(*m_shader);
 
         // Lets draw the line
         m_circular_line->draw(view, projection);
 
-
-        
         /// Draw rocket
 
         float nMilliseconds = static_cast<float>(timer_.elapsed());
@@ -189,9 +187,9 @@ public:
         m_rocket->Draw(*m_shader);
 
         /// Render text
-        m_text->update_position(cord_r[0], cord_r[1]);
-        float view_distance = m_camera->get_camera_distance_to_origin();
-        m_text->draw(view_distance, projection);
+        Eigen::Vector3f cord_text = sph_to_cart(1.05*m_radius, theta, m_inc);
+        m_text->update_position(cord_text[0], cord_text[1], cord_text[2]);
+        m_text->draw(view, projection);
 
         m_window->resetOpenGLState();
     }
@@ -212,7 +210,7 @@ private:
     Model* m_model;
     Model* m_rocket;
     Line* m_circular_line;
-    Text* m_text;
+    Text3D* m_text;
     OrbitalCamera* m_camera;
 
     // Transforms 

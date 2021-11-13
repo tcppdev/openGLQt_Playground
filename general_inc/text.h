@@ -19,16 +19,17 @@ struct Character {
 };
 
 
-class Text: protected QOpenGLFunctions_3_3_Core
+class Text3D: protected QOpenGLFunctions_3_3_Core
 {
 public:
     
-    Text(std::string text_to_write, float x, float y, float scale)
+    Text3D(std::string text_to_write, float x, float y, float z, float scale)
     {
         m_text = text_to_write; 
         m_scale = scale;
         m_x = x;
         m_y = y;
+        m_z = z;
 
         initializeOpenGLFunctions();   // Initialise current context  (required)
 
@@ -43,7 +44,7 @@ public:
         setup(font_path);
     }
 
-    ~Text() {
+    ~Text3D() {
         delete m_text_shader;
     }
 
@@ -126,21 +127,31 @@ public:
         glGenBuffers(1, &vbo_);
         glBindVertexArray(vao_);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
+
+        // Positions:
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+
+        // Texture coordinates:
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         
     }
 
-    void update_position(float x, float y) 
+    void update_position(float x, float y, float z) 
     {
         m_x = x;
         m_y = y;
+        m_z = z;
     }
 
-    void draw(float distance_from_camera, glm::mat4 projection_matrix = glm::mat4(1.0f))
+    void draw(glm::mat4 view_matrix, 
+              glm::mat4 projection_matrix,
+              bool fixed_size = true)
     {
         // OpenGL state
         // ------------
@@ -151,21 +162,22 @@ public:
         // activate corresponding render state	
         m_text_shader->use();
 
-        // using an orthographic projection matrix also allows us to specify all text vertex coordinates in screen coordinates
-        // glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-        // glUniformMatrix4fv(glGetUniformLocation(m_text_shader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        // view_matrix = glm::mat4(1.0f);
+		// http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/billboards/
+		m_text_shader->setVec3("camera_right_worldspace", view_matrix[0][0], view_matrix[1][0], view_matrix[2][0]);
+		m_text_shader->setVec3("camera_up_worldspace", view_matrix[0][1], view_matrix[1][1], view_matrix[2][1]);
+        m_text_shader->setVec3("text_position", m_x, m_y, m_z);
+        m_text_shader->setBool("fixed_size", fixed_size);
 
         m_text_shader->setMat4("projection", projection_matrix);
-        // m_text_shader->setMat4("view", view_matrix);
-        m_text_shader->setFloat("distance_from_camera", -distance_from_camera);
+        m_text_shader->setMat4("view", view_matrix);
         m_text_shader->setVec3("textColor", m_color); // Set uniform
         glActiveTexture(GL_TEXTURE0);  // set texture slot to 0th 
         glBindVertexArray(vao_);
 
         // iterate through all characters
-        float start_x = m_x;
-        float start_y = m_y;
+        float start_x = 0.0;
+        float start_y = 0.0;
+        float start_z = 0.0;
 
         std::string::const_iterator c;
         for (c = m_text.begin(); c != m_text.end(); c++) 
@@ -178,14 +190,14 @@ public:
             float w = ch.Size.x * m_scale;
             float h = ch.Size.y * m_scale;
             // update VBO for each character
-            float vertices[6][4] = {
-                { xpos,     ypos + h,   0.0f, 0.0f },            
-                { xpos,     ypos,       0.0f, 1.0f },
-                { xpos + w, ypos,       1.0f, 1.0f },
+            float vertices[6][5] = {
+                { xpos,     ypos + h,  start_z,    0.0f, 0.0f },            
+                { xpos,     ypos,      start_z,    0.0f, 1.0f },
+                { xpos + w, ypos,      start_z,    1.0f, 1.0f },
 
-                { xpos,     ypos + h,   0.0f, 0.0f },
-                { xpos + w, ypos,       1.0f, 1.0f },
-                { xpos + w, ypos + h,   1.0f, 0.0f }           
+                { xpos,     ypos + h,  start_z,    0.0f, 0.0f },
+                { xpos + w, ypos,      start_z,    1.0f, 1.0f },
+                { xpos + w, ypos + h,  start_z,    1.0f, 0.0f }           
             };
             // render glyph texture over quad
             glBindTexture(GL_TEXTURE_2D, ch.TextureID);  // bind the correct texture object to active texture slot (0th)
@@ -218,5 +230,6 @@ private:
     float m_scale;
     float m_x;
     float m_y;
-    glm::vec3 m_color = {1.0, 0.0, 0.0}; // red
+    float m_z;
+    glm::vec3 m_color = {0.0, 0.0, 1.0}; // blue
 };
