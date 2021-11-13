@@ -39,14 +39,11 @@ public:
     
     Line() = delete; // need to at least give some coordinates
 
-    Line(std::vector<Eigen::Vector3f> coordinates, glm::mat4 view_matrix = glm::mat4(1.0f), 
-        glm::mat4 projection_matrix = glm::mat4(1.0f), float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::RED)
+    Line(std::vector<Eigen::Vector3f> coordinates, float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::RED)
     {
         linewidth_ = linewidth;
         linecolor_ = linecolor;
-        view_matrix_ = view_matrix;
-        projection_matrix_ = projection_matrix;
-
+        
         // Line shader
         const char* vertex_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.vs";
         const char* fragment_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.fs";
@@ -96,15 +93,15 @@ public:
         // glBindVertexArray(0);  // Unbind vao
     }
 
-    void draw()
+    void draw(glm::mat4 view_matrix = glm::mat4(1.0f), glm::mat4 projection_matrix = glm::mat4(1.0f))
     {
         m_line_shader->use();  // Bind shader
 
         // Set the uniforms:
         glm::vec4 ourcolor = get_color(linecolor_);  // get the color
         m_line_shader->setVec4("ourColor", ourcolor); // Set uniform
-        m_line_shader->setMat4("view", view_matrix_);
-        m_line_shader->setMat4("projection", projection_matrix_);
+        m_line_shader->setMat4("view", view_matrix);
+        m_line_shader->setMat4("projection", projection_matrix);
         
         // Set linewidth uniform
          
@@ -123,8 +120,6 @@ private:
     Color linecolor_ = Color::RED;
     float linewidth_ = DEFAULT_LINE_WIDTH;
     std::vector<SimpleVertex> vertices_;
-    glm::mat4 view_matrix_ = glm::mat4(1.0f);
-    glm::mat4 projection_matrix_ = glm::mat4(1.0f);
     unsigned int vao_, vbo_;
     
     Shader* m_line_shader;

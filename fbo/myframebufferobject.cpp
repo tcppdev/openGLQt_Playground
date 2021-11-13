@@ -33,6 +33,8 @@
 #include <orbital_camera.h>
 #include <shader.h>
 #include <line.h>
+#include <text.h>
+
 // #include <mesh.h>
 #include <string>
 #include <vector>
@@ -86,6 +88,17 @@ public:
         // Camera 
         m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f));  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
         
+        // My (static) line
+        std::vector<Eigen::Vector3f> the_coordinates;
+        for (std::size_t i_theta = 0; i_theta <= 360; ++i_theta) {
+            Eigen::Vector3f coordinate = sph_to_cart(m_radius, i_theta, m_inc);
+            the_coordinates.push_back(coordinate);
+        }
+        m_circular_line = new Line(the_coordinates, 10); 
+
+        // My text
+        m_text = new Text("The hacks have begun", 0.0f, 0.0f, 1.0f/600.0f); 
+
         // start timer
         timer_.start();
         
@@ -130,8 +143,10 @@ public:
 
         // view/projection transformations
         m_camera->process_mouse_scroll(m_mouse_delta_angle);
-        // glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, -100.0f, 100.0f);
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, 0.1f, 100.0f);
+        //glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -50.0f, 50.0f);
+        // for othographic projection zoom to work, scale the object using mouse scroll rather and 
+        // changing the distance of the camera to the object (using the mouse scroll)
 
         m_camera->process_mouse_movements(m_delta_x, m_delta_y);
         glm::mat4 view = m_camera->get_view_matrix();
@@ -146,47 +161,38 @@ public:
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
-        m_model->Draw(*m_shader);
+        // m_model->Draw(*m_shader);
 
-        // Lets draw a line
-        // Define coordinates
-        std::vector<Eigen::Vector3f> the_coordinates;
-        float radius = 3;  // [m]
-        float inc = 45;  // inclination angle [deg]
+        // Lets draw the line
+        m_circular_line->draw(view, projection);
+
+
         
-        // the_coordinates.push_back(Eigen::Vector3f(0,0,0));
-        // the_coordinates.push_back(Eigen::Vector3f(4,0,0));
-        // the_coordinates.push_back(Eigen::Vector3f(4,4,0));
-        // the_coordinates.push_back(Eigen::Vector3f(0,0,0));
-
-        for (std::size_t i_theta = 0; i_theta <= 360; ++i_theta) {
-            Eigen::Vector3f coordinate = sph_to_cart(radius, i_theta, inc);
-            the_coordinates.push_back(coordinate);
-        }
-
-        Line my_circular_line(the_coordinates, view, projection, 10); 
-        my_circular_line.draw();
-
-        // Draw rocket
+        /// Draw rocket
 
         float nMilliseconds = static_cast<float>(timer_.elapsed());
         float theta = nMilliseconds/100;  //  aol [deg]
         // std::cout << theta << std::endl;
 
         glm::mat4 model_rocket = glm::mat4(1.0f);
-        Eigen::Vector3f cord_r = sph_to_cart(radius, theta, inc);
+        Eigen::Vector3f cord_r = sph_to_cart(m_radius, theta, m_inc);
         model_rocket = glm::translate(model_rocket, glm::vec3(cord_r[0], cord_r[1], cord_r[2]));  // translate it
         model_rocket = glm::scale(model_rocket, glm::vec3(0.001f));	// scale it down
         // rotations
         model_rocket = glm::rotate(model_rocket, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
-        model_rocket = glm::rotate(model_rocket, glm::radians(-inc), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
+        model_rocket = glm::rotate(model_rocket, glm::radians(-m_inc), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
         model_rocket = glm::rotate(model_rocket, glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f));  // theta-rotation
 
         // Set shader properties
         m_shader->use();  
         m_shader->setMat4("model", model_rocket);
         m_rocket->Draw(*m_shader);
-        
+
+        /// Render text
+        m_text->update_position(cord_r[0], cord_r[1]);
+        float view_distance = m_camera->get_camera_distance_to_origin();
+        m_text->draw(view_distance, projection);
+
         m_window->resetOpenGLState();
     }
 
@@ -205,6 +211,8 @@ private:
     // Shader* m_line_shader;
     Model* m_model;
     Model* m_rocket;
+    Line* m_circular_line;
+    Text* m_text;
     OrbitalCamera* m_camera;
 
     // Transforms 
@@ -214,6 +222,10 @@ private:
     float m_delta_x; 
     float m_delta_y;
     int m_mouse_delta_angle;
+
+    // Orbital line properties
+    float m_radius = 3;  // [m]
+    float m_inc = 45;  // inclination angle [deg]
 
     QElapsedTimer timer_;
 };

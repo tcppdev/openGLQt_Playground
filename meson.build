@@ -24,10 +24,14 @@ assimp_dep = dependency('assimp')
 # Getting eigen from wrap (but first tries locally)
 eigen_dep = dependency('eigen', fallback : ['eigen', 'eigen_dep'])
 
+# Freetype dependency for text
+freetype_dep = subproject('freetype').get_variable('freetype_dep')
+
 deps_common = [
   qt5_dep,
   assimp_dep,
-  eigen_dep
+  eigen_dep,
+  freetype_dep
   ]
 
 ### Includes:

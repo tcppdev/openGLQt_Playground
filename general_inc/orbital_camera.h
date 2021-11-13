@@ -45,6 +45,11 @@ public:
         return view_;
     }
 
+    float get_camera_distance_to_origin()
+    {
+        return distance_to_origin_;
+    }
+
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void update_camera_vectors()
