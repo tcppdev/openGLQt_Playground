@@ -39,7 +39,7 @@ public:
     
     Line() = delete; // need to at least give some coordinates
 
-    Line(std::vector<Eigen::Vector3f> coordinates, float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::RED)
+    Line(std::vector<Eigen::Vector3f> coordinates, float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::GREEN)
     {
         linewidth_ = linewidth;
         linecolor_ = linecolor;
@@ -117,7 +117,7 @@ public:
     }
 
 private:
-    Color linecolor_ = Color::RED;
+    Color linecolor_ = Color::GREEN;
     float linewidth_ = DEFAULT_LINE_WIDTH;
     std::vector<SimpleVertex> vertices_;
     unsigned int vao_, vbo_;

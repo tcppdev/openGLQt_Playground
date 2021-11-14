@@ -103,7 +103,7 @@ public:
         the_points.push_back(Eigen::Vector3f(2.0f, -2.0f, -2.0f));
         the_points.push_back(Eigen::Vector3f(-2.0f, 2.0f, 2.0f));
         the_points.push_back(Eigen::Vector3f(-2.0f, -2.0f, 2.0f));
-        m_points = new Point(the_points, 0.2f);
+        m_points = new Point(the_points, 0.2f, Symbol::CIRCLE);
 
         // My text
         m_text = new Text3D("Le rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 

@@ -14,15 +14,19 @@ struct VertexP {   // just want to make sure
     glm::vec3 Position;
 };
 
+enum class Symbol { CIRCLE, SQUARE, TRIANGLE };
+
 class Point: protected QOpenGLFunctions_3_3_Core
 {
 public:
     
     Point() = delete; // need to at least give some coordinates
 
-    Point(std::vector<Eigen::Vector3f> coordinates, float size, glm::vec4 color = glm::vec4(0.0, 1.0, 0.0, 1.0))
+    Point(std::vector<Eigen::Vector3f> coordinates, float size, Symbol symbol = Symbol::SQUARE,
+         glm::vec4 color = glm::vec4(0.0, 1.0, 0.0, 1.0))
     {
         size_ = size;
+        symbol_ = symbol;
         color_ = color;
         
         // Point shader
@@ -84,6 +88,25 @@ public:
         m_point_shader->setMat4("projection", projection_matrix);
         m_point_shader->setFloat("size", size_);
 
+        switch (symbol_) {
+            case Symbol::SQUARE: {
+                m_point_shader->setBool("square", true);
+                break;
+            }
+            case Symbol::CIRCLE: {
+                m_point_shader->setBool("circle", true);
+                break;
+            }
+            case Symbol::TRIANGLE: { 
+                m_point_shader->setBool("triangle", true);
+                break;
+            }
+            default: { 
+                m_point_shader->setBool("triangle", true);
+                break; 
+            }  // draw a triangle
+        }
+
         // Draw line
         glBindVertexArray(vao_);
         glDrawArrays(GL_POINTS, 0, vertices_.size()); 
@@ -91,8 +114,9 @@ public:
     }
 
 private:
-    glm::vec4 color_ = glm::vec4(0.0, 1.0, 0.0, 1.0);
+    glm::vec4 color_ = glm::vec4(1.0, 0.0, 0.0, 1.0);
     float size_ = 5;
+    Symbol symbol_ = Symbol::SQUARE;
     std::vector<VertexP> vertices_;
     unsigned int vao_, vbo_;
     
