@@ -33,6 +33,7 @@
 #include <orbital_camera.h>
 #include <shader.h>
 #include <line.h>
+#include <point.h>
 #include <text.h>
 
 // #include <mesh.h>
@@ -95,6 +96,14 @@ public:
             the_coordinates.push_back(coordinate);
         }
         m_circular_line = new Line(the_coordinates, 10); 
+
+        // My points
+        std::vector<Eigen::Vector3f> the_points;
+        the_points.push_back(Eigen::Vector3f(2.0f, 2.0f, -2.0f));
+        the_points.push_back(Eigen::Vector3f(2.0f, -2.0f, -2.0f));
+        the_points.push_back(Eigen::Vector3f(-2.0f, 2.0f, 2.0f));
+        the_points.push_back(Eigen::Vector3f(-2.0f, -2.0f, 2.0f));
+        m_points = new Point(the_points, 0.2f);
 
         // My text
         m_text = new Text3D("Le rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
@@ -165,6 +174,9 @@ public:
 
         // Lets draw the line
         m_circular_line->draw(view, projection);
+        
+        // Draw points
+        m_points->draw(view, projection);
 
         /// Draw rocket
 
@@ -210,6 +222,7 @@ private:
     Model* m_model;
     Model* m_rocket;
     Line* m_circular_line;
+    Point* m_points;
     Text3D* m_text;
     OrbitalCamera* m_camera;
 
