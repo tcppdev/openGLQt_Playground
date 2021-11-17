@@ -20,34 +20,42 @@
 ****************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Controls 2.15
 import MyRenderLibrary 42.0
 
 Rectangle {
     id: root
-    width: 600
-    height: 600
+    width: 900
+    height: 900
 
     color: "white" //  "lightblue"
 
     MyFrame {
         id: renderer0
-        x: 600
-        width: 600
-        height: 600
+        x: 750
+        width: 750
+        height: 750
+        anchors.top: root.top
+        anchors.leftMargin: 25
+        anchors.topMargin: 25
         smooth: true
     }
 
     MyFrame {
         id: renderer
-        width: 600
-        height: 600
+        width: 750
+        height: 750
+        anchors.left: root.left
+        anchors.top: root.top
+        anchors.leftMargin: 25
+        anchors.topMargin: 25
         smooth: true
 
-        Text {
-            text: "Testing text"
-            anchors.top: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
+        // Text {
+        //     text: "Testing text"
+        //     anchors.top: parent.bottom
+        //     anchors.horizontalCenter: parent.horizontalCenter
+        // }
 
         // MouseArea { 
         //     anchors.fill: parent
@@ -115,11 +123,26 @@ Rectangle {
     }
 
 
+    Switch {
+        id: my_toggle
+        checked : true
+        anchors.left: root.left
+        
+        Text {text: "Show line"; color: "black"; anchors.left: my_toggle.right;
+            anchors.verticalCenter: my_toggle.verticalCenter}
+
+        onClicked: {
+            renderer.set_line_visibility(checked)
+        }
+
+    }
+
     CameraControls {
         camera: renderer  // sets camera property (property var camera) using  MyFrame instance with id renderer
         anchors.bottom: root.bottom
         anchors.horizontalCenter: root.horizontalCenter
     }
+
 
     // ParallelAnimation {
     //     loops: Animation.Infinite

@@ -45,6 +45,7 @@ public:
     float delta_x();
     float delta_y();
     int mouse_angle();
+    bool line_visibility() const;
     void trigger_redraw();
 
 signals:
@@ -57,6 +58,7 @@ public slots:
     void setDistance(float distance);
     void setElevation(float elevation);
     void request_redraw() { update(); }
+    void set_line_visibility(bool visibility);
 
 protected:
     void mousePressEvent(QMouseEvent *e) override {
@@ -112,6 +114,9 @@ private:
     int mouse_angle_delta_ = 0;  // Current mouse scroll delta angle
     float delta_x_pos_ = 0;  // Change in mouse x position
     float delta_y_pos_ = 0;  // Change in mouse x position
+
+    // Toggle
+    bool line_visibility_ = true;
 
 };
 

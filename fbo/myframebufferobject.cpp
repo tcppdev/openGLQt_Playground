@@ -70,11 +70,6 @@ public:
         const char* fragment_shader_path = "/home/t.clar/Repos/openGLQt/shaders/1.model_loading.fs";
         m_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
-        // Line shader
-        // const char* vertex_line_path = "/home/t.clar/Repos/integrating-qq2-with-opengl/shaders/line_shader.vs";
-        // const char* fragment_line_path = "/home/t.clar/Repos/integrating-qq2-with-opengl/shaders/line_shader.fs";
-        // m_line_shader = new Shader(vertex_line_path, fragment_line_path);
-
         // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
         stbi_set_flip_vertically_on_load(true);
         
@@ -106,7 +101,7 @@ public:
         m_points = new Point(the_points, 0.2f, Symbol::CIRCLE);
 
         // My text
-        m_text = new Text3D("Le rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
+        m_text = new Text3D("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
 
         // start timer
         timer_.start();
@@ -137,6 +132,9 @@ public:
         m_current_azimuth = i->azimuth(); // m_current_azimuth + i->delta_x();//
         m_current_elevation = i->elevation(); // m_current_elevation + i->delta_y(); 
         // m_current_distance = i->distance();
+
+        // Line visibility toggle
+        m_draw_line = i->line_visibility();
 
     }
 
@@ -173,7 +171,9 @@ public:
         m_model->Draw(*m_shader);
 
         // Lets draw the line
-        m_circular_line->draw(view, projection);
+        if (m_draw_line) {
+            m_circular_line->draw(view, projection);
+        }
         
         // Draw points
         m_points->draw(view, projection);
@@ -239,6 +239,9 @@ private:
     float m_inc = 45;  // inclination angle [deg]
 
     QElapsedTimer timer_;
+
+    // Line toggle
+    bool m_draw_line = true;
 };
 
 // MyFrameBufferObject implementation
@@ -251,8 +254,8 @@ MyFrameBufferObject::MyFrameBufferObject(QQuickItem *parent)
 {
     setMirrorVertically(true);
     setAcceptedMouseButtons(Qt::AllButtons);  // Need this to make sure mousePressEvent is called
-
-    // // Trigger a redraw every 10 ms no matter what
+    
+    /// Trigger a redraw every 10 ms no matter what:
     // QTimer *redrawTimer = new QTimer(this);
     // QObject::connect(redrawTimer, &QTimer::timeout, this, &MyFrameBufferObject::trigger_redraw);
     // redrawTimer->start(10);
@@ -268,9 +271,19 @@ void MyFrameBufferObject::trigger_redraw()
     update();
 }
 
+void MyFrameBufferObject::set_line_visibility(bool visibility)
+{
+    line_visibility_ = visibility;
+}
+
 float MyFrameBufferObject::azimuth() const
 {
     return m_azimuth;
+}
+
+bool MyFrameBufferObject::line_visibility() const
+{ 
+    return line_visibility_;
 }
 
 float MyFrameBufferObject::distance() const

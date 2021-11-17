@@ -62,7 +62,7 @@ private:
         view_ = glm::lookAt(camera_pos, target_, camera_up_);
     }
 
-    float distance_to_origin_ = 6.0f;
+    float distance_to_origin_ = 8.0f;
     float phi_ = M_PI/2;
     float theta_ = M_PI/2;
     glm::vec3 camera_up_ = glm::vec3(0, 1, 0);   // camera up vector
