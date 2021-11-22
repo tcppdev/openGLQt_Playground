@@ -187,7 +187,7 @@ public:
         glm::mat4 model_rocket = glm::mat4(1.0f);
         Eigen::Vector3f cord_r = sph_to_cart(m_radius, theta, m_inc);
         model_rocket = glm::translate(model_rocket, glm::vec3(cord_r[0], cord_r[1], cord_r[2]));  // translate it
-        model_rocket = glm::scale(model_rocket, glm::vec3(0.001f));	// scale it down
+        model_rocket = glm::scale(model_rocket, glm::vec3(0.001f)); // glm::vec3(0.1f)); // (0.001f));	// scale it down
         // rotations
         model_rocket = glm::rotate(model_rocket, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
         model_rocket = glm::rotate(model_rocket, glm::radians(-m_inc), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
@@ -252,7 +252,7 @@ MyFrameBufferObject::MyFrameBufferObject(QQuickItem *parent)
     , m_elevation(0.0)
     , m_distance(0.0)
 {
-    setMirrorVertically(true);
+    setMirrorVertically(true);  // 
     setAcceptedMouseButtons(Qt::AllButtons);  // Need this to make sure mousePressEvent is called
     
     /// Trigger a redraw every 10 ms no matter what:
