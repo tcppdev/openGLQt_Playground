@@ -3,12 +3,13 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+// #include <glm/gtc/quaternion.hpp>
 
 #include <vector>
 #include <cmath>
 
 const float ORBITAL_MOUSE_SENSITIVITY =  0.01f; 
-const float ORBITAL_ZOOM_SENSITIVITY =  0.01f;
+const float ORBITAL_ZOOM_SENSITIVITY =  0.001f;
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class OrbitalCamera
@@ -25,7 +26,7 @@ public:
         theta_ += ORBITAL_MOUSE_SENSITIVITY*delta_x;
 
         if (constrain_pitch) {
-            if (phi_ > M_PI - 0.001) { phi_ = M_PI; }
+            if (phi_ > M_PI - 0.001) { phi_ = M_PI - 0.001; }
             if (phi_ < 0.001) { phi_ = 0.001; }
         }
 
@@ -60,6 +61,10 @@ private:
         glm::vec3 camera_pos(x, y, z);
 
         view_ = glm::lookAt(camera_pos, target_, camera_up_);
+
+        // glm::mat4 look_mat = glm::lookAt(camera_pos, target_, camera_up_);
+        // glm::quat rotation = glm::quat_cast(look_mat);
+        // view_ = glm::mat4_cast(rotation);
     }
 
     float distance_to_origin_ = 8.0f;

@@ -74,7 +74,7 @@ public:
         stbi_set_flip_vertically_on_load(true);
         
         // Create models
-        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/backpack/backpack.obj";
+        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_110m_rough.obj";
         m_model = new Model(model_path);
 
         // Get our rocket
@@ -150,7 +150,7 @@ public:
 
         // view/projection transformations
         m_camera->process_mouse_scroll(m_mouse_delta_angle);
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, 0.005f, 100.0f);
         // glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -50.0f, 50.0f);
         // for othographic projection zoom to work, scale the object using mouse scroll rather and 
         // changing the distance of the camera to the object (using the mouse scroll)
@@ -163,7 +163,7 @@ public:
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(0.0000004f, 0.0000004f, 0.0000004f));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
