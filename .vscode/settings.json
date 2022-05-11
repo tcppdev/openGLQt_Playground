@@ -86,6 +86,9 @@
         "splines": "cpp",
         "threadpool": "cpp",
         "random": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "codecvt": "c",
+        "variant": "c",
+        "bit": "c"
     }
 }

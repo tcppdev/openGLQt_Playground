@@ -34,6 +34,7 @@
 #include <shader.h>
 #include <line.h>
 #include <point.h>
+#include <cube_map.h>
 #include <text.h>
 
 // #include <mesh.h>
@@ -102,6 +103,9 @@ public:
 
         // My text
         m_text = new Text3D("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
+
+        // My cubemap
+        m_cubemap = new CubeMap("path_to_cube_map");
 
         // start timer
         timer_.start();
@@ -203,6 +207,9 @@ public:
         m_text->update_position(cord_text[0], cord_text[1], cord_text[2]);
         m_text->draw(view, projection);
 
+        // Draw cubemap (last)
+        m_cubemap->draw(view, projection);
+
         m_window->resetOpenGLState();
     }
 
@@ -224,6 +231,7 @@ private:
     Line* m_circular_line;
     Point* m_points;
     Text3D* m_text;
+    CubeMap* m_cubemap;
     OrbitalCamera* m_camera;
 
     // Transforms 
