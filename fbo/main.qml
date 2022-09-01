@@ -25,26 +25,26 @@ import MyRenderLibrary 42.0
 
 Rectangle {
     id: root
-    width: 900
-    height: 900
+    width: 1000
+    height: 1000
 
     color: "white" //  "lightblue"
 
-    MyFrame {
-        id: renderer0
-        x: 750
-        width: 750
-        height: 750
-        anchors.top: root.top
-        anchors.leftMargin: 25
-        anchors.topMargin: 25
-        smooth: true
-    }
+    // MyFrame {
+    //     id: renderer0
+    //     x: 750
+    //     width: 750
+    //     height: 750
+    //     anchors.top: root.top
+    //     anchors.leftMargin: 25
+    //     anchors.topMargin: 25
+    //     smooth: true
+    // }
 
     MyFrame {
         id: renderer
-        width: 750
-        height: 750
+        width: 1000
+        height: 1000
         anchors.left: root.left
         anchors.top: root.top
         anchors.leftMargin: 25

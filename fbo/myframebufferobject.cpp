@@ -75,7 +75,7 @@ public:
         stbi_set_flip_vertically_on_load(true);
         
         // Create models
-        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_110m_rough.obj";
+        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_110m.obj";
         m_model = new Model(model_path);
 
         // Get our rocket
@@ -202,13 +202,13 @@ public:
         m_shader->setMat4("model", model_rocket);
         m_rocket->Draw(*m_shader);
 
-        /// Render text
+        // Draw cubemap (last)
+        m_cubemap->draw(view, projection);
+
+        /// Render text after cubemap (since its a 2D object)
         Eigen::Vector3f cord_text = sph_to_cart(1.05*m_radius, theta, m_inc);
         m_text->update_position(cord_text[0], cord_text[1], cord_text[2]);
         m_text->draw(view, projection);
-
-        // Draw cubemap (last)
-        m_cubemap->draw(view, projection);
 
         m_window->resetOpenGLState();
     }

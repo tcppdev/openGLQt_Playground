@@ -73,12 +73,12 @@ public:
         // Cube map images need to have following names
         vector<std::string> faces
         {
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/opensky/right.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/opensky/left.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/opensky/top.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/opensky/bottom.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/opensky/front.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/opensky/back.jpg"
+            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/right.jpg",
+            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/left.jpg",
+            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/top.jpg",
+            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/bottom.jpg",
+            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/front.jpg",
+            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/back.jpg"
         };
         
         // Load texture 
