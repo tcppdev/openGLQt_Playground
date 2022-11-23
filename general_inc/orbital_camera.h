@@ -9,7 +9,7 @@
 #include <cmath>
 
 const float ORBITAL_MOUSE_SENSITIVITY =  0.01f; 
-const float ORBITAL_ZOOM_SENSITIVITY =  0.001f;
+const float ORBITAL_ZOOM_SENSITIVITY =  0.01f;
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class OrbitalCamera

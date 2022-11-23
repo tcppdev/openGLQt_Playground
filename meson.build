@@ -34,6 +34,23 @@ deps_common = [
   freetype_dep
   ]
 
+
+## FSA dependencies
+# geomancer_proj = subproject('geomancer')
+
+# Build Mahjong
+# geomancer_lib = static_library('geomancer',
+#                              sources : src,
+#                              include_directories : includes,
+#                              link_args : link_args,
+#                              dependencies : mahjong_deps)
+
+# mahjong_dep = declare_dependency(link_with : mahjong_lib,
+#                                  include_directories : includes,
+#                                  dependencies: mahjong_deps)
+
+# geomancer_dep = mahjong_proj.get_variable('mahjong_dep')
+
 ### Includes:
 
 inc_common = [include_directories('lib')] #, include_directories('glad'), 
@@ -98,6 +115,8 @@ processed_moc_files_fbo = qt5_bin.preprocess(
     qresources: qresources_common + qresources_fbo,
     dependencies: qt5_dep
 )
+
+
 
 application_fbo = executable('fbo',
                         sources: ['fbo/main.cpp'] + sources_common + sources_fbo + processed_moc_files_fbo + sources_general,

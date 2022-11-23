@@ -78,6 +78,9 @@ public:
         std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_110m.obj";
         m_model = new Model(model_path);
 
+        // 
+        small_earth = new Model(model_path);
+
         // Get our rocket
         std::string rocket_path = "/home/t.clar/Repos/openGLQt/resources/objects/rocket_v1/12217_rocket_v1_l1.obj";
         m_rocket = new Model(rocket_path);
@@ -116,6 +119,7 @@ public:
     ~MyFrameBufferObjectRenderer(){
         delete m_shader;
         delete m_model;
+        delete small_earth;
         delete m_camera;
     }
 
@@ -174,6 +178,18 @@ public:
         m_shader->setMat4("model", model);
         m_model->Draw(*m_shader);
 
+        // render small earth
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(4.0f, 0.0f, 0.0f));  // elevation rotation
+        // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.00000004f, 0.00000004f, 0.00000004f));	// it's a bit too big for our scene, so scale it down
+        model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
+        model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
+        // model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));  // elevation rotation
+
+        m_shader->setMat4("model", model);
+        small_earth->Draw(*m_shader);
+
         // Lets draw the line
         if (m_draw_line) {
             m_circular_line->draw(view, projection);
@@ -227,6 +243,8 @@ private:
     Shader* m_shader;
     // Shader* m_line_shader;
     Model* m_model;
+
+    Model* small_earth;
     Model* m_rocket;
     Line* m_circular_line;
     Point* m_points;
