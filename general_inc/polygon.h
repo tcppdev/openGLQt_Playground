@@ -11,8 +11,6 @@
 #include <general_inc/line.h>
 #include <general_inc/utilities.h> // colors
 
-constexpr int MAX_POLYGONS = 1000000; // Max number of polygons that can be draw in one call
-
 /// Class for drawin convex shaped polygons 
 // Note: for concave polygon we'd need to use polygon triangulation or stencil buffers hacks
 // https://stackoverflow.com/questions/25463015/black-out-everything-outside-a-polygon/25463682#25463682
@@ -81,11 +79,6 @@ public:
         glGenVertexArrays(1, &vao_);
         glGenBuffers(1, &vbo_);
 
-        glStencilMask(0x00);
-
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
-        
         glBindVertexArray(vao_);  
 
         // load data into buffers
@@ -103,6 +96,7 @@ public:
     void draw(glm::mat4 view_matrix = glm::mat4(1.0f), glm::mat4 projection_matrix = glm::mat4(1.0f))
     {
         m_polygon_shader->use();  // Bind shader
+
         // Set the uniforms:
         glm::vec4 ourcolor = get_color(linecolor_);  // get the color
         m_polygon_shader->setVec4("ourColor", ourcolor); // Set uniform
@@ -129,8 +123,8 @@ private:
     float linewidth_ = DEFAULT_LINE_WIDTH;
     std::vector<std::vector<Eigen::Vector3f>> polygons_;
     GLuint polygons_count_ = 1;
-    GLsizei elements_start_indexes_[MAX_POLYGONS];
-    GLsizei element_vertex_count_[MAX_POLYGONS];
+    GLsizei elements_start_indexes_[MAX_FEATURES];
+    GLsizei element_vertex_count_[MAX_FEATURES];
     std::vector<SimpleVertex> vertices_;
     unsigned int vao_, vbo_;
     

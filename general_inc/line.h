@@ -19,10 +19,12 @@ public:
     
     Line() = delete; // need to at least give some coordinates
 
-    Line(std::vector<Eigen::Vector3f> coordinates, float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::GREEN)
+    Line(std::vector<std::vector<Eigen::Vector3f>> lines, float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::GREEN)
     {
         linewidth_ = linewidth;
         linecolor_ = linecolor;
+        lines_ = lines;
+        lines_count_ = lines.size();
         
         // Line shader
         const char* vertex_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.vs";
@@ -32,15 +34,29 @@ public:
 
         SimpleVertex vertex;
 
-        for (const Eigen::Vector3f& coordinate : coordinates) {// access by const reference  
-            glm::vec3 vector; 
-            // positions
-            vector.x = coordinate[0];
-            vector.y = coordinate[1];
-            vector.z = coordinate[2];
-            vertex.Position = vector;
+        unsigned int element_start_index = 0;
+        unsigned int line_size = 0;
 
-            vertices_.push_back(vertex);
+        for(std::size_t i = 0; i < lines_count_; ++i) {
+
+            const std::vector<Eigen::Vector3f>& line = lines[i];
+            line_size = line.size();
+            element_vertex_count_[i] = (GLsizei)line_size;
+            elements_start_indexes_[i] = (GLuint)element_start_index;
+
+            for (const Eigen::Vector3f& coordinate : line) {// access by const reference  
+                glm::vec3 vector; 
+                // positions
+                vector.x = coordinate[0];
+                vector.y = coordinate[1];
+                vector.z = coordinate[2];
+                vertex.Position = vector;
+
+                vertices_.push_back(vertex);
+            }
+            
+            element_start_index += line_size;
+
         }
 
         initializeOpenGLFunctions();   // Initialise current context  (required)
@@ -89,11 +105,11 @@ public:
         else if (linewidth_ < MIN_LINE_WIDTH) {linewidth_ = MIN_LINE_WIDTH;}
         m_line_shader->setFloat("thickness", linewidth_*LINEWIDTH_SCALING_FACTOR);
 
-        // Draw line
+        // Draw lines
         glEnable(GL_MULTISAMPLE);  
         glBindVertexArray(vao_);
-        // glMultiDrawArrays(GL_LINE_STRIP, line_start_indexes_, line_vertex_count_, line_count_);
-        glDrawArrays(GL_LINE_STRIP, 0, vertices_.size()); 
+        glMultiDrawArrays(GL_LINE_STRIP, elements_start_indexes_, element_vertex_count_, lines_count_); //
+        // glDrawArrays(GL_LINE_STRIP, 0, vertices_.size()); 
         glBindVertexArray(0);  // Unbind vao
     }
 
@@ -102,8 +118,12 @@ private:
     float linewidth_ = DEFAULT_LINE_WIDTH;
     std::vector<SimpleVertex> vertices_;
     unsigned int vao_, vbo_;
-    
     Shader* m_line_shader;
+
+    std::vector<std::vector<Eigen::Vector3f>> lines_;
+    GLuint lines_count_ = 1;
+    GLsizei elements_start_indexes_[MAX_FEATURES];
+    GLsizei element_vertex_count_[MAX_FEATURES];
 };
 
 #endif

@@ -90,18 +90,21 @@ public:
         m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f));  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
         
         // My (static) line
+        std::vector<std::vector<Eigen::Vector3f>> the_lines;
         std::vector<Eigen::Vector3f> the_coordinates;
         for (std::size_t i_theta = 0; i_theta <= 360; ++i_theta) {
             Eigen::Vector3f coordinate = sph_to_cart(m_radius, i_theta, m_inc);
             the_coordinates.push_back(coordinate);
         }
-        m_circular_line = new Line(the_coordinates, 10); 
+        the_lines.push_back(the_coordinates);
+        m_circular_line = new Line(the_lines, 10); 
 
         // My polygon
         std::vector<std::vector<Eigen::Vector3f>> the_polygons;
         std::vector<Eigen::Vector3f> polygon_1_coordinates;
         polygon_1_coordinates.emplace_back(3, 3, 3);
         polygon_1_coordinates.emplace_back(3, 0, 3);
+        polygon_1_coordinates.emplace_back(4, -1, 3);
         polygon_1_coordinates.emplace_back(0, 0, 3);
         polygon_1_coordinates.emplace_back(0, 3, 3);
         polygon_1_coordinates.emplace_back(3, 3, 3);

@@ -8,6 +8,8 @@ constexpr float LINEWIDTH_SCALING_FACTOR = 0.0005;
 constexpr float MIN_LINE_WIDTH = 1;
 constexpr float MAX_LINE_WIDTH = 20;
 
+constexpr int MAX_FEATURES = 1000000; // Max number of features (lines/polygons) that can be draw in one call
+
 /// Looks like colours to me
 enum class Color { RED, GREEN, BLUE, BLACK, WHITE };
 glm::vec4 get_color(Color color)   // use unordered map instead?
