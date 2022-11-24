@@ -12,7 +12,11 @@
 #include <general_inc/utilities.h> // colors
 
 /// Class for drawin convex shaped polygons 
-// Note: for concave polygon we'd need to use polygon triangulation or stencil buffers hacks
+// Note: for concave polygon we'd need to use polygon triangulation 
+// (probably something like https://github.com/delfrrr/delaunator-cpp would be good
+// by first transforming to local flat polygon coordinates, doing the delaunay triangulation and then transforming back
+// to original coordinates) 
+// or could try the stencil buffers hacks
 // https://stackoverflow.com/questions/25463015/black-out-everything-outside-a-polygon/25463682#25463682
 class Polygon: protected QOpenGLFunctions_3_3_Core
 {
