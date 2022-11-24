@@ -89,6 +89,7 @@
         "future": "cpp",
         "codecvt": "c",
         "variant": "c",
-        "bit": "c"
+        "bit": "c",
+        "utilities.h": "c"
     }
 }

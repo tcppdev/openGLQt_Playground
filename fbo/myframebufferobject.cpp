@@ -104,7 +104,7 @@ public:
         std::vector<Eigen::Vector3f> polygon_1_coordinates;
         polygon_1_coordinates.emplace_back(3, 3, 3);
         polygon_1_coordinates.emplace_back(3, 0, 3);
-        polygon_1_coordinates.emplace_back(4, -1, 3);
+        // polygon_1_coordinates.emplace_back(4, -1, 3);
         polygon_1_coordinates.emplace_back(0, 0, 3);
         polygon_1_coordinates.emplace_back(0, 3, 3);
         polygon_1_coordinates.emplace_back(3, 3, 3);

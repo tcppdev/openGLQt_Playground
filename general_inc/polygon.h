@@ -21,9 +21,10 @@ public:
     Polygon() = delete; // need to at least give some coordinates
 
     Polygon(std::vector<std::vector<Eigen::Vector3f>> polygons, Color fill_color = Color::GREEN,
-            float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::GREEN)
+            float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::BLACK)
     {
         linewidth_ = linewidth;
+        fill_color_ = fill_color;
         linecolor_ = linecolor;
         polygons_ = polygons;
         polygons_count_ = polygons.size();
@@ -62,6 +63,9 @@ public:
             element_start_index += polygon_size;
         }
 
+        // Create the polygons outline lines
+        outline_lines_ptr = new Line(polygons, linewidth_, linecolor_); 
+
         initializeOpenGLFunctions();   // Initialise current context  (required)
  
         // Setup opengl states
@@ -89,8 +93,6 @@ public:
         // vertex Positions
         glEnableVertexAttribArray(0);	
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)0);
-
-        // glBindVertexArray(0);  // Unbind vao
     }
 
     void draw(glm::mat4 view_matrix = glm::mat4(1.0f), glm::mat4 projection_matrix = glm::mat4(1.0f))
@@ -98,27 +100,24 @@ public:
         m_polygon_shader->use();  // Bind shader
 
         // Set the uniforms:
-        glm::vec4 ourcolor = get_color(linecolor_);  // get the color
+        glm::vec4 ourcolor = get_color(fill_color_);  // get the color
         m_polygon_shader->setVec4("ourColor", ourcolor); // Set uniform
         m_polygon_shader->setMat4("view", view_matrix);
         m_polygon_shader->setMat4("projection", projection_matrix);
-        
-        // // Set linewidth uniform
-         
-        // if (linewidth_ > MAX_LINE_WIDTH) {linewidth_ = MAX_LINE_WIDTH;}  // Clamping the value
-        // else if (linewidth_ < MIN_LINE_WIDTH) {linewidth_ = MIN_LINE_WIDTH;}
-        // m_line_shader->setFloat("thickness", linewidth_*LINEWIDTH_SCALING_FACTOR);
-
-        // // Draw line
+    
+        // Draw polygons
         glEnable(GL_MULTISAMPLE);  // Antialiasing
         glBindVertexArray(vao_);
         
         glMultiDrawArrays(GL_TRIANGLE_FAN, elements_start_indexes_, element_vertex_count_, polygons_count_); //
         glBindVertexArray(0);  // Unbind vao
+
+        // Draw outline lines
+        outline_lines_ptr->draw(view_matrix, projection_matrix);
     }
 
 private:
-    Color polygoncolor_ = Color::GREEN;
+    Color fill_color_ = Color::GREEN;
     Color linecolor_ = Color::BLUE;
     float linewidth_ = DEFAULT_LINE_WIDTH;
     std::vector<std::vector<Eigen::Vector3f>> polygons_;
@@ -129,4 +128,5 @@ private:
     unsigned int vao_, vbo_;
     
     Shader* m_polygon_shader;
+    Line* outline_lines_ptr;
 };
