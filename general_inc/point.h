@@ -39,7 +39,7 @@ public:
 
         for (const Eigen::Vector3f& coordinate : coordinates) {// access by const reference  
             glm::vec3 vector; 
-            // positions
+            // positions 
             vector.x = coordinate[0];
             vector.y = coordinate[1];
             vector.z = coordinate[2];

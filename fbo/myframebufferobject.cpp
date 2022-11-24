@@ -33,6 +33,7 @@
 #include <orbital_camera.h>
 #include <shader.h>
 #include <line.h>
+#include <polygon.h>
 #include <point.h>
 #include <cube_map.h>
 #include <text.h>
@@ -96,6 +97,24 @@ public:
         }
         m_circular_line = new Line(the_coordinates, 10); 
 
+        // My polygon
+        std::vector<std::vector<Eigen::Vector3f>> the_polygons;
+        std::vector<Eigen::Vector3f> polygon_1_coordinates;
+        polygon_1_coordinates.emplace_back(3, 3, 3);
+        polygon_1_coordinates.emplace_back(3, 0, 3);
+        polygon_1_coordinates.emplace_back(0, 0, 3);
+        polygon_1_coordinates.emplace_back(0, 3, 3);
+        polygon_1_coordinates.emplace_back(3, 3, 3);
+        the_polygons.push_back(polygon_1_coordinates);
+
+        std::vector<Eigen::Vector3f> polygon_2_coordinates;
+        polygon_2_coordinates.emplace_back(0, 3, 0);
+        polygon_2_coordinates.emplace_back(0, 3, 3);
+        polygon_2_coordinates.emplace_back(0, 0, 3);
+        the_polygons.push_back(polygon_2_coordinates);
+
+        m_polygon = new Polygon(the_polygons); 
+
         // My points
         std::vector<Eigen::Vector3f> the_points;
         the_points.push_back(Eigen::Vector3f(2.0f, 2.0f, -2.0f));
@@ -151,8 +170,9 @@ public:
         // m_render.render();
         // don't forget to enable shader before setting uniforms
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_STENCIL_TEST); 
         // glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
         m_shader->use();
 
@@ -194,6 +214,9 @@ public:
         if (m_draw_line) {
             m_circular_line->draw(view, projection);
         }
+
+        // Lets draw the polygon
+        m_polygon->draw(view, projection);
         
         // Draw points
         m_points->draw(view, projection);
@@ -247,6 +270,7 @@ private:
     Model* small_earth;
     Model* m_rocket;
     Line* m_circular_line;
+    Polygon* m_polygon;
     Point* m_points;
     Text3D* m_text;
     CubeMap* m_cubemap;
