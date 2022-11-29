@@ -27,6 +27,16 @@ eigen_dep = dependency('eigen', fallback : ['eigen', 'eigen_dep'])
 # Freetype dependency for text
 freetype_dep = subproject('freetype').get_variable('freetype_dep')
 
+# Get 2D delaunay library
+cmake = import('cmake')
+delaunay_dep = cmake.subproject('delaunator')
+inc_delaunay = include_directories('subprojects/delaunator/include')
+
+# Get 2D polygon triangulation library
+cmake = import('cmake')
+delaunay_dep = cmake.subproject('earcut')
+inc_earcut = include_directories('subprojects/earcut/include')
+
 deps_common = [
   qt5_dep,
   assimp_dep,
@@ -121,7 +131,7 @@ processed_moc_files_fbo = qt5_bin.preprocess(
 application_fbo = executable('fbo',
                         sources: ['fbo/main.cpp'] + sources_common + sources_fbo + processed_moc_files_fbo + sources_general,
                         dependencies: deps_common,
-                        include_directories: inc_common + inc_fbo + inc_ext + inc_general,
+                        include_directories: inc_common + inc_fbo + inc_ext + inc_general + inc_delaunay + inc_earcut,
                         link_args: ['-lstdc++fs'])
 endif
 

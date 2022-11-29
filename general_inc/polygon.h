@@ -11,7 +11,10 @@
 #include <general_inc/line.h>
 #include <general_inc/utilities.h> // colors
 
-/// Class for drawin convex shaped polygons 
+#include "delaunator.hpp"
+#include "mapbox/earcut.hpp"
+
+/// Class for drawing flat convex shaped polygons 
 // Note: for concave polygon we'd need to use polygon triangulation 
 // (probably something like https://github.com/delfrrr/delaunator-cpp would be good
 // by first transforming to local flat polygon coordinates, doing the delaunay triangulation and then transforming back
@@ -25,13 +28,11 @@ public:
     Polygon() = delete; // need to at least give some coordinates
 
     Polygon(std::vector<std::vector<Eigen::Vector3f>> polygons, Color fill_color = Color::GREEN,
-            float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::BLACK)
+            float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::BLACK, bool is_concave = false)
     {
         linewidth_ = linewidth;
         fill_color_ = fill_color;
         linecolor_ = linecolor;
-        polygons_ = polygons;
-        polygons_count_ = polygons.size();
 
         // Polygon shader
         const char* polygon_vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/polygon.vs";
@@ -45,6 +46,31 @@ public:
         
         unsigned int element_start_index = 0;
         unsigned int polygon_size = 0;
+
+        // if (is_concave) { // Triangulate polygons
+        //     for (const std::vector<Eigen::Vector3f>& original_polygon: polygons) {
+        //         std::vector<std::array<double, 2>> projected_polygon;
+        //         // Find two non parallel vectors in polygon
+                
+        //         // Project polygon points to plane (u, v) (using Gram Schmit process)
+        //         // https://www.mathworks.com/matlabcentral/answers/60784-how-do-i-create-orthogonal-basis-based-on-two-almost-perpendicular-vectors
+        //         // Record origin relative to global coordinate system (P0)
+                
+
+        //         // Project points onto plane coordinates (a1, b1)
+
+        //         // Do triangulation
+                
+
+        //         // Project back points to 3D space
+        //         // P = a1*u + b1*v + P0
+
+        //         // Create new triangles
+        //     }
+        // }
+
+        polygons_ = polygons;
+        polygons_count_ = polygons.size();
 
         for(std::size_t i = 0; i < polygons_count_; ++i) {
 
