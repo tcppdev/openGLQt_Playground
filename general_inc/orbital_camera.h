@@ -19,6 +19,23 @@ float lerp(float x0, float x1, float y0, float y1, float xp)
     return y0 + ((y1-y0)/(x1-x0))*(xp - x0);
 }
 
+float exponential(float x0, float x1, float y0, float y1, float xp)
+{
+    float b = std::pow((y1/y0), 1/(x1-x0));
+    float a = y0/std::pow(b, x0);
+
+    if (xp > x0) {
+        std::cout << "less" << std::endl;
+        return y0;
+    }
+    else if (xp < x1) {
+        std::cout << "more" << std::endl;
+        return y1;
+    }
+    
+    return a*std::pow(b, xp);
+}
+
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class OrbitalCamera
 {
@@ -36,9 +53,9 @@ public:
 
     void process_mouse_movements(float delta_x, float delta_y, bool constrain_pitch = true)
     {
-        float mouse_sensitivity = lerp(start_distance_to_origin_, min_distance_to_origin_,
-                                      ORBITAL_MOUSE_SENSITIVITY_START, ORBITAL_MOUSE_SENSITIVITY_END,
-                                      distance_to_origin_);
+        float mouse_sensitivity = exponential(start_distance_to_origin_, min_distance_to_origin_,
+                                            ORBITAL_MOUSE_SENSITIVITY_START, ORBITAL_MOUSE_SENSITIVITY_END,
+                                            distance_to_origin_);
         phi_ += mouse_sensitivity*delta_y;
         theta_ += mouse_sensitivity*delta_x;
 
@@ -53,9 +70,10 @@ public:
     void process_mouse_scroll(int offset)
     {
        //  std::cout << offset << std::endl;
-        float zoom_sensitivity = lerp(start_distance_to_origin_, min_distance_to_origin_,
-                                      ORBITAL_ZOOM_SENSITIVITY_START, ORBITAL_ZOOM_SENSITIVITY_END,
-                                      distance_to_origin_);
+        float zoom_sensitivity = exponential(start_distance_to_origin_, min_distance_to_origin_,
+                                            ORBITAL_ZOOM_SENSITIVITY_START, ORBITAL_ZOOM_SENSITIVITY_END,
+                                            distance_to_origin_);
+        std::cout << zoom_sensitivity << std::endl;
         distance_to_origin_ -= offset*zoom_sensitivity;
 
         if (distance_to_origin_ <= min_distance_to_origin_)
