@@ -50,6 +50,8 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFramebufferObjectFormat>
 
+const float EARTH_RADIUS = 6371000; // [m]
+
 Eigen::Vector3f sph_to_cart(float radius, float theta, float inc)  // all angles in degrees
 {   // convert cylindrical to cartesian coordinates
     double x = radius*std::sin(glm::radians(theta))*std::cos(glm::radians(inc));
@@ -87,7 +89,7 @@ public:
         m_rocket = new Model(rocket_path);
 
         // Camera 
-        m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f));  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
+        m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f), 3*EARTH_RADIUS, 1.1*EARTH_RADIUS);  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
         
         // My (static) line
         std::vector<std::vector<Eigen::Vector3f>> the_lines;
@@ -181,7 +183,7 @@ public:
 
         // view/projection transformations
         m_camera->process_mouse_scroll(m_mouse_delta_angle);
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, 0.005f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, (float)0.001*EARTH_RADIUS, 10*EARTH_RADIUS);  // 
         // glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -50.0f, 50.0f);
         // for othographic projection zoom to work, scale the object using mouse scroll rather and 
         // changing the distance of the camera to the object (using the mouse scroll)
@@ -194,7 +196,8 @@ public:
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.0000004f, 0.0000004f, 0.0000004f));	// it's a bit too big for our scene, so scale it down
+        float earth_scaling = 1.0f;
+        model = glm::scale(model, glm::vec3(earth_scaling, earth_scaling, earth_scaling));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
@@ -203,9 +206,9 @@ public:
 
         // render small earth
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(4.0f, 0.0f, 0.0f));  // elevation rotation
+        model = glm::translate(model, glm::vec3(1.5*EARTH_RADIUS, 0.0f, 0.0f));  // elevation rotation
         // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.00000004f, 0.00000004f, 0.00000004f));	// it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(0.2*earth_scaling, 0.2*earth_scaling, 0.2*earth_scaling));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
         // model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));  // elevation rotation
@@ -233,7 +236,7 @@ public:
         glm::mat4 model_rocket = glm::mat4(1.0f);
         Eigen::Vector3f cord_r = sph_to_cart(m_radius, theta, m_inc);
         model_rocket = glm::translate(model_rocket, glm::vec3(cord_r[0], cord_r[1], cord_r[2]));  // translate it
-        model_rocket = glm::scale(model_rocket, glm::vec3(0.001f)); // glm::vec3(0.1f)); // (0.001f));	// scale it down
+        model_rocket = glm::scale(model_rocket, glm::vec3(1000.0f)); // glm::vec3(0.1f)); // (0.001f));	// scale it down
         // rotations
         model_rocket = glm::rotate(model_rocket, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
         model_rocket = glm::rotate(model_rocket, glm::radians(-m_inc), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
@@ -288,7 +291,7 @@ private:
     int m_mouse_delta_angle;
 
     // Orbital line properties
-    float m_radius = 3;  // [m]
+    float m_radius = 1.2*EARTH_RADIUS;  // [m]
     float m_inc = 45;  // inclination angle [deg]
 
     QElapsedTimer timer_;

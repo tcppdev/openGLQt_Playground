@@ -11,8 +11,8 @@
 const float ORBITAL_MOUSE_SENSITIVITY_START =  0.01f; 
 const float ORBITAL_MOUSE_SENSITIVITY_END =  0.0001f;
 
-const float ORBITAL_ZOOM_SENSITIVITY_START = 0.01f;
-const float ORBITAL_ZOOM_SENSITIVITY_END = 0.0001f;
+const float ORBITAL_ZOOM_SENSITIVITY_START = 10000.0f;
+const float ORBITAL_ZOOM_SENSITIVITY_END = 1000.0f;
 
 float lerp(float x0, float x1, float y0, float y1, float xp)
 {
@@ -25,11 +25,11 @@ float exponential(float x0, float x1, float y0, float y1, float xp)
     float a = y0/std::pow(b, x0);
 
     if (xp > x0) {
-        std::cout << "less" << std::endl;
+        std::cout << "more" << std::endl;
         return y0;
     }
     else if (xp < x1) {
-        std::cout << "more" << std::endl;
+        std::cout << "less" << std::endl;
         return y1;
     }
     
@@ -73,13 +73,14 @@ public:
         float zoom_sensitivity = exponential(start_distance_to_origin_, min_distance_to_origin_,
                                             ORBITAL_ZOOM_SENSITIVITY_START, ORBITAL_ZOOM_SENSITIVITY_END,
                                             distance_to_origin_);
-        std::cout << zoom_sensitivity << std::endl;
+        
         distance_to_origin_ -= offset*zoom_sensitivity;
 
-        if (distance_to_origin_ <= min_distance_to_origin_)
+        if (distance_to_origin_ < min_distance_to_origin_)
         {
             distance_to_origin_ = min_distance_to_origin_;
         }
+        
         update_camera_vectors();
     }
 
