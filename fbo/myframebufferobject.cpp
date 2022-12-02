@@ -101,32 +101,33 @@ public:
         the_lines.push_back(the_coordinates);
         m_circular_line = new Line(the_lines, 10); 
 
+        // 
         // My polygon
         std::vector<std::vector<Eigen::Vector3f>> the_polygons;
         std::vector<Eigen::Vector3f> polygon_1_coordinates;
-        polygon_1_coordinates.emplace_back(3, 3, 3);
-        polygon_1_coordinates.emplace_back(3, 0, 3);
-        // polygon_1_coordinates.emplace_back(4, -1, 3);
-        polygon_1_coordinates.emplace_back(0, 0, 3);
-        polygon_1_coordinates.emplace_back(0, 3, 3);
-        polygon_1_coordinates.emplace_back(3, 3, 3);
+        polygon_1_coordinates.emplace_back(EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS);
+        polygon_1_coordinates.emplace_back(EARTH_RADIUS, 0, EARTH_RADIUS);
+        // polygon_1_coordinates.emplace_back(4, -1, 1);
+        polygon_1_coordinates.emplace_back(0, 0, EARTH_RADIUS);
+        polygon_1_coordinates.emplace_back(0, EARTH_RADIUS, EARTH_RADIUS);
+        polygon_1_coordinates.emplace_back(EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS);
         the_polygons.push_back(polygon_1_coordinates);
 
         std::vector<Eigen::Vector3f> polygon_2_coordinates;
-        polygon_2_coordinates.emplace_back(0, 3, 0);
-        polygon_2_coordinates.emplace_back(0, 3, 3);
-        polygon_2_coordinates.emplace_back(0, 0, 3);
+        polygon_2_coordinates.emplace_back(0, EARTH_RADIUS, 0);
+        polygon_2_coordinates.emplace_back(0, EARTH_RADIUS, EARTH_RADIUS);
+        polygon_2_coordinates.emplace_back(0, 0, EARTH_RADIUS);
         the_polygons.push_back(polygon_2_coordinates);
 
         m_polygon = new Polygon(the_polygons); 
 
         // My points
         std::vector<Eigen::Vector3f> the_points;
-        the_points.push_back(Eigen::Vector3f(2.0f, 2.0f, -2.0f));
-        the_points.push_back(Eigen::Vector3f(2.0f, -2.0f, -2.0f));
-        the_points.push_back(Eigen::Vector3f(-2.0f, 2.0f, 2.0f));
-        the_points.push_back(Eigen::Vector3f(-2.0f, -2.0f, 2.0f));
-        m_points = new Point(the_points, 0.2f, Symbol::CIRCLE);
+        the_points.push_back(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS));
+        the_points.push_back(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS));
+        the_points.push_back(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS));
+        the_points.push_back(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS));
+        m_points = new Point(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
         // My text
         m_text = new Text3D("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
