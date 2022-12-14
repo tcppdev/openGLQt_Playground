@@ -1,3 +1,5 @@
+#pragma once
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -18,18 +20,23 @@ struct Character {
     unsigned int Advance;   // Horizontal offset to advance to next glyph
 };
 
+std::string NEWLINE_CHARACTER = "\\";
 
 class Text3D: protected QOpenGLFunctions_3_3_Core
 {
 public:
     
-    Text3D(std::string text_to_write, float x, float y, float z, float scale)
+    Text3D(std::string text_to_write, float x, float y, float z, float scale, float offset_x_screen = 0, float offset_y_screen = 0)
     {
         m_text = text_to_write; 
         m_scale = scale;
         m_x = x;
         m_y = y;
         m_z = z;
+        
+        // Offset of text in clip/screen space (xpos + m_offset_x_screen and ypos + m_offset_y_screen must be between -1 and 1)
+        m_offset_x_screen = offset_x_screen;
+        m_offset_y_screen = offset_y_screen;
 
         initializeOpenGLFunctions();   // Initialise current context  (required)
 
@@ -184,34 +191,42 @@ public:
         {
             Character ch = m_characters[*c];
 
-            float xpos = start_x + ch.Bearing.x * m_scale;
-            float ypos = start_y - (ch.Size.y - ch.Bearing.y) * m_scale;
+            float xpos = start_x + ch.Bearing.x * m_scale + m_offset_x_screen;
+            float ypos = start_y - (ch.Size.y - ch.Bearing.y) * m_scale + m_offset_y_screen;
 
-            float w = ch.Size.x * m_scale;
-            float h = ch.Size.y * m_scale;
-            // update VBO for each character
-            float vertices[6][5] = {
-                { xpos,     ypos + h,  start_z,    0.0f, 0.0f },            
-                { xpos,     ypos,      start_z,    0.0f, 1.0f },
-                { xpos + w, ypos,      start_z,    1.0f, 1.0f },
+            
+            if (NEWLINE_CHARACTER.find(*c) != std::string::npos)
+            {
+                start_x = 0.0; // Reset to start of line
+                start_y -= 1.1*ch.Size.y * m_scale;
+            }
+            else {
+                float w = ch.Size.x * m_scale;
+                float h = ch.Size.y * m_scale;
+                // update VBO for each character
+                float vertices[6][5] = {
+                    { xpos,     ypos + h,  start_z,    0.0f, 0.0f },            
+                    { xpos,     ypos,      start_z,    0.0f, 1.0f },
+                    { xpos + w, ypos,      start_z,    1.0f, 1.0f },
 
-                { xpos,     ypos + h,  start_z,    0.0f, 0.0f },
-                { xpos + w, ypos,      start_z,    1.0f, 1.0f },
-                { xpos + w, ypos + h,  start_z,    1.0f, 0.0f }           
-            };
-            // render glyph texture over quad
-            glBindTexture(GL_TEXTURE_2D, ch.TextureID);  // bind the correct texture object to active texture slot (0th)
-            // update content of VBO memory
-            glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);  // sets data within a specified region
-            // of the currently bound buffer object. 
-            // be sure to use glBufferSubData and not glBufferData
+                    { xpos,     ypos + h,  start_z,    0.0f, 0.0f },
+                    { xpos + w, ypos,      start_z,    1.0f, 1.0f },
+                    { xpos + w, ypos + h,  start_z,    1.0f, 0.0f }           
+                };
+                // render glyph texture over quad
+                glBindTexture(GL_TEXTURE_2D, ch.TextureID);  // bind the correct texture object to active texture slot (0th)
+                // update content of VBO memory
+                glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);  // sets data within a specified region
+                // of the currently bound buffer object. 
+                // be sure to use glBufferSubData and not glBufferData
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            // render quad
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-            start_x += (ch.Advance >> 6) * m_scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                // render quad
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+                start_x += (ch.Advance >> 6) * m_scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+            }
         }
 
         glBindVertexArray(0);
@@ -232,4 +247,8 @@ private:
     float m_y;
     float m_z;
     glm::vec3 m_color = {0.0, 0.0, 1.0}; // blue
+
+    // Offsets
+    float m_offset_x_screen;
+    float m_offset_y_screen;
 };

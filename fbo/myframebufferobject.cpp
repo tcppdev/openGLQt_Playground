@@ -121,6 +121,20 @@ public:
 
         m_polygon = new Polygon(the_polygons); 
 
+        // Draw circle on sphere?
+        // Method 1: Flat circle
+        // Choose center point (ECEF) and convert it to NED frame
+        // Draw circle in NE coordinates
+        // Convert coordinates back to ECEF
+        // Draw the polygon (using triangle fan)
+
+        // Method 2: Unfilled curve circle
+        // Choose center point (ECEF)
+        // Find point on sphere that make a (projected) circle
+        // https://en.wikipedia.org/wiki/Circle_of_a_sphere
+        // Push points outward from earth using NED frame
+        // Draw line connecting points
+
         // My points
         std::vector<Eigen::Vector3f> the_points;
         the_points.push_back(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS));

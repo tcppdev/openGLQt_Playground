@@ -2,12 +2,15 @@
 #include <Eigen/Core>
 
 #include <vector>
+#include <string>
 #include <stdexcept>
 
 #include <QOpenGLContext> 
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <general_inc/shader.h>
+
+#include <general_inc/text.h>
 
 struct VertexP {   // just want to make sure 
     // position
@@ -23,7 +26,7 @@ public:
     Point() = delete; // need to at least give some coordinates
 
     Point(std::vector<Eigen::Vector3f> coordinates, float size, Symbol symbol = Symbol::SQUARE,
-         glm::vec4 color = glm::vec4(0.0, 1.0, 0.0, 1.0))
+         glm::vec4 color = glm::vec4(0.0, 1.0, 0.0, 1.0), std::string description = "Heks\\newstuff")
     {
         size_ = size;
         symbol_ = symbol;
@@ -47,6 +50,13 @@ public:
 
             vertices_.push_back(vertex);
         }
+
+        // Billboard rectangle
+
+        // Billboard text
+        m_text = new Text3D(description, coordinates.back().x(), coordinates.back().y(), coordinates.back().z(), 1.0f/1200.0f, 0.05, 0.05);//1.0f/600.0f); 
+        //
+        // billboard = new BillboardPolygon(top_left, size_x, size_y, margin_left, margin_top);
 
         initializeOpenGLFunctions();   // Initialise current context  (required)
  
@@ -111,6 +121,10 @@ public:
         glBindVertexArray(vao_);
         glDrawArrays(GL_POINTS, 0, vertices_.size()); 
         glBindVertexArray(0);  // Unbind vao
+
+        // Draw text
+        m_text->draw(view_matrix, projection_matrix, true);
+
     }
 
 private:
@@ -121,4 +135,7 @@ private:
     unsigned int vao_, vbo_;
     
     Shader* m_point_shader;
+
+    // Billboard
+    Text3D* m_text;
 };
