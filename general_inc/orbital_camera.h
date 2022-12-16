@@ -25,11 +25,11 @@ float exponential(float x0, float x1, float y0, float y1, float xp)
     float a = y0/std::pow(b, x0);
 
     if (xp > x0) {
-        std::cout << "more" << std::endl;
+        // std::cout << "more" << std::endl;
         return y0;
     }
     else if (xp < x1) {
-        std::cout << "less" << std::endl;
+        // std::cout << "less" << std::endl;
         return y1;
     }
     

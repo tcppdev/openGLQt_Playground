@@ -8,6 +8,7 @@ uniform float size;
 int delta_angle = 20; // Change in angle between circle triangles
 uniform bool circle = false;
 uniform bool square = false;
+uniform bool fixed_size = false;
 
 // Note 1: Maybe batch rendering will be noticeably faster if we have loads 
 // of entities (circle, triangle, squares) to draw (eg: debris).
@@ -22,6 +23,10 @@ uniform bool square = false;
 void main()
 {
     vec4 center_pos = gl_in[0].gl_Position;   // position in clip space (obtain from vertex shader)
+
+    if (fixed_size) {  // Set size relative to screen space
+        center_pos /= center_pos.w;
+    } 
 
     vec4 previous_pos = vec4(center_pos.x + size, center_pos.yzw);
 
@@ -40,7 +45,7 @@ void main()
             gl_Position = new_pos;
             EmitVertex();
 
-            previous_pos = new_pos; // reset position
+            //previous_pos = new_pos; // reset position
         }
     }
     else if (square) {  // square

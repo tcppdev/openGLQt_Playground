@@ -22,7 +22,10 @@
 #ifndef MYFRAMEBUFFEROBJECT_H
 #define MYFRAMEBUFFEROBJECT_H
 
+#include <Eigen/Core>
+
 #include <QQuickFramebufferObject>
+#include <glm/glm.hpp>
 // #include <QQuickView>
 
 #include <iostream>
@@ -47,6 +50,7 @@ public:
     int mouse_angle();
     bool line_visibility() const;
     void trigger_redraw();
+    std::pair<bool, glm::vec3> mouse_click() const;
 
 signals:
     void azimuthChanged(float azimuth);
@@ -69,6 +73,26 @@ protected:
         // Initial mouse coordinates:
         mouse_x_ = e->x();
         mouse_y_ = e->y();
+    
+        if (e->button() == Qt::RightButton) 
+        {
+            mouse_pressed_ = false;  // Disable moving when clicking
+            mouse_click_ = true;
+
+            // Convert to 3d normalised device coordinates
+            // https://antongerdelan.net/opengl/raycasting.html
+            qreal width_window = this->width();
+            qreal height_window = this->height();
+            float x = (2.0f * mouse_x_) / width_window - 1.0f;
+            float y = 1.0f - (2.0f * mouse_y_) / height_window;
+            float z = 1.0f;
+            ray_ndc_ = glm::vec3(x, y, z);
+
+            // Convert to 4d homogeneous clip coordinates
+            // ray_clip_ = glm::vec4(ray_ndc_.x(), ray_ndc_.y(), -1.0f, 1.0f);
+        }
+
+        update();
     }
 
     void mouseMoveEvent(QMouseEvent *e) override {
@@ -94,6 +118,11 @@ protected:
         mouse_pressed_ = false; 
         delta_x_pos_ = 0;
         delta_y_pos_ = 0;
+
+        if (e->button() == Qt::RightButton) 
+        {
+            mouse_click_ = false;  // release mouse
+        }
     }
 
     void wheelEvent(QWheelEvent *event) override {
@@ -109,15 +138,19 @@ private:
 
     bool mouse_wheel_activated_ = false;
     bool mouse_pressed_ = false;
+    bool mouse_click_ = false; // Mouse clicking (with right click)
     int mouse_x_ = 0;  // Current mouse x coordinate (relative to widget)
     int mouse_y_ = 0;  // Current mouse x coordinate (relative to widget)
     int mouse_angle_delta_ = 0;  // Current mouse scroll delta angle
     float delta_x_pos_ = 0;  // Change in mouse x position
     float delta_y_pos_ = 0;  // Change in mouse x position
 
+    // Mouse ray
+    glm::vec3 ray_ndc_;   // Ray vector in normalised device coordinates
+    glm::vec4 ray_clip_;  // Ray vector in homogeneous clip coordinates
+
     // Toggle
     bool line_visibility_ = true;
-
 };
 
 #endif // MYFRAMEBUFFEROBJECT_H

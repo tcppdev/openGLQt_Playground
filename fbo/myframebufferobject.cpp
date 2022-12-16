@@ -136,11 +136,11 @@ public:
         // Draw line connecting points
 
         // My points
-        std::vector<Eigen::Vector3f> the_points;
-        the_points.push_back(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS));
-        the_points.push_back(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS));
-        the_points.push_back(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS));
-        the_points.push_back(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS));
+        std::vector<GeoPoint> the_points;
+        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS), "Heks\nnewstuff\nthis one is a long line"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This point 2"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "eifjewi"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
         m_points = new Point(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
         // My text
@@ -171,7 +171,6 @@ public:
         // m_render.setElevation(i->elevation());
         // m_render.setDistance(i->distance());
 
-        // 
         m_delta_x = i->delta_x();
         m_delta_y = -i->delta_y(); 
         m_mouse_delta_angle = i->mouse_angle();
@@ -182,6 +181,9 @@ public:
 
         // Line visibility toggle
         m_draw_line = i->line_visibility();
+
+        // Process (right) click input
+        m_click_toggle = i->mouse_click();
 
     }
 
@@ -194,8 +196,6 @@ public:
         // glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
-        m_shader->use();
-
         // view/projection transformations
         m_camera->process_mouse_scroll(m_mouse_delta_angle);
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, (float)0.001*EARTH_RADIUS, 10*EARTH_RADIUS);  // 
@@ -205,6 +205,11 @@ public:
 
         m_camera->process_mouse_movements(m_delta_x, m_delta_y);
         glm::mat4 view = m_camera->get_view_matrix();
+        
+        // Draw cubemap (draw first -> required as text are 2D objects)
+        m_cubemap->draw(view, projection);
+
+        m_shader->use();
         m_shader->setMat4("projection", projection);
         m_shader->setMat4("view", view);
 
@@ -240,6 +245,10 @@ public:
         m_polygon->draw(view, projection);
         
         // Draw points
+        if (m_click_toggle.first) {
+            m_points->test_ray_tracing(view, projection, m_click_toggle.second);
+            // m_click_toggle.first = false;  // desactivate mouse click
+        }
         m_points->draw(view, projection);
 
         /// Draw rocket
@@ -261,9 +270,6 @@ public:
         m_shader->use();  
         m_shader->setMat4("model", model_rocket);
         m_rocket->Draw(*m_shader);
-
-        // Draw cubemap (last)
-        m_cubemap->draw(view, projection);
 
         /// Render text after cubemap (since its a 2D object)
         Eigen::Vector3f cord_text = sph_to_cart(1.05*m_radius, theta, m_inc);
@@ -313,6 +319,9 @@ private:
 
     // Line toggle
     bool m_draw_line = true;
+
+    // Mouse clicking 
+    std::pair<bool, glm::vec3> m_click_toggle = std::make_pair(false, glm::vec3(0.0f));
 };
 
 // MyFrameBufferObject implementation
@@ -345,6 +354,11 @@ void MyFrameBufferObject::trigger_redraw()
 void MyFrameBufferObject::set_line_visibility(bool visibility)
 {
     line_visibility_ = visibility;
+}
+
+std::pair<bool, glm::vec3> MyFrameBufferObject::mouse_click() const
+{
+    return std::make_pair(mouse_click_, ray_ndc_);
 }
 
 float MyFrameBufferObject::azimuth() const

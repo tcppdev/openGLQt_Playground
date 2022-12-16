@@ -28,6 +28,9 @@ glm::vec4 get_color(Color color)   // use unordered map instead?
 struct SimpleVertex {   // just want to make sure 
     // position
     glm::vec3 Position;
+
+    SimpleVertex() {};
+    SimpleVertex(glm::vec3 position_in): Position(position_in) {};
 };
 
 #endif

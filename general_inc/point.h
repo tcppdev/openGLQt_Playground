@@ -11,10 +11,20 @@
 #include <general_inc/shader.h>
 
 #include <general_inc/text.h>
+#include <general_inc/billboard.h>
 
 struct VertexP {   // just want to make sure 
     // position
     glm::vec3 Position;
+};
+
+struct GeoPoint {
+
+    Eigen::Vector3f coordinate;
+    std::string description;
+
+    GeoPoint(Eigen::Vector3f coordinate_in, std::string description_in):
+             coordinate(coordinate_in), description(description_in) {}
 };
 
 enum class Symbol { CIRCLE, SQUARE, TRIANGLE };
@@ -25,12 +35,15 @@ public:
     
     Point() = delete; // need to at least give some coordinates
 
-    Point(std::vector<Eigen::Vector3f> coordinates, float size, Symbol symbol = Symbol::SQUARE,
-         glm::vec4 color = glm::vec4(0.0, 1.0, 0.0, 1.0), std::string description = "Heks\\newstuff")
+    Point(std::vector<GeoPoint> geopoints, float size, 
+         Symbol symbol = Symbol::SQUARE,  bool fixed_size = false,
+         glm::vec4 color = glm::vec4(0.0, 1.0, 0.0, 1.0))
     {
+        geopoints_ = geopoints;
         size_ = size;
         symbol_ = symbol;
         color_ = color;
+        fixed_size_ = fixed_size;
         
         // Point shader
         const char* vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/point.vs";
@@ -40,12 +53,12 @@ public:
 
         VertexP vertex;
 
-        for (const Eigen::Vector3f& coordinate : coordinates) {// access by const reference  
+        for (auto const& geopoint : geopoints) {// access by const reference  
             glm::vec3 vector; 
             // positions 
-            vector.x = coordinate[0];
-            vector.y = coordinate[1];
-            vector.z = coordinate[2];
+            vector.x = geopoint.coordinate[0];
+            vector.y = geopoint.coordinate[1];
+            vector.z = geopoint.coordinate[2];
             vertex.Position = vector;
 
             vertices_.push_back(vertex);
@@ -53,10 +66,14 @@ public:
 
         // Billboard rectangle
 
-        // Billboard text
-        m_text = new Text3D(description, coordinates.back().x(), coordinates.back().y(), coordinates.back().z(), 1.0f/1200.0f, 0.05, 0.05);//1.0f/600.0f); 
-        //
-        // billboard = new BillboardPolygon(top_left, size_x, size_y, margin_left, margin_top);
+        // Billboard text (set ramdon initial positions/text)
+        m_text = new Text3D("hecls\noshfosei\ndfca", 0.0, 0.0, 0.0, 1.0f/2000.0f, 
+                            {1, 0, 0}, 0.0, 0.0);//1.0f/600.0f); 
+
+        m_billboard = new BillboardPolygon(geopoints.back().coordinate, m_text->get_text_screen_size().first, 
+                                           m_text->get_text_screen_size().second, 0, 0, {1.0, 1.0, 1.0, 0.5});
+        // m_billboard = new BillboardPolygon(Eigen::Vector3f({0, 0, 0}), 0.4, 
+        //                                    0.5, 0, 0, {1.0, 1.0, 1.0, 0.5});
 
         initializeOpenGLFunctions();   // Initialise current context  (required)
  
@@ -88,6 +105,66 @@ public:
         // glBindVertexArray(0);  // Unbind vao
     }
 
+    // Args:
+    // ray_ndc: incoming ray in normalised device coordinates
+    bool test_ray_tracing(glm::mat4 view_matrix = glm::mat4(1.0f), glm::mat4 projection_matrix = glm::mat4(1.0f), glm::vec3 ray_ndc = glm::vec3(0.0f)) {
+        
+        // Test ray tracing intersection 
+        draw_description_ = false;
+
+        if (fixed_size_)  // Test intersection in ndc
+        {
+            for (VertexP const& vertex: vertices_)
+            {
+                auto pos = vertex.Position;
+                glm::vec4 vertex_center_clip = projection_matrix * view_matrix * glm::vec4(vertex.Position, 1.0);
+
+                // glm::vec4 ray_clip = glm::vec4(ray_ndc.x, ray_ndc.y, -1.0f, 1.0f); // Get ray in clip coordinates
+                // glm::vec4 ray_eye = glm::inverse(projection_matrix) * ray_clip;  // eye coordinates
+                // ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);  // Now, we only needed to un-project the x,y part, so let's manually set the z,w part to mean "forwards, and not a point".
+                
+                // glm::vec4 ray_world = glm::inverse(view_matrix) * ray_eye;   // Get ray in world coordinates
+                // glm::vec3 ray_world_3d = glm::vec3(ray_world.x, ray_world.y, ray_world.z);  
+                // // don't forget to normalise the vector at some point
+                // ray_world_3d = glm::normalize(ray_world_3d);
+                // std::cout << "\n\n" << std::endl;
+            }
+        }
+        else {  // Intersection in model coordinates
+
+            // std::cout << ray_clip.x << " " << ray_clip.y << " " <<ray_clip.z << " " << ray_clip.w << std::endl;
+
+            for (std::size_t i = 0; i < vertices_.size(); i++)
+            {
+                VertexP vertex = vertices_[i];
+                glm::vec4 vertex_center_clip = projection_matrix * view_matrix * glm::vec4(vertex.Position, 1.0);
+                glm::vec4 vertex_center_clip_norm = glm::normalize(vertex_center_clip);
+                glm::vec4 vertex_center_ndc = vertex_center_clip_norm/vertex_center_clip_norm.w;
+
+                glm::vec4 size_circle_clip = glm::normalize(vertex_center_clip + glm::vec4(size_, 0.0, 0.0, 0.0));
+                glm::vec4 size_circle_ndc = size_circle_clip/size_circle_clip.w;
+
+                float radius_ndc = abs(size_circle_ndc.x - vertex_center_ndc.x);
+                float radius_ray = std::pow(std::pow(ray_ndc.x-vertex_center_ndc.x, 2) + std::pow(ray_ndc.y-vertex_center_ndc.y, 2), 0.5); 
+
+                if (radius_ray <= radius_ndc)
+                {
+                    draw_description_ = true;
+                    description_index = i;
+                }
+            }
+        }
+
+        if (draw_description_)
+        {
+            GeoPoint geopoint = geopoints_[description_index];
+            m_text->change_text(geopoint.description, geopoint.coordinate.x(), geopoint.coordinate.y(), geopoint.coordinate.z());
+            m_billboard->change_billboard(geopoint.coordinate, m_text->get_text_screen_size().first, m_text->get_text_screen_size().second);   
+        }
+
+        return false;
+    }
+    
     void draw(glm::mat4 view_matrix = glm::mat4(1.0f), glm::mat4 projection_matrix = glm::mat4(1.0f))
     {
         m_point_shader->use();  // Bind shader
@@ -96,6 +173,7 @@ public:
         m_point_shader->setVec4("ourColor", color_); // Set uniform
         m_point_shader->setMat4("view", view_matrix);
         m_point_shader->setMat4("projection", projection_matrix);
+        m_point_shader->setBool("fixed_size", fixed_size_);
         m_point_shader->setFloat("size", size_);
 
         switch (symbol_) {
@@ -123,13 +201,19 @@ public:
         glBindVertexArray(0);  // Unbind vao
 
         // Draw text
-        m_text->draw(view_matrix, projection_matrix, true);
-
+        // m_billboard->draw(view_matrix, projection_matrix);
+        
+        if (draw_description_) 
+        {
+            m_billboard->draw(view_matrix, projection_matrix);
+            m_text->draw(view_matrix, projection_matrix, true);
+        }
     }
 
 private:
     glm::vec4 color_ = glm::vec4(1.0, 0.0, 0.0, 1.0);
     float size_ = 5;
+    bool fixed_size_ = false;
     Symbol symbol_ = Symbol::SQUARE;
     std::vector<VertexP> vertices_;
     unsigned int vao_, vbo_;
@@ -138,4 +222,9 @@ private:
 
     // Billboard
     Text3D* m_text;
+    BillboardPolygon* m_billboard;
+
+    std::vector<GeoPoint> geopoints_;
+    bool draw_description_ = false;
+    std::size_t description_index = 0;
 };

@@ -17,7 +17,6 @@ void main()
     // http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/billboards/
     // https://github.com/andersonfreitas/opengl-tutorial-org/tree/master/tutorial18_billboards_and_particles
 
-    vec3 particle_center_wordspace = text_position;
 	vec3 vertex_position_worldspace = (text_position +
          camera_right_worldspace * raw_vertex_pos.x + camera_up_worldspace * raw_vertex_pos.y);
 
@@ -25,11 +24,12 @@ void main()
 	gl_Position = projection * view * vec4(vertex_position_worldspace, 1.0f);
 
 	if (fixed_size) {   // make text fixed size wrt to zoom
-        vertex_position_worldspace = particle_center_wordspace;
+        vertex_position_worldspace = text_position;
         gl_Position = projection * view * vec4(vertex_position_worldspace, 1.0f); // Get the screen-space position of the particle's center
         gl_Position /= gl_Position.w; // Here we have to do the perspective division ourselves.
         gl_Position.xy += raw_vertex_pos.xy; // Move the vertex in directly screen space. No need for CameraUp/Right_worlspace here.
     }
+    gl_Position.z -= 0.000002; // Makes sure text is slightly offset from origin point
 
     TexCoords = texcoords.xy; //vertex.zw;
 }

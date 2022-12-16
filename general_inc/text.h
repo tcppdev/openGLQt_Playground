@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -20,19 +22,22 @@ struct Character {
     unsigned int Advance;   // Horizontal offset to advance to next glyph
 };
 
-std::string NEWLINE_CHARACTER = "\\";
+const char NEWLINE_CHARACTER = '\n';
+const float MULTILINE_TEXT_HEIGHT_OFFSET_FACTOR = 1.2;
 
 class Text3D: protected QOpenGLFunctions_3_3_Core
 {
 public:
     
-    Text3D(std::string text_to_write, float x, float y, float z, float scale, float offset_x_screen = 0, float offset_y_screen = 0)
+    Text3D(std::string text_to_write, float x, float y, float z, float scale, 
+            glm::vec3 color = {0, 0, 0}, float offset_x_screen = 0, float offset_y_screen = 0)
     {
-        m_text = text_to_write; 
+        process_text(text_to_write); 
         m_scale = scale;
         m_x = x;
         m_y = y;
         m_z = z;
+        m_color = color;
         
         // Offset of text in clip/screen space (xpos + m_offset_x_screen and ypos + m_offset_y_screen must be between -1 and 1)
         m_offset_x_screen = offset_x_screen;
@@ -55,6 +60,14 @@ public:
         delete m_text_shader;
     }
 
+    void change_text(std::string text_to_write, float x, float y, float z)
+    {
+        process_text(text_to_write); 
+        m_x = x;
+        m_y = y;
+        m_z = z;
+    }
+    
     void setup(std::string font_path)
     {
         // find path to font
@@ -149,11 +162,64 @@ public:
         
     }
 
+    void process_text(std::string text_to_process)
+    {
+        // Pre-process text we want to write from bottom to top
+        std::vector<std::string> lines_of_text;
+        auto string_stream = std::stringstream{text_to_process};
+
+        for (std::string line; std::getline(string_stream, line, NEWLINE_CHARACTER);) {
+            lines_of_text.push_back(line);
+        }
+        std::reverse(lines_of_text.begin(), lines_of_text.end());
+        lines_of_text_ = lines_of_text;
+
+    }
     void update_position(float x, float y, float z) 
     {
         m_x = x;
         m_y = y;
         m_z = z;
+    }
+
+    std::pair<float, float> get_text_screen_size() {
+
+        float start_x = 0.0;
+        float start_y = 0.0;
+
+        float total_height_of_text = 0;
+        float max_line_width = 0;
+
+        for (std::string const& line_entry: lines_of_text_) {
+            std::string::const_iterator c;
+
+            float max_caracter_height_in_line = 0;
+
+            for (c = line_entry.begin(); c != line_entry.end(); c++) 
+            {
+                Character ch = m_characters[*c];
+                float xpos = start_x + ch.Bearing.x * m_scale + m_offset_x_screen;
+                float character_height = ch.Size.y * m_scale ;
+                if (character_height > max_caracter_height_in_line)
+                {
+                    max_caracter_height_in_line = character_height;
+                }
+                float end_of_character_x_pos = xpos + ch.Size.x * m_scale;
+                if (end_of_character_x_pos > max_line_width)
+                {
+                    max_line_width = end_of_character_x_pos;
+                }
+                start_x += (ch.Advance >> 6) * m_scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+            
+            }
+
+            // At the end of line push text up
+            start_x = 0.0; // Reset to start of line
+            float next_line_height_offset = MULTILINE_TEXT_HEIGHT_OFFSET_FACTOR*max_caracter_height_in_line;
+            start_y += next_line_height_offset;
+            total_height_of_text += abs(next_line_height_offset);
+        }
+        return std::make_pair(max_line_width, total_height_of_text);
     }
 
     void draw(glm::mat4 view_matrix, 
@@ -181,26 +247,39 @@ public:
         glActiveTexture(GL_TEXTURE0);  // set texture slot to 0th 
         glBindVertexArray(vao_);
 
+        // Iterate through characters
+
         // iterate through all characters
         float start_x = 0.0;
         float start_y = 0.0;
         float start_z = 0.0;
+        
+        for (std::string const& line_entry: lines_of_text_) {
+            std::string::const_iterator c;
 
-        std::string::const_iterator c;
-        for (c = m_text.begin(); c != m_text.end(); c++) 
-        {
-            Character ch = m_characters[*c];
+            float max_caracter_height_in_line = 0;
 
-            float xpos = start_x + ch.Bearing.x * m_scale + m_offset_x_screen;
-            float ypos = start_y - (ch.Size.y - ch.Bearing.y) * m_scale + m_offset_y_screen;
-
-            
-            if (NEWLINE_CHARACTER.find(*c) != std::string::npos)
+            float highest_origin = 0;
+            for (c = line_entry.begin(); c != line_entry.end(); c++) 
             {
-                start_x = 0.0; // Reset to start of line
-                start_y -= 1.1*ch.Size.y * m_scale;
+                Character ch = m_characters[*c];
+                float origin = (ch.Size.y - ch.Bearing.y) * m_scale;
+                if (origin > highest_origin) { highest_origin = origin; }
             }
-            else {
+
+            for (c = line_entry.begin(); c != line_entry.end(); c++) 
+            {
+                Character ch = m_characters[*c];
+
+                float xpos = start_x + ch.Bearing.x * m_scale + m_offset_x_screen;
+                float ypos = start_y - (ch.Size.y - ch.Bearing.y) * m_scale + m_offset_y_screen + highest_origin;
+
+                float character_height = ch.Size.y * m_scale;
+                if (character_height > max_caracter_height_in_line)
+                {
+                    max_caracter_height_in_line = character_height;
+                }
+
                 float w = ch.Size.x * m_scale;
                 float h = ch.Size.y * m_scale;
                 // update VBO for each character
@@ -213,6 +292,7 @@ public:
                     { xpos + w, ypos,      start_z,    1.0f, 1.0f },
                     { xpos + w, ypos + h,  start_z,    1.0f, 0.0f }           
                 };
+
                 // render glyph texture over quad
                 glBindTexture(GL_TEXTURE_2D, ch.TextureID);  // bind the correct texture object to active texture slot (0th)
                 // update content of VBO memory
@@ -226,9 +306,15 @@ public:
                 glDrawArrays(GL_TRIANGLES, 0, 6);
                 // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
                 start_x += (ch.Advance >> 6) * m_scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+            
             }
-        }
 
+            // At the end of line push text up
+            start_x = 0.0; // Reset to start of line
+            float next_line_height_offset = MULTILINE_TEXT_HEIGHT_OFFSET_FACTOR*max_caracter_height_in_line;
+            start_y += next_line_height_offset;
+        }
+        
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
         
@@ -242,6 +328,7 @@ private:
     unsigned int vao_, vbo_;
 
     std::string m_text;
+    std::vector<std::string> lines_of_text_;
     float m_scale;
     float m_x;
     float m_y;
@@ -251,4 +338,8 @@ private:
     // Offsets
     float m_offset_x_screen;
     float m_offset_y_screen;
+
+    // Screen size of text
+    float m_text_screensize_x = 0;
+    float m_text_screensize_y = 0;
 };
