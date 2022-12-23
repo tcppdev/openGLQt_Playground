@@ -93,6 +93,10 @@
         "utilities.h": "c",
         "filesystem": "cpp",
         "regex": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "any": "cpp",
+        "slist": "cpp",
+        "pointers": "cpp",
+        "format": "cpp"
     }
 }

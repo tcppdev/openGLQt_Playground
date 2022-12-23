@@ -37,6 +37,7 @@
 #include <point.h>
 #include <cube_map.h>
 #include <text.h>
+#include <delaunay_2_5D.h>
 
 // #include <mesh.h>
 #include <string>
@@ -142,6 +143,24 @@ public:
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "eifjewi"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
         m_points = new Point(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
+
+        // Delaunay triangulation test
+        std::vector<ConstrainedDelaunayContourEdges> contour_edges;
+
+        std::vector<std::vector<std::pair<double, double>>> delaunay_edges_1;
+        // TO-DO: FIX ME lat, long not in order issue
+        delaunay_edges_1.push_back({std::make_pair(0, 0), std::make_pair(10, 0), std::make_pair(10, -10)});  // lat, -long 
+        ConstrainedDelaunayContourEdges contour_edges_1(delaunay_edges_1, false);
+        contour_edges.push_back(contour_edges_1);
+
+        std::vector<std::vector<std::pair<double, double>>> delaunay_edges_2;
+        delaunay_edges_2.push_back({std::make_pair(50, 0), std::make_pair(70, 0), std::make_pair(70, -30), std::make_pair(80, -40),
+                                    std::make_pair(50, -30), std::make_pair(50, 0)});
+        ConstrainedDelaunayContourEdges contour_edges_2(delaunay_edges_2, false);
+
+        contour_edges.push_back(contour_edges_2);
+        m_projected_shapes = new Delaunay2_5D(contour_edges, 1, 1, 5000);
+
 
         // My text
         m_text = new Text3D("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
@@ -251,6 +270,10 @@ public:
         }
         m_points->draw(view, projection);
 
+        // Draw delaunay projection
+        m_projected_shapes->draw(view, projection); 
+
+
         /// Draw rocket
 
         float nMilliseconds = static_cast<float>(timer_.elapsed());
@@ -298,6 +321,7 @@ private:
     Model* m_rocket;
     Line* m_circular_line;
     Polygon* m_polygon;
+    Delaunay2_5D* m_projected_shapes;
     Point* m_points;
     Text3D* m_text;
     CubeMap* m_cubemap;

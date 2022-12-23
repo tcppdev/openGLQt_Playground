@@ -33,9 +33,19 @@ delaunay_dep = cmake.subproject('delaunator')
 inc_delaunay = include_directories('subprojects/delaunator/include')
 
 # Get 2D polygon triangulation library
-cmake = import('cmake')
-delaunay_dep = cmake.subproject('earcut')
+earcut_dep = cmake.subproject('earcut')
 inc_earcut = include_directories('subprojects/earcut/include')
+
+# Get cgal graphics library
+cdt_dep = cmake.subproject('cdt')
+inc_cdt = include_directories('subprojects/cdt/CDT/include')
+
+poly2tri_dep = cmake.subproject('poly2tri')
+inc_poly2tri = include_directories('subprojects/poly2tri')
+
+# FSA dependencies
+lagan_proj = subproject('lagan')
+lagan_dep = lagan_proj.get_variable('lagan_dep')
 
 deps_common = [
   qt5_dep,
@@ -130,8 +140,8 @@ processed_moc_files_fbo = qt5_bin.preprocess(
 
 application_fbo = executable('fbo',
                         sources: ['fbo/main.cpp'] + sources_common + sources_fbo + processed_moc_files_fbo + sources_general,
-                        dependencies: deps_common,
-                        include_directories: inc_common + inc_fbo + inc_ext + inc_general + inc_delaunay + inc_earcut,
+                        dependencies: deps_common + [lagan_dep],
+                        include_directories: inc_common + inc_fbo + inc_ext + inc_general + inc_delaunay + inc_earcut + inc_cdt + inc_poly2tri,
                         link_args: ['-lstdc++fs'])
 endif
 

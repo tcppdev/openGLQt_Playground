@@ -8,7 +8,7 @@ constexpr float LINEWIDTH_SCALING_FACTOR = 0.0005;
 constexpr float MIN_LINE_WIDTH = 1;
 constexpr float MAX_LINE_WIDTH = 20;
 
-constexpr int MAX_FEATURES = 1000000; // Max number of features (lines/polygons) that can be draw in one call
+constexpr int MAX_FEATURES = 100000000; // Max number of features (lines/polygons) that can be draw in one call
 
 /// Looks like colours to me
 enum class Color { RED, GREEN, BLUE, BLACK, WHITE };
@@ -31,6 +31,17 @@ struct SimpleVertex {   // just want to make sure
 
     SimpleVertex() {};
     SimpleVertex(glm::vec3 position_in): Position(position_in) {};
+};
+
+std::vector<double> make_step_vector(double beginning, double step, double end) 
+{
+    std::vector<double> output_vector;
+    output_vector.reserve((end - beginning) / step + 1);
+    while (beginning <= end) {
+        output_vector.push_back(beginning);
+        beginning += step;
+    }
+    return output_vector;
 };
 
 #endif
