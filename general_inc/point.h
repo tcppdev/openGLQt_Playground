@@ -114,21 +114,25 @@ public:
 
         if (fixed_size_)  // Test intersection in ndc
         {
-            for (VertexP const& vertex: vertices_)
-            {
-                auto pos = vertex.Position;
-                glm::vec4 vertex_center_clip = projection_matrix * view_matrix * glm::vec4(vertex.Position, 1.0);
+            // for (std::size_t i = 0; i < vertices_.size(); i++)
+            // {
+                // VertexP vertex = vertices_[i];
+                // glm::vec4 vertex_center_clip = projection_matrix * view_matrix * glm::vec4(vertex.Position, 1.0);
+                // glm::vec4 vertex_center_clip_norm = glm::normalize(vertex_center_clip);
+                // glm::vec4 vertex_center_ndc = vertex_center_clip_norm;
 
-                // glm::vec4 ray_clip = glm::vec4(ray_ndc.x, ray_ndc.y, -1.0f, 1.0f); // Get ray in clip coordinates
-                // glm::vec4 ray_eye = glm::inverse(projection_matrix) * ray_clip;  // eye coordinates
-                // ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);  // Now, we only needed to un-project the x,y part, so let's manually set the z,w part to mean "forwards, and not a point".
-                
-                // glm::vec4 ray_world = glm::inverse(view_matrix) * ray_eye;   // Get ray in world coordinates
-                // glm::vec3 ray_world_3d = glm::vec3(ray_world.x, ray_world.y, ray_world.z);  
-                // // don't forget to normalise the vector at some point
-                // ray_world_3d = glm::normalize(ray_world_3d);
-                // std::cout << "\n\n" << std::endl;
-            }
+                // glm::vec4 size_circle_clip = glm::normalize(vertex_center_clip + glm::vec4(size_, 0.0, 0.0, 0.0));
+                // glm::vec4 size_circle_ndc = size_circle_clip;
+
+                // float radius_ndc = abs(size_circle_ndc.x - vertex_center_ndc.x);
+                // float radius_ray = std::pow(std::pow(ray_ndc.x-vertex_center_ndc.x, 2) + std::pow(ray_ndc.y-vertex_center_ndc.y, 2), 0.5); 
+
+                // if (radius_ray <= radius_ndc)
+                // {
+                //     draw_description_ = true;
+                //     description_index = i;
+                // }
+            // }
         }
         else {  // Intersection in model coordinates
 

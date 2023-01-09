@@ -266,8 +266,12 @@ public:
         // Draw polygons
         glEnable(GL_MULTISAMPLE);  // Antialiasing
         glBindVertexArray(vao_);
-        glMultiDrawArrays(GL_TRIANGLES, elements_start_indexes_, element_vertex_count_, triangles_count_); //
 
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.0, 1.0f); // move polygon backward
+        glMultiDrawArrays(GL_TRIANGLES, elements_start_indexes_, element_vertex_count_, triangles_count_); //
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        
         if (include_wireframe_) {
             // Turn on wireframe mode
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

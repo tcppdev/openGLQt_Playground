@@ -38,6 +38,8 @@
 #include <cube_map.h>
 #include <text.h>
 #include <delaunay_2_5D.h>
+#include <ellipsoid.h>
+#include <OBB.h>
 
 // #include <mesh.h>
 #include <string>
@@ -88,6 +90,14 @@ public:
         // Get our rocket
         std::string rocket_path = "/home/t.clar/Repos/openGLQt/resources/objects/rocket_v1/12217_rocket_v1_l1.obj";
         m_rocket = new Model(rocket_path);
+
+        // Ellipsoid
+        m_ellipsoid = new Ellipsoid(glm::vec3(EARTH_RADIUS, 1.5*EARTH_RADIUS, 0.5*EARTH_RADIUS), 40, 40);
+
+        // OBB 
+        m_obb = new OBB(glm::vec3(-0.75*EARTH_RADIUS, -EARTH_RADIUS, -0.5*EARTH_RADIUS), 
+                        glm::vec3(0.75*EARTH_RADIUS, EARTH_RADIUS, 0.5*EARTH_RADIUS));
+
 
         // Camera 
         m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f), 3*EARTH_RADIUS, 1.1*EARTH_RADIUS);  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
@@ -225,6 +235,24 @@ public:
         m_camera->process_mouse_movements(m_delta_x, m_delta_y);
         glm::mat4 view = m_camera->get_view_matrix();
         
+        ///////////////////////////////////
+        // Evaluate incoming ray properties
+        // See https://github.com/opengl-tutorials/ogl/blob/master/misc05_picking/misc05_picking_custom.cpp
+        glm::vec3 ray_ndc = m_click_toggle.second;
+        glm::vec4 ray_clip_start = glm::vec4(ray_ndc.x, ray_ndc.y, -1.0f, 1.0f); // Ray vector start point in homogeneous clip coordinates
+        glm::vec4 ray_clip_end = glm::vec4(ray_ndc.x, ray_ndc.y, 0.0f, 1.0f); // Ray vector end point in homogeneous clip coordinates
+        
+        // Faster way (just one inverse)
+        glm::mat4 M = glm::inverse(projection * view);
+        glm::vec4 ray_world_start = M * ray_clip_start; ray_world_start /= ray_world_start.w;
+        glm::vec4 ray_world_end   = M * ray_clip_end  ; ray_world_end   /= ray_world_end.w;
+        glm::vec3 ray_direction_world(ray_world_end - ray_world_start);
+
+        glm::vec3 ray_world_origin = glm::vec3(ray_world_start);
+        ray_direction_world = glm::normalize(ray_direction_world);
+
+        ///////////////////////////////////
+
         // Draw cubemap (draw first -> required as text are 2D objects)
         m_cubemap->draw(view, projection);
 
@@ -241,7 +269,7 @@ public:
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
-        m_model->Draw(*m_shader);
+        // m_model->Draw(*m_shader);
 
         // render small earth
         model = glm::mat4(1.0f);
@@ -273,6 +301,36 @@ public:
         // Draw delaunay projection
         m_projected_shapes->draw(view, projection); 
 
+        // Draw ellipsoid
+        glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // elevation rotation
+        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(1.0, 1.0, 1.0));
+        model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
+        model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
+        // m_ellipsoid->draw(view, projection, model_ellipsoid);
+
+        if (m_click_toggle.first) {
+            // glm::mat4 model_obb = glm::mat4(1.0f);
+
+            // if(m_ellipsoid->test_ray_tracing(ray_world_origin, ray_direction_world)) {
+            //     std::cout << "Intersected Ellipse!" << std::endl;
+            // }
+            // else {
+            //     std::cout << "Did not intersect Ellipse "  << std::endl;
+            // }
+        }
+
+        // Draw OBB
+        m_obb->draw(view, projection, model_ellipsoid);
+        if (m_click_toggle.first) {
+            glm::mat4 model_obb = glm::mat4(1.0f);
+
+            if(m_obb->test_ray_tracing(ray_world_origin, ray_direction_world, model_ellipsoid)) {
+                std::cout << "Intersected OBB!" << std::endl;
+            }
+            else {
+                std::cout << "Did not intersect OBB "  << std::endl;
+            }
+        }
 
         /// Draw rocket
 
@@ -319,6 +377,8 @@ private:
 
     Model* small_earth;
     Model* m_rocket;
+    Ellipsoid* m_ellipsoid;
+    OBB* m_obb;
     Line* m_circular_line;
     Polygon* m_polygon;
     Delaunay2_5D* m_projected_shapes;

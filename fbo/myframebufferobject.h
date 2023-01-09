@@ -87,9 +87,6 @@ protected:
             float y = 1.0f - (2.0f * mouse_y_) / height_window;
             float z = 1.0f;
             ray_ndc_ = glm::vec3(x, y, z);
-
-            // Convert to 4d homogeneous clip coordinates
-            // ray_clip_ = glm::vec4(ray_ndc_.x(), ray_ndc_.y(), -1.0f, 1.0f);
         }
 
         update();
@@ -147,7 +144,6 @@ private:
 
     // Mouse ray
     glm::vec3 ray_ndc_;   // Ray vector in normalised device coordinates
-    glm::vec4 ray_clip_;  // Ray vector in homogeneous clip coordinates
 
     // Toggle
     bool line_visibility_ = true;

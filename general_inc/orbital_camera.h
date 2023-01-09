@@ -95,6 +95,10 @@ public:
         return distance_to_origin_;
     }
 
+    glm::vec3 get_camera_current_world_position() {
+        return camera_pos_;
+    }
+
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void update_camera_vectors()
@@ -102,11 +106,11 @@ private:
         float x = distance_to_origin_ * sin(phi_) * cos(theta_);
         float y = distance_to_origin_ * cos(phi_);
         float z = distance_to_origin_ * sin(phi_) * sin(theta_);
-        glm::vec3 camera_pos(x, y, z);
+        camera_pos_ = glm::vec3(x, y, z);
 
-        view_ = glm::lookAt(camera_pos, target_, camera_up_);
+        view_ = glm::lookAt(camera_pos_, target_, camera_up_);
 
-        // glm::mat4 look_mat = glm::lookAt(camera_pos, target_, camera_up_);
+        // glm::mat4 look_mat = glm::lookAt(camera_pos_, target_, camera_up_);
         // glm::quat rotation = glm::quat_cast(look_mat);
         // view_ = glm::mat4_cast(rotation);
     }
@@ -115,6 +119,7 @@ private:
     float phi_ = M_PI/2;
     float theta_ = M_PI/2;
     glm::vec3 camera_up_ = glm::vec3(0, 1, 0);   // camera up vector
+    glm::vec3 camera_pos_ = glm::vec3(0, 0, 0);   // camera world position 
     glm::vec3 target_ = glm::vec3(0, 0, 0);   // Target position
     glm::mat4 view_ = glm::mat4(1.0f);  // view matrix
 

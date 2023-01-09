@@ -317,7 +317,10 @@ public:
         
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
+        // Reset defaults
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
 
     }
 
