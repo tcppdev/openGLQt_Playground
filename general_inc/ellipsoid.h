@@ -104,34 +104,102 @@ class Ellipsoid: protected QOpenGLFunctions_3_3_Core
     }
 
     // ray_ndc: incoming ray in normalised device coordinates
+    // http://www.illusioncatalyst.com/notes_files/mathematics/line_nu_sphere_intersection.php
     bool test_ray_tracing(
-        glm::vec3 ray_world_origin,        // Ray origin, in world space
-        glm::vec3 ray_world_direction     // Ray direction (NOT target position!), in world space. Must be normalize()'d.
+        glm::vec4 ray_world_origin,        // Ray origin, in world space
+        glm::vec4 ray_world_direction,     // Ray direction (NOT target position!), in world space. Must be normalize()'d.
+        glm::mat4 model_matrix
     ){
-        glm::vec3 ray_origin = ray_world_origin; //  - ellipsoid_origin;
-        float a = ((ray_world_direction.x*ray_world_direction.x)/(radius_abc_.x*radius_abc_.x))
-                + ((ray_world_direction.y*ray_world_direction.y)/(radius_abc_.y*radius_abc_.y))
-                + ((ray_world_direction.z*ray_world_direction.z)/(radius_abc_.z*radius_abc_.z));
-        float b = ((2*ray_origin.x*ray_world_direction.x)/(radius_abc_.x*radius_abc_.x))
-                + ((2*ray_origin.y*ray_world_direction.y)/(radius_abc_.y*radius_abc_.y))
-                + ((2*ray_origin.z*ray_world_direction.z)/(radius_abc_.z*radius_abc_.z));
-        float c = ((ray_origin.x*ray_origin.x)/(radius_abc_.x*radius_abc_.x))
-                + ((ray_origin.y*ray_origin.y)/(radius_abc_.y*radius_abc_.y))
-                + ((ray_origin.z*ray_origin.z)/(radius_abc_.z*radius_abc_.z))
-                - 1;
+        // Compute translation matrix
+        glm::mat4 T = glm::mat4(1.0f);
+        T[3].x = model_matrix[3].x;  // Third column
+        T[3].y = model_matrix[3].y;
+        T[3].z = model_matrix[3].z;
 
-        float d = ((b*b)-(4*a*c));
-        if ( d < 0 ) { return false; }
-        else { d = std::pow(d, 0.5); }
-        float hit = (-b + d)/(2*a);
-        float hitsecond = (-b - d)/(2*a);
+        // Compute local axes (wrt world axes) R matrix
+        glm::vec3 x_axis(model_matrix[0].x, model_matrix[0].y, model_matrix[0].z);
+        glm::vec3 y_axis(model_matrix[1].x, model_matrix[1].y, model_matrix[1].z);
+        glm::vec3 z_axis(model_matrix[2].x, model_matrix[2].y, model_matrix[2].z);
+        glm::mat4 R = glm::mat4(1.0f);
+        R[0].x = x_axis.x;
+        R[0].y = x_axis.y;
+        R[0].z = x_axis.z;
+        R[1].x = y_axis.x;
+        R[1].y = y_axis.y;
+        R[1].z = y_axis.z;        
+        R[2].x = z_axis.x;
+        R[2].y = z_axis.y;
+        R[2].z = z_axis.z;
 
-        //DEBUG
-        //std::cout << "Hit1: " << hit << " Hit2: " << hitsecond << std::endl;
+        // Compute scaling matrix
+        glm::mat4 S = glm::mat4(1.0f);
+        float length = glm::length(x_axis);
+        S[0].x = glm::length(x_axis)*radius_abc_[0];
+        S[1].y = glm::length(y_axis)*radius_abc_[1];
+        S[2].z = glm::length(z_axis)*radius_abc_[2];
 
-        return true;
-        // if( hit < hitsecond) { return hit; }
-        // else { return hitsecond; }
+        // Transform matrix
+        glm::mat4 M = T * R * S;
+
+        // Solve intersection
+        glm::vec4 v_dash = inverse(M) * ray_world_direction;
+        glm::vec4 w = inverse(M) * ray_world_origin - glm::vec4({0, 0, 0, 1});
+
+        float a = glm::dot(v_dash, v_dash);
+        float b = 2*glm::dot(v_dash, w);
+        float c = glm::dot(w, w) - 1;
+
+        float determinant = b*b - 4*a*c;
+        std::cout << determinant << std::endl;
+
+        if (determinant < 0) {
+            return false;
+        }
+        else {
+            
+            float t; 
+
+            if (determinant > 0) {
+                float t1 = (-b + std::pow(determinant, 0.5))/(2*a);
+                float t2 = (-b - std::pow(determinant, 0.5))/(2*a);
+                t = std::min({t1, t2});
+            }
+            else {  // determinant == 0
+                t = -b/(2*a);
+            }
+
+            glm::vec3 intersection_point = ray_world_origin + t * ray_world_direction;
+            std::cout << intersection_point.x << " " << intersection_point.y << " " << intersection_point.z << std::endl;
+
+            return true;
+        }
+        
+        // // glm::mat4 M2 = S * R * T;
+
+        // glm::vec3 ray_origin = ray_world_origin; //  - ellipsoid_origin;
+        // float a = ((ray_world_direction.x*ray_world_direction.x)/(radius_abc_.x*radius_abc_.x))
+        //         + ((ray_world_direction.y*ray_world_direction.y)/(radius_abc_.y*radius_abc_.y))
+        //         + ((ray_world_direction.z*ray_world_direction.z)/(radius_abc_.z*radius_abc_.z));
+        // float b = ((2*ray_origin.x*ray_world_direction.x)/(radius_abc_.x*radius_abc_.x))
+        //         + ((2*ray_origin.y*ray_world_direction.y)/(radius_abc_.y*radius_abc_.y))
+        //         + ((2*ray_origin.z*ray_world_direction.z)/(radius_abc_.z*radius_abc_.z));
+        // float c = ((ray_origin.x*ray_origin.x)/(radius_abc_.x*radius_abc_.x))
+        //         + ((ray_origin.y*ray_origin.y)/(radius_abc_.y*radius_abc_.y))
+        //         + ((ray_origin.z*ray_origin.z)/(radius_abc_.z*radius_abc_.z))
+        //         - 1;
+
+        // float d = ((b*b)-(4*a*c));
+        // if ( d < 0 ) { return false; }
+        // else { d = std::pow(d, 0.5); }
+        // float hit = (-b + d)/(2*a);
+        // float hitsecond = (-b - d)/(2*a);
+
+        // //DEBUG
+        // //std::cout << "Hit1: " << hit << " Hit2: " << hitsecond << std::endl;
+
+        // return true;
+        // // if( hit < hitsecond) { return hit; }
+        // // else { return hitsecond; }
 
     }
 

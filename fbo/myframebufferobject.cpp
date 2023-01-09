@@ -246,9 +246,9 @@ public:
         glm::mat4 M = glm::inverse(projection * view);
         glm::vec4 ray_world_start = M * ray_clip_start; ray_world_start /= ray_world_start.w;
         glm::vec4 ray_world_end   = M * ray_clip_end  ; ray_world_end   /= ray_world_end.w;
-        glm::vec3 ray_direction_world(ray_world_end - ray_world_start);
+        glm::vec4 ray_direction_world(ray_world_end - ray_world_start);
 
-        glm::vec3 ray_world_origin = glm::vec3(ray_world_start);
+        glm::vec4 ray_world_origin = ray_world_start;
         ray_direction_world = glm::normalize(ray_direction_world);
 
         ///////////////////////////////////
@@ -302,21 +302,19 @@ public:
         m_projected_shapes->draw(view, projection); 
 
         // Draw ellipsoid
-        glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // elevation rotation
-        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(1.0, 1.0, 1.0));
+        glm::mat4 model_ellipsoid = glm::scale(glm::mat4(1.0f), glm::vec3(1.0, 1.0, 1.0));
+        model_ellipsoid = glm::translate(model_ellipsoid, glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // elevation rotation
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
-        // m_ellipsoid->draw(view, projection, model_ellipsoid);
+        m_ellipsoid->draw(view, projection, model_ellipsoid);
 
         if (m_click_toggle.first) {
-            // glm::mat4 model_obb = glm::mat4(1.0f);
-
-            // if(m_ellipsoid->test_ray_tracing(ray_world_origin, ray_direction_world)) {
-            //     std::cout << "Intersected Ellipse!" << std::endl;
-            // }
-            // else {
-            //     std::cout << "Did not intersect Ellipse "  << std::endl;
-            // }
+            if(m_ellipsoid->test_ray_tracing(ray_world_origin, ray_direction_world, model_ellipsoid)) {
+                std::cout << "Intersected Ellipse!" << std::endl;
+            }
+            else {
+                std::cout << "Did not intersect Ellipse "  << std::endl;
+            }
         }
 
         // Draw OBB
@@ -324,7 +322,7 @@ public:
         if (m_click_toggle.first) {
             glm::mat4 model_obb = glm::mat4(1.0f);
 
-            if(m_obb->test_ray_tracing(ray_world_origin, ray_direction_world, model_ellipsoid)) {
+            if(m_obb->test_ray_tracing(glm::vec3(ray_world_origin), glm::vec3(ray_direction_world), model_ellipsoid)) {
                 std::cout << "Intersected OBB!" << std::endl;
             }
             else {
