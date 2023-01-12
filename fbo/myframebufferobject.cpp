@@ -92,7 +92,7 @@ public:
         m_rocket = new Model(rocket_path);
 
         // Ellipsoid
-        m_ellipsoid = new Ellipsoid(glm::vec3(EARTH_RADIUS, 1.5*EARTH_RADIUS, 0.5*EARTH_RADIUS), 40, 40);
+        m_ellipsoid = new Ellipsoid(glm::vec3(0.4*EARTH_RADIUS, 1.2*EARTH_RADIUS, 0.2*EARTH_RADIUS), 40, 40);
 
         // OBB 
         m_obb = new OBB(glm::vec3(-0.75*EARTH_RADIUS, -EARTH_RADIUS, -0.5*EARTH_RADIUS), 
@@ -118,7 +118,7 @@ public:
         std::vector<Eigen::Vector3f> polygon_1_coordinates;
         polygon_1_coordinates.emplace_back(EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS);
         polygon_1_coordinates.emplace_back(EARTH_RADIUS, 0, EARTH_RADIUS);
-        // polygon_1_coordinates.emplace_back(4, -1, 1);
+        // polygon_1_coordinates.emplace_back(4, -1, 1);v
         polygon_1_coordinates.emplace_back(0, 0, EARTH_RADIUS);
         polygon_1_coordinates.emplace_back(0, EARTH_RADIUS, EARTH_RADIUS);
         polygon_1_coordinates.emplace_back(EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS);
@@ -302,10 +302,10 @@ public:
         m_projected_shapes->draw(view, projection); 
 
         // Draw ellipsoid
-        glm::mat4 model_ellipsoid = glm::scale(glm::mat4(1.0f), glm::vec3(1.0, 1.0, 1.0));
-        model_ellipsoid = glm::translate(model_ellipsoid, glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // elevation rotation
+        glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // 
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
+        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(1.0, 0.7, 0.2));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
         m_ellipsoid->draw(view, projection, model_ellipsoid);
 
         if (m_click_toggle.first) {
@@ -318,7 +318,7 @@ public:
         }
 
         // Draw OBB
-        m_obb->draw(view, projection, model_ellipsoid);
+        // m_obb->draw(view, projection, model_ellipsoid);
         if (m_click_toggle.first) {
             glm::mat4 model_obb = glm::mat4(1.0f);
 

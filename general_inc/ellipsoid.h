@@ -121,15 +121,20 @@ class Ellipsoid: protected QOpenGLFunctions_3_3_Core
         glm::vec3 y_axis(model_matrix[1].x, model_matrix[1].y, model_matrix[1].z);
         glm::vec3 z_axis(model_matrix[2].x, model_matrix[2].y, model_matrix[2].z);
         glm::mat4 R = glm::mat4(1.0f);
-        R[0].x = x_axis.x;
-        R[0].y = x_axis.y;
-        R[0].z = x_axis.z;
-        R[1].x = y_axis.x;
-        R[1].y = y_axis.y;
-        R[1].z = y_axis.z;        
-        R[2].x = z_axis.x;
-        R[2].y = z_axis.y;
-        R[2].z = z_axis.z;
+
+        glm::vec3 x_axis_norm = glm::normalize(x_axis);
+        glm::vec3 y_axis_norm = glm::normalize(y_axis);
+        glm::vec3 z_axis_norm = glm::normalize(z_axis);
+
+        R[0].x = x_axis_norm.x;
+        R[0].y = x_axis_norm.y;
+        R[0].z = x_axis_norm.z;
+        R[1].x = y_axis_norm.x;
+        R[1].y = y_axis_norm.y;
+        R[1].z = y_axis_norm.z;        
+        R[2].x = z_axis_norm.x;
+        R[2].y = z_axis_norm.y;
+        R[2].z = z_axis_norm.z;
 
         // Compute scaling matrix
         glm::mat4 S = glm::mat4(1.0f);
@@ -137,6 +142,10 @@ class Ellipsoid: protected QOpenGLFunctions_3_3_Core
         S[0].x = glm::length(x_axis)*radius_abc_[0];
         S[1].y = glm::length(y_axis)*radius_abc_[1];
         S[2].z = glm::length(z_axis)*radius_abc_[2];
+
+        std::cout << glm::length(x_axis) << std::endl;
+        std::cout << glm::length(y_axis) << std::endl;
+        std::cout << glm::length(z_axis) << std::endl;
 
         // Transform matrix
         glm::mat4 M = T * R * S;
