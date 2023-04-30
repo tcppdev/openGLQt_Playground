@@ -143,6 +143,33 @@ public:
         glm::vec3 ray_world_direction,     // Ray direction (NOT target position!), in world space. Must be normalize()'d.
         glm::mat4 model_matrix       // Transformation applied to the mesh (which will thus be also applied to its bounding box),
     ){
+        // Compute local axes (wrt world axes) R matrix
+        glm::vec3 x_axis(model_matrix[0].x, model_matrix[0].y, model_matrix[0].z);
+        glm::vec3 y_axis(model_matrix[1].x, model_matrix[1].y, model_matrix[1].z);
+        glm::vec3 z_axis(model_matrix[2].x, model_matrix[2].y, model_matrix[2].z);
+
+        // Compute scaling matrix
+        // glm::mat3 S = glm::mat3(1.0f);
+        // S[0].x = glm::length(x_axis);
+        // S[1].y = glm::length(y_axis);
+        // S[2].z = glm::length(z_axis);
+
+        float x_scaling = glm::length(x_axis);
+        float y_scaling = glm::length(y_axis);
+        float z_scaling = glm::length(z_axis);
+
+        // Compute scaled bounding box points
+        glm::vec3 aabb_min_scaled; // = S * aabb_min_;
+        glm::vec3 aabb_max_scaled; // = S * aabb_max_;
+
+        aabb_min_scaled.x = aabb_min_.x * x_scaling;
+        aabb_min_scaled.y = aabb_min_.y * y_scaling;
+        aabb_min_scaled.z = aabb_min_.z * z_scaling;
+
+        aabb_max_scaled.x = aabb_max_.x * x_scaling;
+        aabb_max_scaled.y = aabb_max_.y * y_scaling;
+        aabb_max_scaled.z = aabb_max_.z * z_scaling;
+
         // Intersection method from Real-Time Rendering and Essential Mathematics for Games
         
         float tMin = 0.0f;
@@ -162,8 +189,8 @@ public:
 
             if ( fabs(f) > 0.001f ){ // Standard case
 
-                float t1 = (e+aabb_min_.x)/f; // Intersection with the "left" plane
-                float t2 = (e+aabb_max_.x)/f; // Intersection with the "right" plane
+                float t1 = (e+aabb_min_scaled.x)/f; // Intersection with the "left" plane
+                float t2 = (e+aabb_max_scaled.x)/f; // Intersection with the "right" plane
                 // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
 
                 // We want t1 to represent the nearest intersection, 
@@ -186,7 +213,7 @@ public:
                     return false;
 
             }else{ // Rare case : the ray is almost parallel to the planes, so they don't have any "intersection"
-                if(-e+aabb_min_.x > 0.0f || -e+aabb_max_.x < 0.0f)
+                if(-e+aabb_min_scaled.x > 0.0f || -e+aabb_max_scaled.x < 0.0f)
                     return false;
             }
         }
@@ -201,8 +228,8 @@ public:
 
             if ( fabs(f) > 0.001f ){
 
-                float t1 = (e+aabb_min_.y)/f;
-                float t2 = (e+aabb_max_.y)/f;
+                float t1 = (e+aabb_min_scaled.y)/f;
+                float t2 = (e+aabb_max_scaled.y)/f;
 
                 if (t1>t2){float w=t1;t1=t2;t2=w;}
 
@@ -214,7 +241,7 @@ public:
                     return false;
 
             }else{
-                if(-e+aabb_min_.y > 0.0f || -e+aabb_max_.y < 0.0f)
+                if(-e+aabb_min_scaled.y > 0.0f || -e+aabb_max_scaled.y < 0.0f)
                     return false;
             }
         }
@@ -229,8 +256,8 @@ public:
 
             if ( fabs(f) > 0.001f ){
 
-                float t1 = (e+aabb_min_.z)/f;
-                float t2 = (e+aabb_max_.z)/f;
+                float t1 = (e+aabb_min_scaled.z)/f;
+                float t2 = (e+aabb_max_scaled.z)/f;
 
                 if (t1>t2){float w=t1;t1=t2;t2=w;}
 
@@ -242,7 +269,7 @@ public:
                     return false;
 
             }else{
-                if(-e+aabb_min_.z > 0.0f || -e+aabb_max_.z < 0.0f)
+                if(-e+aabb_min_scaled.z > 0.0f || -e+aabb_max_scaled.z < 0.0f)
                     return false;
             }
         }

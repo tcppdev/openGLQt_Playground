@@ -64,6 +64,42 @@ Eigen::Vector3f sph_to_cart(float radius, float theta, float inc)  // all angles
     return Eigen::Vector3f(x, y, z);
 };
 
+std::vector<std::string> lineToVectorOfStrings(std::string line)
+{
+    std::stringstream ss(line);
+    std::vector<std::string> strVec;
+    while (ss.good()) {
+        std::string substr;
+        std::getline(ss, substr, ',');
+        strVec.push_back(substr);
+    }
+    return strVec;
+}
+
+void getMapCoords(const std::string& coastLinePath,
+                  std::vector<double>& vecLats,
+                  std::vector<double>& vecLongs,
+                  std::vector<int>& indexes)
+{
+    // The vector arguments are empty at this point.
+
+    // Read csv file:
+    std::ifstream is(coastLinePath);
+    if (!is.is_open()) {
+        std::string err = "Could not find coastline path at loc: ";
+        err += coastLinePath;
+        throw std::invalid_argument(err);
+    }
+
+    std::string line("");
+    while (std::getline(is, line)) {
+        std::vector<std::string> csv = lineToVectorOfStrings(line);
+        vecLats.push_back(std::stod(csv[0]));
+        vecLongs.push_back(std::stod(csv[1]));
+        indexes.push_back(std::stoi(csv[2]));
+    }
+};
+
 class MyFrameBufferObjectRenderer : public QQuickFramebufferObject::Renderer, protected QOpenGLFunctions_3_3_Core
 {
 public:
@@ -81,8 +117,11 @@ public:
         stbi_set_flip_vertically_on_load(true);
         
         // Create models
-        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_110m.obj";
+        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_50m_NZ_removed.obj";
         m_model = new Model(model_path);
+
+        // Ellipsoid earth 
+        m_ellipsoid_earth = new Ellipsoid(glm::vec3(0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS), 40, 40);
 
         // 
         small_earth = new Model(model_path);
@@ -100,7 +139,7 @@ public:
 
 
         // Camera 
-        m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f), 3*EARTH_RADIUS, 1.1*EARTH_RADIUS);  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
+        m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f), 3*EARTH_RADIUS, 1.0*EARTH_RADIUS);  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
         
         // My (static) line
         std::vector<std::vector<Eigen::Vector3f>> the_lines;
@@ -155,22 +194,58 @@ public:
         m_points = new Point(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
         // Delaunay triangulation test
+        // std::vector<ConstrainedDelaunayContourEdges> contour_edges;
+
+        // std::vector<std::vector<std::pair<double, double>>> delaunay_edges_1;
+        // // TO-DO: FIX ME lat, long not in order issue
+        // delaunay_edges_1.push_back({std::make_pair(0, 0), std::make_pair(10, 0), std::make_pair(10, -10)});  // lat, -long 
+        // ConstrainedDelaunayContourEdges contour_edges_1(delaunay_edges_1, false);
+        // contour_edges.push_back(contour_edges_1);
+
+        // std::vector<std::vector<std::pair<double, double>>> delaunay_edges_2;
+        // delaunay_edges_2.push_back({std::make_pair(50, 0), std::make_pair(70, 0), std::make_pair(70, -30), std::make_pair(80, -40),
+        //                             std::make_pair(50, -30), std::make_pair(50, 0)});
+        // ConstrainedDelaunayContourEdges contour_edges_2(delaunay_edges_2, false);
+
+        // contour_edges.push_back(contour_edges_2);
+        // m_projected_shapes = new Delaunay2_5D(contour_edges, 1, 1, 5000);
+
+        std::vector<double> lats;
+        std::vector<double> longs;
+        std::vector<int> indexes;
+        getMapCoords("./filtered_coast.csv", lats, longs, indexes);
+        int current_index = -999;
+
         std::vector<ConstrainedDelaunayContourEdges> contour_edges;
+        std::vector<std::vector<std::pair<double, double>>> delaunay_edges;
+        std::vector<std::pair<double, double>> edge;
+        
+        for (std::size_t i = 0; i < lats.size(); ++i) {
+            // TODO Maybe replace with the vector one of these
+            int new_index = indexes[i];
+            
+            if (new_index == current_index || i == 0)
+            {
+                edge.push_back(std::make_pair(longs[i], lats[i]));
+            }
+            else {
+                delaunay_edges.push_back(edge);
+                ConstrainedDelaunayContourEdges contour_edge(delaunay_edges, false);
+                contour_edges.push_back(contour_edge);
 
-        std::vector<std::vector<std::pair<double, double>>> delaunay_edges_1;
-        // TO-DO: FIX ME lat, long not in order issue
-        delaunay_edges_1.push_back({std::make_pair(0, 0), std::make_pair(10, 0), std::make_pair(10, -10)});  // lat, -long 
-        ConstrainedDelaunayContourEdges contour_edges_1(delaunay_edges_1, false);
-        contour_edges.push_back(contour_edges_1);
+                // if (new_index > 3000) {break;}
+                edge.clear();
+                delaunay_edges.clear();
+                edge.push_back(std::make_pair(longs[i], lats[i]));
+            }
+            current_index = new_index;
+        }
 
-        std::vector<std::vector<std::pair<double, double>>> delaunay_edges_2;
-        delaunay_edges_2.push_back({std::make_pair(50, 0), std::make_pair(70, 0), std::make_pair(70, -30), std::make_pair(80, -40),
-                                    std::make_pair(50, -30), std::make_pair(50, 0)});
-        ConstrainedDelaunayContourEdges contour_edges_2(delaunay_edges_2, false);
+        delaunay_edges.push_back(edge);  // Push back last line
+        ConstrainedDelaunayContourEdges contour_edge(delaunay_edges, false);
+        contour_edges.push_back(contour_edge);
 
-        contour_edges.push_back(contour_edges_2);
-        m_projected_shapes = new Delaunay2_5D(contour_edges, 1, 1, 5000);
-
+        // m_projected_shapes = new Delaunay2_5D(contour_edges, 1, 1, 5000, Color::RED, true);
 
         // My text
         m_text = new Text3D("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
@@ -207,6 +282,7 @@ public:
         m_current_azimuth = i->azimuth(); // m_current_azimuth + i->delta_x();//
         m_current_elevation = i->elevation(); // m_current_elevation + i->delta_y(); 
         // m_current_distance = i->distance();
+        m_current_center_to_vehicle = i->center_to_vehicle();
 
         // Line visibility toggle
         m_draw_line = i->line_visibility();
@@ -224,6 +300,15 @@ public:
         glEnable(GL_STENCIL_TEST); 
         // glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        
+        // Rocket Center 
+        float nMilliseconds = static_cast<float>(timer_.elapsed());
+        float theta = nMilliseconds/100;  //  aol [deg]
+        Eigen::Vector3f cord_r = sph_to_cart(m_radius, theta, m_inc);
+
+        if (m_current_center_to_vehicle) {
+            m_camera->set_camera_target(glm::vec3(cord_r[0], cord_r[1], cord_r[2]));
+        }
         
         // view/projection transformations
         m_camera->process_mouse_scroll(m_mouse_delta_angle);
@@ -266,10 +351,10 @@ public:
         float earth_scaling = 1.0f;
         model = glm::scale(model, glm::vec3(earth_scaling, earth_scaling, earth_scaling));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
-        model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
+        model = glm::rotate(model, glm::radians(m_current_elevation + 90), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
-        // m_model->Draw(*m_shader);
+        m_model->Draw(*m_shader);
 
         // render small earth
         model = glm::mat4(1.0f);
@@ -299,7 +384,7 @@ public:
         m_points->draw(view, projection);
 
         // Draw delaunay projection
-        m_projected_shapes->draw(view, projection); 
+        // m_projected_shapes->draw(view, projection); 
 
         // Draw ellipsoid
         glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // 
@@ -307,6 +392,9 @@ public:
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
         model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(1.0, 0.7, 0.2));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
         m_ellipsoid->draw(view, projection, model_ellipsoid);
+
+        // Draw earth ellispoid
+        m_ellipsoid_earth->draw(view, projection);
 
         if (m_click_toggle.first) {
             if(m_ellipsoid->test_ray_tracing(ray_world_origin, ray_direction_world, model_ellipsoid)) {
@@ -318,10 +406,8 @@ public:
         }
 
         // Draw OBB
-        // m_obb->draw(view, projection, model_ellipsoid);
+        m_obb->draw(view, projection, model_ellipsoid);
         if (m_click_toggle.first) {
-            glm::mat4 model_obb = glm::mat4(1.0f);
-
             if(m_obb->test_ray_tracing(glm::vec3(ray_world_origin), glm::vec3(ray_direction_world), model_ellipsoid)) {
                 std::cout << "Intersected OBB!" << std::endl;
             }
@@ -331,13 +417,9 @@ public:
         }
 
         /// Draw rocket
-
-        float nMilliseconds = static_cast<float>(timer_.elapsed());
-        float theta = nMilliseconds/100;  //  aol [deg]
         // std::cout << theta << std::endl;
 
         glm::mat4 model_rocket = glm::mat4(1.0f);
-        Eigen::Vector3f cord_r = sph_to_cart(m_radius, theta, m_inc);
         model_rocket = glm::translate(model_rocket, glm::vec3(cord_r[0], cord_r[1], cord_r[2]));  // translate it
         model_rocket = glm::scale(model_rocket, glm::vec3(1000.0f)); // glm::vec3(0.1f)); // (0.001f));	// scale it down
         // rotations
@@ -376,6 +458,7 @@ private:
     Model* small_earth;
     Model* m_rocket;
     Ellipsoid* m_ellipsoid;
+    Ellipsoid* m_ellipsoid_earth;
     OBB* m_obb;
     Line* m_circular_line;
     Polygon* m_polygon;
@@ -392,6 +475,8 @@ private:
     float m_delta_x; 
     float m_delta_y;
     int m_mouse_delta_angle;
+
+    bool m_current_center_to_vehicle = false;
 
     // Orbital line properties
     float m_radius = 1.2*EARTH_RADIUS;  // [m]
@@ -446,6 +531,11 @@ std::pair<bool, glm::vec3> MyFrameBufferObject::mouse_click() const
 float MyFrameBufferObject::azimuth() const
 {
     return m_azimuth;
+}
+
+bool MyFrameBufferObject::center_to_vehicle() const
+{
+    return m_center_to_vehicle;
 }
 
 bool MyFrameBufferObject::line_visibility() const
@@ -507,6 +597,13 @@ void MyFrameBufferObject::setAzimuth(float azimuth)
     m_azimuth = azimuth;
     emit azimuthChanged(azimuth);
     update();
+}
+
+void MyFrameBufferObject::set_center_to_vehicle(bool center_to_vehicle)
+{
+    m_center_to_vehicle = center_to_vehicle;
+    emit center_to_vehicle_changed();
+    // update();
 }
 
 void MyFrameBufferObject::setDistance(float distance)

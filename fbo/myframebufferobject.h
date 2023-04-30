@@ -37,6 +37,7 @@ class MyFrameBufferObject : public QQuickFramebufferObject
     Q_PROPERTY(float azimuth READ azimuth WRITE setAzimuth NOTIFY azimuthChanged)
     Q_PROPERTY(float elevation READ elevation WRITE setElevation NOTIFY elevationChanged)
     Q_PROPERTY(float distance READ distance WRITE setDistance NOTIFY distanceChanged)
+    Q_PROPERTY(bool center_to_vehicle READ center_to_vehicle WRITE set_center_to_vehicle NOTIFY center_to_vehicle_changed)
 
 public:
     explicit MyFrameBufferObject(QQuickItem *parent = 0);
@@ -45,6 +46,7 @@ public:
     float azimuth() const;
     float distance() const;
     float elevation() const;
+    bool center_to_vehicle() const;
     float delta_x();
     float delta_y();
     int mouse_angle();
@@ -56,11 +58,13 @@ signals:
     void azimuthChanged(float azimuth);
     void distanceChanged(float distance);
     void elevationChanged(float elevation);
+    void center_to_vehicle_changed();
 
 public slots:
     void setAzimuth(float azimuth);
     void setDistance(float distance);
     void setElevation(float elevation);
+    void set_center_to_vehicle(bool center_to_vehicle);
     void request_redraw() { update(); }
     void set_line_visibility(bool visibility);
 
@@ -132,6 +136,7 @@ private:
     float m_azimuth;
     float m_elevation;
     float m_distance;
+    bool m_center_to_vehicle = false;
 
     bool mouse_wheel_activated_ = false;
     bool mouse_pressed_ = false;

@@ -43,8 +43,8 @@ Rectangle {
 
     MyFrame {
         id: renderer
-        width: 1000
-        height: 1000
+        width: 900
+        height: 900
         anchors.left: root.left
         anchors.top: root.top
         anchors.leftMargin: 25
@@ -114,14 +114,33 @@ Rectangle {
         // }
     }
 
+    MyFrame {
+        id: rendererVeh
+        width: 900
+        height: 900
+        anchors.left: renderer.right
+        anchors.top: renderer.top
+        anchors.leftMargin: 25
+        // anchors.topMargin: 25
+        smooth: true
+        center_to_vehicle: true
+    }
+
     Timer {
         id: render_control  // control refresh rate of our scene
-        interval: 5 // [ms]
+        interval: 10 // [ms]
         running: true
         repeat: true
         onTriggered: { renderer.request_redraw() } 
     }
 
+    Timer {
+        id: render_control_veh  // control refresh rate of our scene
+        interval: 10 // [ms]
+        running: true
+        repeat: true
+        onTriggered: { rendererVeh.request_redraw() } 
+    }
 
     Switch {
         id: my_toggle

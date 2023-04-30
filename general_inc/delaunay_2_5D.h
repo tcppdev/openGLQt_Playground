@@ -122,7 +122,9 @@ public:
 
         for (ConstrainedDelaunayContourEdges const contour: contours)
         {
-            CDT::Triangulation<double> cdt;
+            CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::Randomized,
+                                           CDT::IntersectingConstraintEdges::Resolve,
+                                           0.);
             std::vector<CDT::V2d<double>> vertices;
             std::vector<CDT::Edge> edges;
 
@@ -170,13 +172,27 @@ public:
             }
             else 
             {
+                // cdt.eraseSuperTriangle();
                 cdt.eraseOuterTriangles();
+            }
+
+            total_number_of_triangles_ += cdt.triangles.size(); 
+            if (cdt.triangles.size() < 1)
+            {
+                std::cout << "Triangulation was unsuccessfull " << std::endl;
+                std::cout << vertices.size() << std::endl;
+
+                if (vertices.size() == 27)
+                {
+                    std::cout << "" << std::endl;
+                }
             }
 
             cdts.push_back(cdt);
             
         }
 
+        std::cout << "The mesh contains: " << total_number_of_triangles_ << " triangles" << std::endl;
 
         return cdts;
     };
@@ -265,6 +281,7 @@ public:
     
         // Draw polygons
         glEnable(GL_MULTISAMPLE);  // Antialiasing
+        // glEnable(GL_CULL_FACE); 
         glBindVertexArray(vao_);
 
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -281,6 +298,7 @@ public:
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
+        // glDisable(GL_CULL_FACE); 
         glBindVertexArray(0);  // Unbind vao
     }
 
@@ -299,4 +317,5 @@ private:
     Line* outline_lines_ptr;
 
     bool include_wireframe_ = false;
+    int total_number_of_triangles_ = 0;  // Number of triangles in mesh
 };

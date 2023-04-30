@@ -138,14 +138,9 @@ class Ellipsoid: protected QOpenGLFunctions_3_3_Core
 
         // Compute scaling matrix
         glm::mat4 S = glm::mat4(1.0f);
-        float length = glm::length(x_axis);
         S[0].x = glm::length(x_axis)*radius_abc_[0];
         S[1].y = glm::length(y_axis)*radius_abc_[1];
         S[2].z = glm::length(z_axis)*radius_abc_[2];
-
-        std::cout << glm::length(x_axis) << std::endl;
-        std::cout << glm::length(y_axis) << std::endl;
-        std::cout << glm::length(z_axis) << std::endl;
 
         // Transform matrix
         glm::mat4 M = T * R * S;

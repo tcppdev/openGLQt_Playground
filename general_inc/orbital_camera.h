@@ -57,7 +57,7 @@ public:
                                             ORBITAL_MOUSE_SENSITIVITY_START, ORBITAL_MOUSE_SENSITIVITY_END,
                                             distance_to_origin_);
         phi_ += mouse_sensitivity*delta_y;
-        theta_ += mouse_sensitivity*delta_x;
+        theta_ -= mouse_sensitivity*delta_x;
 
         if (constrain_pitch) {
             if (phi_ > M_PI - 0.001) { phi_ = M_PI - 0.001; }
@@ -99,14 +99,25 @@ public:
         return camera_pos_;
     }
 
+    void set_camera_target(glm::vec3 const& new_target) 
+    {
+        target_ = new_target;
+    }
+
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void update_camera_vectors()
     {
+
         float x = distance_to_origin_ * sin(phi_) * cos(theta_);
-        float y = distance_to_origin_ * cos(phi_);
-        float z = distance_to_origin_ * sin(phi_) * sin(theta_);
+        float y = distance_to_origin_ * sin(phi_) * sin(theta_);
+        float z = distance_to_origin_ * cos(phi_);
         camera_pos_ = glm::vec3(x, y, z);
+        
+        // theta_: Rotation around z-axis
+        // phi_ : Rotation around x-y plane (0 - 180 degrees)
+        // std::cout << x << ", " <<  y << ", " << z << std::endl;
+        // std::cout << theta_*180/M_PI << ", " <<  phi_*180/M_PI << std::endl;
 
         view_ = glm::lookAt(camera_pos_, target_, camera_up_);
 
@@ -117,8 +128,8 @@ private:
 
     float distance_to_origin_ = 8.0f;
     float phi_ = M_PI/2;
-    float theta_ = M_PI/2;
-    glm::vec3 camera_up_ = glm::vec3(0, 1, 0);   // camera up vector
+    float theta_ = 0; //M_PI/2;
+    glm::vec3 camera_up_ = glm::vec3(0, 0, 1);   // camera up vector
     glm::vec3 camera_pos_ = glm::vec3(0, 0, 0);   // camera world position 
     glm::vec3 target_ = glm::vec3(0, 0, 0);   // Target position
     glm::mat4 view_ = glm::mat4(1.0f);  // view matrix
