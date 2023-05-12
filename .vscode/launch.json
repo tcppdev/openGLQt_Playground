@@ -5,7 +5,7 @@
             "name": "FBO Debugging",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/fbo",
+            "program": "${workspaceFolder}/debug/fbo",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

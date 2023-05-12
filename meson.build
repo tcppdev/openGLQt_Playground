@@ -10,7 +10,7 @@ project('Qt', ['cpp', 'c'],  # Allow compiling for both c++ and c files
 qt5_bin = import('qt5')
 qt5_dep = dependency('qt5', 
                      modules: ['Core', 'Gui', 'Qml', 'Widgets',
-                               'Quick', 'Location', 'Network', 
+                               'Quick', 'Location', 'Network', 'Charts',
                                'Positioning', 'Test', 'QuickTest'], 
                      required : false)
 
@@ -86,7 +86,8 @@ inc_general = [include_directories('general_inc')]
 headers_to_moc_common = ['lib/camera.h',
                          'lib/meshrenderer.h']  
 headers_to_moc_underlay = ['underlay/myquickview.h']
-headers_to_moc_fbo = ['fbo/myframebufferobject.h']
+headers_to_moc_fbo = ['fbo/myframebufferobject.h',
+                      'fbo/chartwrapper.h']
 
 ## Resources
 qresources_common = ['lib/assets.qrc']
@@ -104,7 +105,7 @@ sources_common = [
  # ]
 
 sources_underlay = ['underlay/myquickview.cpp']
-sources_fbo = ['fbo/myframebufferobject.cpp']
+sources_fbo = ['fbo/myframebufferobject.cpp', 'fbo/chartwrapper.cpp']
 sources_render = ['rendercontrol/renderwindow.cpp']
 sources_general = ['ext_inc/stb_image.cpp']
 
