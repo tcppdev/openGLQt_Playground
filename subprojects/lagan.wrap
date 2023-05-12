@@ -1,3 +1,0 @@
-[wrap-git]
-url = ssh://git@gitlab.rocketlab.local:2244/Range/lagan.git
-revision = head

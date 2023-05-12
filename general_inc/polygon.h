@@ -11,8 +11,8 @@
 #include <general_inc/line.h>
 #include <general_inc/utilities.h> // colors
 
-#include "delaunator.hpp"
-#include "mapbox/earcut.hpp"
+//#include "delaunator.hpp"
+//#include "mapbox/earcut.hpp"
 
 /// Class for drawing flat convex shaped polygons 
 // Note: for concave polygon we'd need to use polygon triangulation 
@@ -35,8 +35,8 @@ public:
         linecolor_ = linecolor;
 
         // Polygon shader
-        const char* polygon_vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/polygon.vs";
-        const char* polygon_fragment_shader_path = "/home/t.clar/Repos/openGLQt/shaders/polygon.fs";
+        const char* polygon_vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/polygon.vs";
+        const char* polygon_fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/polygon.fs";
         m_polygon_shader = new Shader(polygon_vertex_shader_path, polygon_fragment_shader_path);
 
         // // Create the outline lines

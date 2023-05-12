@@ -62,8 +62,8 @@ public:
     CubeMap(std::string cube_map_path){
 
         // Point shader
-        const char* vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/cubemap.vs";
-        const char* fragment_shader_path = "/home/t.clar/Repos/openGLQt/shaders/cubemap.fs";
+        const char* vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/cubemap.vs";
+        const char* fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/cubemap.fs";
         m_cubemap_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         initializeOpenGLFunctions();   // Initialise current context  (required)
@@ -73,12 +73,12 @@ public:
         // Cube map images need to have following names
         vector<std::string> faces
         {
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/right.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/left.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/top.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/bottom.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/front.jpg",
-            "/home/t.clar/Repos/openGLQt/resources/cubemaps/universe/back.jpg"
+            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/right.jpg",
+            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/left.jpg",
+            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/top.jpg",
+            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/bottom.jpg",
+            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/front.jpg",
+            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/back.jpg"
         };
         
         // Load texture 

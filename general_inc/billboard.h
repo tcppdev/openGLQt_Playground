@@ -30,9 +30,9 @@ public:
         initializeOpenGLFunctions();   // Initialise current context  (required)
 
         // Text shaders
-        const char* vertex_billboard = "/home/t.clar/Repos/openGLQt/shaders/billboard.vs";
-        const char* fragment_billboard = "/home/t.clar/Repos/openGLQt/shaders/billboard.fs";
-        const char* geometry_billboard = "/home/t.clar/Repos/openGLQt/shaders/billboard.gs";
+        const char* vertex_billboard = "/home/tclar/Repos/openGLQt/shaders/billboard.vs";
+        const char* fragment_billboard = "/home/tclar/Repos/openGLQt/shaders/billboard.fs";
+        const char* geometry_billboard = "/home/tclar/Repos/openGLQt/shaders/billboard.gs";
         m_shader = new Shader(vertex_billboard, fragment_billboard, geometry_billboard);
 
         // positions

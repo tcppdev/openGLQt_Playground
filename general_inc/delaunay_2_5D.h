@@ -15,7 +15,7 @@
 #include "CDT.h"
 #include "Triangulation.h"
 
-#include "lagan/transform.h"
+//#include "lagan/transform.h"
 
 struct ConstrainedDelaunayContourEdges 
 {
@@ -45,8 +45,8 @@ public:
         fill_color_ = fill_color;
 
         // Polygon shader
-        const char* delaunay_2_5D_vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/delaunay_2_5D.vs";
-        const char* delaunay_2_5D_shader_path = "/home/t.clar/Repos/openGLQt/shaders/delaunay_2_5D.fs";
+        const char* delaunay_2_5D_vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.vs";
+        const char* delaunay_2_5D_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.fs";
         m_delaunay_shader = new Shader(delaunay_2_5D_vertex_shader_path, delaunay_2_5D_shader_path);
 
         // 
@@ -63,8 +63,8 @@ public:
     {
         fill_color_ = fill_color;
         include_wireframe_ = include_wireframe;
-        const char* delaunay_2_5D_vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/delaunay_2_5D.vs";
-        const char* delaunay_2_5D_shader_path = "/home/t.clar/Repos/openGLQt/shaders/delaunay_2_5D.fs";
+        const char* delaunay_2_5D_vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.vs";
+        const char* delaunay_2_5D_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.fs";
         m_delaunay_shader = new Shader(delaunay_2_5D_vertex_shader_path, delaunay_2_5D_shader_path);
 
         // Draw 2D Lat/Lon surface on a 3D WGS84 Ellipsoid
@@ -122,7 +122,7 @@ public:
 
         for (ConstrainedDelaunayContourEdges const contour: contours)
         {
-            CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::Randomized,
+            CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::Auto,
                                            CDT::IntersectingConstraintEdges::Resolve,
                                            0.);
             std::vector<CDT::V2d<double>> vertices;
@@ -213,7 +213,7 @@ public:
             // Project vertex on 3D WGS84 sphere?
             for (auto vertex: vertx){
                 Eigen::Vector3d point_lla = {static_cast<double>(vertex.x), static_cast<double>(vertex.y), altitude};
-                Eigen::Vector3d ecef_point = lagan::lla2ecef(point_lla);
+                Eigen::Vector3d ecef_point = {0, 0, 0}; // lagan::lla2ecef(point_lla);
                 transformed_vertices.push_back(ecef_point);
             }
 

@@ -27,9 +27,9 @@ public:
         lines_count_ = lines.size();
         
         // Line shader
-        const char* vertex_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.vs";
-        const char* fragment_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.fs";
-        const char* geometry_line_path = "/home/t.clar/Repos/openGLQt/shaders/line_shader.gs";
+        const char* vertex_line_path = "/home/tclar/Repos/openGLQt/shaders/line_shader.vs";
+        const char* fragment_line_path = "/home/tclar/Repos/openGLQt/shaders/line_shader.fs";
+        const char* geometry_line_path = "/home/tclar/Repos/openGLQt/shaders/line_shader.gs";
         m_line_shader = new Shader(vertex_line_path, fragment_line_path, geometry_line_path);
 
         SimpleVertex vertex;

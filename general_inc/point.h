@@ -46,9 +46,9 @@ public:
         fixed_size_ = fixed_size;
         
         // Point shader
-        const char* vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/point.vs";
-        const char* fragment_shader_path = "/home/t.clar/Repos/openGLQt/shaders/point.fs";
-        const char* geometry_shader_path = "/home/t.clar/Repos/openGLQt/shaders/point.gs";
+        const char* vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/point.vs";
+        const char* fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/point.fs";
+        const char* geometry_shader_path = "/home/tclar/Repos/openGLQt/shaders/point.gs";
         m_point_shader = new Shader(vertex_shader_path, fragment_shader_path, geometry_shader_path);
 
         VertexP vertex;

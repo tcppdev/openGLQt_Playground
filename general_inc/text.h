@@ -46,12 +46,12 @@ public:
         initializeOpenGLFunctions();   // Initialise current context  (required)
 
         // Text shaders
-        const char* vertex_text = "/home/t.clar/Repos/openGLQt/shaders/text.vs";
-        const char* fragment_text = "/home/t.clar/Repos/openGLQt/shaders/text.fs";
+        const char* vertex_text = "/home/tclar/Repos/openGLQt/shaders/text.vs";
+        const char* fragment_text = "/home/tclar/Repos/openGLQt/shaders/text.fs";
         m_text_shader = new Shader(vertex_text, fragment_text);
 
         // Front 
-        std::string font_path = "/home/t.clar/Repos/openGLQt/resources/fonts/Antonio-Bold.ttf";
+        std::string font_path = "/home/tclar/Repos/openGLQt/resources/fonts/Antonio-Bold.ttf";
         
         setup(font_path);
     }

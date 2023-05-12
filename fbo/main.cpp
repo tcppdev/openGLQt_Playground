@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     //                  heading_dial_pilot_object_ptr, SLOT(set_compass_mode(bool)));  
 
     QTimer* timer_ = new QTimer();
-    timer_->setInterval(50);
+    timer_->setInterval(500);
 
     // // Setup timer trigger to plot update method
     QObject::connect(timer_, SIGNAL(timeout()), &chart_object, SLOT(update_line_data()));  

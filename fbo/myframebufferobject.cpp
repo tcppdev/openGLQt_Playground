@@ -109,15 +109,15 @@ public:
         // m_render.initialize();
 
         // Create shaders
-        const char* vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/1.model_loading.vs";
-        const char* fragment_shader_path = "/home/t.clar/Repos/openGLQt/shaders/1.model_loading.fs";
+        const char* vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/1.model_loading.vs";
+        const char* fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/1.model_loading.fs";
         m_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
         stbi_set_flip_vertically_on_load(true);
         
         // Create models
-        std::string model_path = "/home/t.clar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_50m_NZ_removed.obj";
+        std::string model_path = "/home/tclar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_110m.obj";
         m_model = new Model(model_path);
 
         // Ellipsoid earth 
@@ -127,7 +127,7 @@ public:
         small_earth = new Model(model_path);
 
         // Get our rocket
-        std::string rocket_path = "/home/t.clar/Repos/openGLQt/resources/objects/rocket_v1/12217_rocket_v1_l1.obj";
+        std::string rocket_path = "/home/tclar/Repos/openGLQt/resources/objects/rocket_v1/12217_rocket_v1_l1.obj";
         m_rocket = new Model(rocket_path);
 
         // Ellipsoid

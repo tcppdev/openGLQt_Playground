@@ -29,8 +29,8 @@ public:
         aabb_max_ = aabb_max;
 
         // OBB shader
-        const char* obb_vertex_shader_path = "/home/t.clar/Repos/openGLQt/shaders/obb.vs";
-        const char* obb_fragment_shader_path = "/home/t.clar/Repos/openGLQt/shaders/obb.fs";
+        const char* obb_vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/obb.vs";
+        const char* obb_fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/obb.fs";
         obb_shader_ = new Shader(obb_vertex_shader_path, obb_fragment_shader_path);
 
         // Lets create the vertex position array

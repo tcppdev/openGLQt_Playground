@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import QtQuick.Controls 2.15
+import QtQuick.Controls 2.12
 import QtCharts 2.1
 import MyRenderLibrary 42.0
 
@@ -142,33 +142,33 @@ ApplicationWindow {
         legend.visible: true
     }
 
-    MyFrame {
-        id: rendererVeh
-        width: 900
-        height: 900
-        anchors.left: renderer.right
-        anchors.top: renderer.top
-        anchors.leftMargin: 25
-        // anchors.topMargin: 25
-        smooth: true
-        center_to_vehicle: true
-    }
+//    MyFrame {
+//        id: rendererVeh
+//        width: 900
+//        height: 900
+//        anchors.left: renderer.right
+//        anchors.top: renderer.top
+//        anchors.leftMargin: 25
+//        // anchors.topMargin: 25
+//        smooth: true
+//        center_to_vehicle: true
+//    }
 
     Timer {
         id: render_control  // control refresh rate of our scene
-        interval: 10 // [ms]
+        interval: 200 // [ms]
         running: true
         repeat: true
         onTriggered: { renderer.request_redraw() } 
     }
 
-    Timer {
-        id: render_control_veh  // control refresh rate of our scene
-        interval: 10 // [ms]
-        running: true
-        repeat: true
-        onTriggered: { rendererVeh.request_redraw() } 
-    }
+    // Timer {
+    //     id: render_control_veh  // control refresh rate of our scene
+    //     interval: 10 // [ms]
+    //     running: true
+    //     repeat: true
+    //     onTriggered: { rendererVeh.request_redraw() } 
+    // }
 
     Switch {
         id: my_toggle
