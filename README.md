@@ -25,6 +25,7 @@ Using the combined raw openGL graphics API and the powerful user interface QT fr
 ![](screenshots/screenshot_1.png)
 ![](screenshots/screenshot_2.png)
 
+Click on GIF bellow to access full video
 [![Click to Watch full demo video](screenshots/demo.gif)](https://youtu.be/h2WeD9wGdfo)
 
 # Building application on Linux based environment (tested on Ubuntu 18 and 22)
