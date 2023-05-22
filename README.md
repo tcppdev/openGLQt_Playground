@@ -25,7 +25,7 @@ Using the combined raw openGL graphics API and the powerful user interface QT fr
 ![](screenshots/screenshot_1.png)
 ![](screenshots/screenshot_2.png)
 
-[![Demo Video](https://gifs.com/gif/opengl-79q0lr)](https://youtu.be/h2WeD9wGdfo)
+[![Click to Watch full demo video](screenshots/demo.gif)](https://youtu.be/h2WeD9wGdfo)
 
 # Building application on Linux based environment (tested on Ubuntu 18 and 22)
 The build system used for this project is meson. A few requisites packages and libraries are required to compile this project. To install these I recomend using a conda environment and installing the necessary packages using:
