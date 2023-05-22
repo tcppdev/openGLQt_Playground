@@ -69,7 +69,7 @@ int main(int argc, char **argv)
     QQuickItem *test_chart_view = graphics_window->findChild<QQuickItem*>("test_chart");
     // This = chartview wrapper
     ChartWrapper chart_object = ChartWrapper(test_chart_view);
-    chart_object.create_line("my_test_line", "this is a line");
+    chart_object.create_line("my_test_line", "My blue line");
     QTimer* timer_ = new QTimer();
     timer_->setInterval(50);
 

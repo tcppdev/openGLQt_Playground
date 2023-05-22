@@ -1,29 +1,59 @@
-# Integrating Qt Quick 2 with OpenGL
+# OpenGL QT Playground
 
-This is the code for Giuseppe D'Angelo's talk at the Qt World Summit 2015,
-QtCon 2016, Qt World Summit 2017.
+Welcome to my OpenGL QT playground. The code here has been written as a demonstrator and test platform for OpenGL components rendered inside the QT framework. The repository being a test platform lacks a lot of documentation, functionality and is not optimised. However it displays a wide variety of raw openGL 3.3 code implementations that can be used in a vast array of 3D based applications. Some of the main features include:
 
-* Slides: http://www.kdab.com/kdab-at-qt-world-summit/ https://conf.qtcon.org/system/attachments/99/original/integrating-opengl-qq2.pdf%3F1473007100
-* Video: https://www.youtube.com/watch?v=D-7fVGIBz6k https://www.youtube.com/watch?v=V_idc9BBRuI
-* Blog posts: http://www.kdab.com/integrating-opengl-with-qt-quick-2-applications-part-1/
+* An openGL framebuffer environment hosted inside the QT windowing system.
+* Complete implementation of the C++ openGL geometry pipeline from vertex arrays, array buffers, vertex attribute pointers, vertex/geometry/fragment shader programs, uniforms, blending functions and face culling.
+* The ability to load complex geometry inside a openGL framebuffer made up of muliple meshes with a wrapper around the assimp library
+* The ability to control the entire graphics openGL pipeline from vertex to fragments using GLSL shaders
+* Real time transformations (translation, rotations, scaling) of geometry using the eigen and openGL glm mathematics libraries 
+* Classes for the rendering and construction of simple geometry such as lines, triangles, polygons, cuboid and ellipsoids
+* Ray-tracing intersection of simple 3D object using circle intersection, Object Bounding Boxes and Ellipsoid intersection algorithms
+* An orbital camera to control the properties of the view matrix 
+* A constrained 2.5D Delaunay Algorithm based on (https://github.com/artem-ogre/CDT) wrapped inside a rendering class used to construct complex surface meshes projected on surfaces such as a globe.
+* User interaction of mouse clicking and sliding for camera control and ray intersection of objects
+* 3D Text rendered using glyphs and billboards graphics for text wrappers
+* A class implemented to create and render cubemaps for an immersive environment
+* Automatic graphics resizing implementation through scaling of the projection matrix from QT window properties
+* Interaction with UI components create in the QML based QT framework to control rotations and visibility of component defined in the framebuffer object
+* Multiple methods of using various stages of the shader graphics pipeline to allow special graphics effects such as fixed billboards and text relative to camera, geometry shaders to contructe meshes from vertex coordinates, using clip to increase thickness of lines etc...
 
+Using the combined raw openGL graphics API and the powerful user interface QT framework, a large set of graphically application can be constructed from the implemations demonstrated here. 
+
+# Demos and snapshots
+
+# Building application on Linux based environment (tested on Ubuntu 18 and 22)
+The build system used for this project is meson. A few requisites packages and libraries are required to compile this project. To install these I recomend using a conda environment and installing the necessary packages using:
+
+`conda install -c conda-forge cmake meson ninja`
+
+or using the following command:
+
+`sudo apt install cmake mesom ninja`
+
+You will also need the assimp library which you can install using:
+
+`sudo apt install libassimp-dev`
+
+The last requirement is the installation of the QT framework. QT contains a large set of libraries and can be installed most easily using the offline from https://www.qt.io/offline-installers (5.12.x Offline Installers). If you opt to install QT using the offline installer you will need to link it to your package config and library path by adding the following to your `~/.bashrc`:
 
 ```
-Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company.
-Author: Giuseppe D'Angelo
-Contact: info@kdab.com
+# QT
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+export PATH=$PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/bin/
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/pkgconfig/
+export LIBRARY_PATH=$LIBRARY_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/
 ```
 
+Alternatively you can use you conda environment to install QT using
+`conda install -c conda-forge qt`
+
+Finally you can build and run the final application and externation dependencies using the meson build system by running the following commands:
+
+```
+cd <project_directory>
+meson build -Dbuildtype=release
+ninja -C build
+./build/application
+```

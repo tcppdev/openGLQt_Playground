@@ -71,7 +71,7 @@ processed_moc_files_fbo = qt5_bin.preprocess(
     dependencies: qt5_dep
 )
 
-application_fbo = executable('fbo',
+application_fbo = executable('application',
                         sources: ['fbo/main.cpp'] + sources_fbo + processed_moc_files_fbo + sources_general,
                         dependencies: deps_common,
                         include_directories:  inc_fbo + inc_ext + inc_general + inc_cdt,
