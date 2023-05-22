@@ -2,7 +2,7 @@
 
 Welcome to my OpenGL QT playground. The code here has been written as a demonstrator and test platform for OpenGL components rendered inside the QT framework. The repository being a test platform lacks a lot of documentation, functionality and is not optimised. However it displays a wide variety of raw openGL 3.3 code implementations that can be used in a vast array of 3D based applications. Some of the main features include:
 
-* An openGL framebuffer environment hosted inside the QT windowing system.
+* An openGL framebuffer environment hosted inside the QT windowing system
 * Complete implementation of the C++ openGL geometry pipeline from vertex arrays, array buffers, vertex attribute pointers, vertex/geometry/fragment shader programs, uniforms, blending functions and face culling.
 * The ability to load complex geometry inside a openGL framebuffer made up of muliple meshes with a wrapper around the assimp library
 * The ability to control the entire graphics openGL pipeline from vertex to fragments using GLSL shaders
@@ -16,7 +16,7 @@ Welcome to my OpenGL QT playground. The code here has been written as a demonstr
 * A class implemented to create and render cubemaps for an immersive environment
 * Automatic graphics resizing implementation through scaling of the projection matrix from QT window properties
 * Interaction with UI components create in the QML based QT framework to control rotations and visibility of component defined in the framebuffer object
-* Multiple methods of using various stages of the shader graphics pipeline to allow special graphics effects such as fixed billboards and text relative to camera, geometry shaders to contructe meshes from vertex coordinates, using clip to increase thickness of lines etc...
+* Multiple methods of using various stages of the shader graphics pipeline to allow special graphics effects such as fixed billboards and text relative to camera, geometry shaders to contructe meshes from vertex coordinates, using clip to increase thickness of lines etc
 
 Using the combined raw openGL graphics API and the powerful user interface QT framework, a large set of graphically application can be constructed from the implemations demonstrated here. 
 
