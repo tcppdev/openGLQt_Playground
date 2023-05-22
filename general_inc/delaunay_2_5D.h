@@ -64,6 +64,11 @@ public:
         fill_color_ = fill_color;
         include_wireframe_ = include_wireframe;
 
+        // Polygon shader
+        const char* delaunay_2_5D_vertex_shader_path = DELAUNAY_2_5D_VS.c_str();
+        const char* delaunay_2_5D_shader_path = DELAUNAY_2_5D_FS.c_str();
+        m_delaunay_shader = new Shader(delaunay_2_5D_vertex_shader_path, delaunay_2_5D_shader_path);
+
         // Draw 2D Lat/Lon surface on a 3D WGS84 Ellipsoid
         // Create steiners points
         for (ConstrainedDelaunayContourEdges& contour: contour_edges)
@@ -178,11 +183,6 @@ public:
             {
                 std::cout << "Triangulation was unsuccessfull " << std::endl;
                 std::cout << vertices.size() << std::endl;
-
-                if (vertices.size() == 27)
-                {
-                    std::cout << "" << std::endl;
-                }
             }
 
             cdts.push_back(cdt);

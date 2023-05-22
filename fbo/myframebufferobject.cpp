@@ -45,6 +45,8 @@
 // #include <mesh.h>
 #include <string>
 #include <vector>
+#include <memory>
+
 // ADDED
 #include <QOpenGLContext>  // Optional
 #include <QOpenGLFunctions_3_3_Core>
@@ -118,28 +120,28 @@ public:
         
         // Create models
         std::string model_path = ASSETS_PATH / "natural_earth/natural_earth_110m.obj"; 
-        m_model = new Model(model_path);
+        m_model =  std::make_unique<Model>(model_path);
 
         // Ellipsoid earth 
-        m_ellipsoid_earth = new Ellipsoid(glm::vec3(0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS), 40, 40);
+        m_ellipsoid_earth = std::make_unique<Ellipsoid>(glm::vec3(0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS), 40, 40);
 
         // 
-        small_earth = new Model(model_path);
+        small_earth =  std::make_unique<Model>(model_path);
 
         // Get our rocket
         std::string rocket_path = ASSETS_PATH / "/rocket_v1/12217_rocket_v1_l1.obj";
-        m_rocket = new Model(rocket_path);
+        m_rocket =  std::make_unique<Model>(rocket_path);
 
         // Ellipsoid
-        m_ellipsoid = new Ellipsoid(glm::vec3(0.4*EARTH_RADIUS, 1.2*EARTH_RADIUS, 0.2*EARTH_RADIUS), 40, 40);
+        m_ellipsoid =  std::make_unique<Ellipsoid>(glm::vec3(0.4*EARTH_RADIUS, 1.2*EARTH_RADIUS, 0.2*EARTH_RADIUS), 40, 40);
 
         // OBB 
-        m_obb = new OBB(glm::vec3(-0.75*EARTH_RADIUS, -EARTH_RADIUS, -0.5*EARTH_RADIUS), 
+        m_obb =  std::make_unique<OBB>(glm::vec3(-0.75*EARTH_RADIUS, -EARTH_RADIUS, -0.5*EARTH_RADIUS), 
                         glm::vec3(0.75*EARTH_RADIUS, EARTH_RADIUS, 0.5*EARTH_RADIUS));
 
 
         // Camera 
-        m_camera = new OrbitalCamera(glm::vec3(0.0f, 0.0f, 0.0f), 3*EARTH_RADIUS, 1.0*EARTH_RADIUS);  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
+        m_camera = std::make_unique<OrbitalCamera>(glm::vec3(0.0f, 0.0f, 0.0f), 3*EARTH_RADIUS, 1.0*EARTH_RADIUS);  //new CameraT(glm::vec3(0.0f, 0.0f, 8.0f));
         
         // My (static) line
         std::vector<std::vector<Eigen::Vector3f>> the_lines;
@@ -149,7 +151,7 @@ public:
             the_coordinates.push_back(coordinate);
         }
         the_lines.push_back(the_coordinates);
-        m_circular_line = new Line(the_lines, 10); 
+        m_circular_line =  std::make_unique<Line>(the_lines, 10); 
 
         // 
         // My polygon
@@ -169,7 +171,7 @@ public:
         polygon_2_coordinates.emplace_back(0, 0, EARTH_RADIUS);
         the_polygons.push_back(polygon_2_coordinates);
 
-        m_polygon = new Polygon(the_polygons); 
+        m_polygon =  std::make_unique<Polygon>(the_polygons); 
 
         // Draw circle on sphere?
         // Method 1: Flat circle
@@ -191,12 +193,12 @@ public:
         the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This point 2"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "eifjewi"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
-        m_points = new Point(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
+        m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
         std::vector<double> lats;
         std::vector<double> longs;
         std::vector<int> indexes;
-        getMapCoords("./filtered_coast.csv", lats, longs, indexes);
+        getMapCoords(ROOT_PROJECT_DIRECTORY / "filtered_coast.csv", lats, longs, indexes);
         int current_index = -999;
 
         std::vector<ConstrainedDelaunayContourEdges> contour_edges;
@@ -216,7 +218,6 @@ public:
                 ConstrainedDelaunayContourEdges contour_edge(delaunay_edges, false);
                 contour_edges.push_back(contour_edge);
 
-                // if (new_index > 3000) {break;}
                 edge.clear();
                 delaunay_edges.clear();
                 edge.push_back(std::make_pair(longs[i], lats[i]));
@@ -228,13 +229,13 @@ public:
         ConstrainedDelaunayContourEdges contour_edge(delaunay_edges, false);
         contour_edges.push_back(contour_edge);
 
-        // m_projected_shapes = new Delaunay2_5D(contour_edges, 1, 1, 5000, Color::RED, true);
+        m_projected_shapes = std::make_unique<Delaunay2_5D>(contour_edges, 1, 1, 5000, Color::RED, true);
 
         // My text
-        m_text = new Text3D("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
+        m_text = std::make_unique<Text3D>("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
 
         // My cubemap
-        m_cubemap = new CubeMap("path_to_cube_map");
+        m_cubemap = std::make_unique<CubeMap>("path_to_cube_map");
 
         // start timer
         timer_.start();
@@ -244,9 +245,6 @@ public:
 
     ~MyFrameBufferObjectRenderer(){
         delete m_shader;
-        delete m_model;
-        delete small_earth;
-        delete m_camera;
     }
 
     void synchronize(QQuickFramebufferObject *item) Q_DECL_OVERRIDE
@@ -364,7 +362,7 @@ public:
         m_points->draw(view, projection);
 
         // Draw delaunay projection
-        // m_projected_shapes->draw(view, projection); 
+        m_projected_shapes->draw(view, projection); 
 
         // Draw ellipsoid
         glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // 
@@ -434,20 +432,20 @@ private:
     QQuickWindow *m_window;    
     Shader* m_shader;
     // Shader* m_line_shader;
-    Model* m_model;
+    std::unique_ptr<Model> m_model;
 
-    Model* small_earth;
-    Model* m_rocket;
-    Ellipsoid* m_ellipsoid;
-    Ellipsoid* m_ellipsoid_earth;
-    OBB* m_obb;
-    Line* m_circular_line;
-    Polygon* m_polygon;
-    Delaunay2_5D* m_projected_shapes;
-    Point* m_points;
-    Text3D* m_text;
-    CubeMap* m_cubemap;
-    OrbitalCamera* m_camera;
+    std::unique_ptr<Model> small_earth;
+    std::unique_ptr<Model> m_rocket;
+    std::unique_ptr<Ellipsoid> m_ellipsoid;
+    std::unique_ptr<Ellipsoid> m_ellipsoid_earth;
+    std::unique_ptr<OBB> m_obb;
+    std::unique_ptr<Line> m_circular_line;
+    std::unique_ptr<Polygon> m_polygon;
+    std::unique_ptr<Delaunay2_5D> m_projected_shapes;
+    std::unique_ptr<Point> m_points;
+    std::unique_ptr<Text3D> m_text;
+    std::unique_ptr<CubeMap> m_cubemap;
+    std::unique_ptr<OrbitalCamera> m_camera;
 
     // Transforms 
     float m_current_azimuth = 0;
