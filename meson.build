@@ -30,7 +30,7 @@ freetype_dep = subproject('freetype').get_variable('freetype_dep')
 cmake = import('cmake')
 
 # Get Constrained Delaunay Triangulation library
-# cdt_dep = cmake.subproject('cdt')
+cdt_dep = cmake.subproject('cdt')
 inc_cdt = include_directories('subprojects/CDT/CDT/include')
 
 deps_common = [

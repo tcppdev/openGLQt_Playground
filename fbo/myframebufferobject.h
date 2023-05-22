@@ -53,6 +53,9 @@ public:
     void trigger_redraw();
     std::pair<bool, glm::vec3> mouse_click() const;
 
+    qreal get_window_height();
+    qreal get_window_width();
+
 signals:
     void azimuthChanged(float azimuth);
     void distanceChanged(float distance);

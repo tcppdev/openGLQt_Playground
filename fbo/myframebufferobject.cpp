@@ -126,7 +126,8 @@ public:
         m_ellipsoid_earth = std::make_unique<Ellipsoid>(glm::vec3(0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS), 40, 40);
 
         // 
-        small_earth =  std::make_unique<Model>(model_path);
+        model_path = ASSETS_PATH / "backpack/backpack.obj"; 
+        other_model =  std::make_unique<Model>(model_path);
 
         // Get our rocket
         std::string rocket_path = ASSETS_PATH / "/rocket_v1/12217_rocket_v1_l1.obj";
@@ -137,7 +138,7 @@ public:
 
         // OBB 
         m_obb =  std::make_unique<OBB>(glm::vec3(-0.02*EARTH_RADIUS, -0.02*EARTH_RADIUS, -0.1*EARTH_RADIUS), 
-                                       glm::vec3(0.02*EARTH_RADIUS, 0.02*EARTH_RADIUS, 0.25*EARTH_RADIUS), Color::TRANSPARENT_BLUE);
+                                       glm::vec3(0.02*EARTH_RADIUS, 0.02*EARTH_RADIUS, 0.25*EARTH_RADIUS), Color::TRANSPARENT_WHITE);
 
 
         // Camera 
@@ -189,7 +190,7 @@ public:
 
         // My points
         std::vector<GeoPoint> the_points;
-        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS), "Ok\nnewthing\nthis one is a long line"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS), "Ok\nnew line\nthis one is a long line"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This is point 2"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "eifjewi"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
@@ -268,6 +269,9 @@ public:
         // Process (right) click input
         m_click_toggle = i->mouse_click();
 
+        m_window_width = i->get_window_width();
+        m_window_height = i->get_window_height();
+
     }
 
     void render() Q_DECL_OVERRIDE
@@ -290,7 +294,7 @@ public:
         
         // view/projection transformations
         m_camera->process_mouse_scroll(m_mouse_delta_angle);
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)600 / (float)600, (float)0.001*EARTH_RADIUS, 10*EARTH_RADIUS);  // 
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)m_window_width / (float)m_window_height, (float)0.001*EARTH_RADIUS, 10*EARTH_RADIUS);  // 
         // glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -50.0f, 50.0f);
         // for othographic projection zoom to work, scale the object using mouse scroll rather and 
         // changing the distance of the camera to the object (using the mouse scroll)
@@ -335,15 +339,15 @@ public:
 
         // render small earth
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(1.5*EARTH_RADIUS, 0.0f, 0.0f));  // elevation rotation
+        model = glm::translate(model, glm::vec3(-1.5*EARTH_RADIUS, 0.0f, 0.0f));  // elevation rotation
         // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.2*earth_scaling, 0.2*earth_scaling, 0.2*earth_scaling));	// it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(1000000.0f, 1000000.0f, 1000000.0f));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model = glm::rotate(model, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
         // model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
-        small_earth->Draw(*m_shader);
+        other_model->Draw(*m_shader);
 
         // Lets draw the line
         if (m_draw_line) {
@@ -364,7 +368,7 @@ public:
         m_projected_shapes->draw(view, projection); 
 
         // Draw ellipsoid
-        Eigen::Vector3f cord_ellipsoid = sph_to_cart(m_radius, theta, 135);
+        Eigen::Vector3f cord_ellipsoid = sph_to_cart(m_radius, theta/2, 135);
         glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(cord_ellipsoid[0], cord_ellipsoid[1], cord_ellipsoid[2]));  // 
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
@@ -454,7 +458,7 @@ private:
     // Shader* m_line_shader;
     std::unique_ptr<Model> m_model;
 
-    std::unique_ptr<Model> small_earth;
+    std::unique_ptr<Model> other_model;
     std::unique_ptr<Model> m_rocket;
     std::unique_ptr<Ellipsoid> m_ellipsoid;
     std::unique_ptr<Ellipsoid> m_ellipsoid_earth;
@@ -490,6 +494,10 @@ private:
 
     // Mouse clicking 
     std::pair<bool, glm::vec3> m_click_toggle = std::make_pair(false, glm::vec3(0.0f));
+
+    // Window params
+    qreal m_window_width;
+    qreal m_window_height;
 };
 
 // MyFrameBufferObject implementation
@@ -517,6 +525,17 @@ QQuickFramebufferObject::Renderer *MyFrameBufferObject::createRenderer() const
 void MyFrameBufferObject::trigger_redraw()
 {
     update();
+}
+
+qreal MyFrameBufferObject::get_window_height()
+{
+    return this->height();
+}
+
+
+qreal MyFrameBufferObject::get_window_width()
+{
+    return this->width();
 }
 
 void MyFrameBufferObject::set_line_visibility(bool visibility)

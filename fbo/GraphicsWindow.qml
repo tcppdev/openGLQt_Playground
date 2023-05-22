@@ -26,8 +26,8 @@ import MyRenderLibrary 42.0
 
 ApplicationWindow {
     id: root
-    width: 1000
-    height: 1000
+    width: 900
+    height: 900
     objectName: "graphics_window"
 
     color: "white" //  "lightblue"
@@ -45,8 +45,8 @@ ApplicationWindow {
 
     MyFrame {
         id: renderer
-        width: 900
-        height: 900
+        width: root.width
+        height: root.height*0.9
         anchors.left: root.left
         anchors.top: root.top
         anchors.leftMargin: 25
@@ -88,7 +88,7 @@ ApplicationWindow {
 
     Timer {
         id: render_control  // control refresh rate of our scene
-        interval: 20 // [ms]
+        interval: 10 // [ms]
         running: true
         repeat: true
         onTriggered: { renderer.request_redraw() } 
