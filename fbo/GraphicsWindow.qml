@@ -52,19 +52,6 @@ ApplicationWindow {
         anchors.leftMargin: 25
         anchors.topMargin: 25
         smooth: true
-        
-        // ChartView {
-        //     width: 400
-        //     height: 300
-        //     theme: ChartView.ChartThemeBrownSand
-        //     antialiasing: true
-
-        //     PieSeries {
-        //         id: pieSeries
-        //         PieSlice { label: "eaten"; value: 94.9 }
-        //         PieSlice { label: "not yet eaten"; value: 5.1 }
-        //     }
-        // }
 
         Text {
             text: "Testing text"
@@ -72,61 +59,6 @@ ApplicationWindow {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        // MouseArea { 
-        //     anchors.fill: parent
-        //     enabled: false // set to true and it blocks events from FBO
-        //     acceptedButtons: Qt.LeftButton
-        //     //onClicked: flashyThing.flash()
-        // }
-
-        // Rectangle {
-        //     id: flashyThing
-        //     anchors.fill: parent
-        //     opacity: 0
-
-        //     color: "yellow"
-
-        //     Text {
-        //         id: flashyThingText
-        //         anchors.centerIn: parent
-        //         text: "Clicked!"
-        //         font.pointSize: 40
-        //     }
-
-        //     function flash() {
-        //         flashyAnimation.restart()
-        //     }
-
-        //     ParallelAnimation {
-        //         id: flashyAnimation
-
-        //         NumberAnimation {
-        //             target: flashyThingText
-        //             properties: "font.pointSize"
-        //             from: 20
-        //             to: 60
-        //             duration: 2000
-        //             easing.type: Easing.OutCubic
-        //         }
-
-        //         SequentialAnimation {
-        //             PropertyAction {
-        //                 target: flashyThing
-        //                 properties: "opacity"
-        //                 value: 1
-        //             }
-
-        //             NumberAnimation {
-        //                 target: flashyThing
-        //                 properties: "opacity"
-        //                 to: 0
-        //                 easing.type: Easing.InCubic
-        //                 duration: 1500
-        //             }
-        //         }
-        //     }
-
-        // }
     }
 
     ChartView {
@@ -156,7 +88,7 @@ ApplicationWindow {
 
     Timer {
         id: render_control  // control refresh rate of our scene
-        interval: 200 // [ms]
+        interval: 20 // [ms]
         running: true
         repeat: true
         onTriggered: { renderer.request_redraw() } 
@@ -189,98 +121,5 @@ ApplicationWindow {
         anchors.bottom: renderer.bottom
         anchors.horizontalCenter: renderer.horizontalCenter
     }
-
-
-    // ParallelAnimation {
-    //     loops: Animation.Infinite
-    //     running: false
-    //     SequentialAnimation {
-    //         loops: Animation.Infinite
-
-    //         NumberAnimation {
-    //             target: renderer
-    //             properties: "x"
-    //             from: 50
-    //             to: root.width - renderer.width
-    //             duration: 4000
-    //         }
-    //         NumberAnimation {
-    //             target: renderer
-    //             properties: "x"
-    //             from: root.width - renderer.width
-    //             to: 0
-    //             duration: 5000
-    //         }
-    //         NumberAnimation {
-    //             target: renderer
-    //             properties: "x"
-    //             from: 0
-    //             to: 50
-    //             duration: 1000
-    //         }
-    //     }
-
-    //     SequentialAnimation {
-    //         loops: Animation.Infinite
-    //         NumberAnimation {
-    //             target: renderer
-    //             properties: "y"
-    //             from: 100
-    //             to: 0
-    //             duration: 1500
-    //         }
-
-    //         NumberAnimation {
-    //             target: renderer
-    //             properties: "y"
-    //             from: 0
-    //             to: root.height - renderer.height
-    //             duration: 5000
-    //         }
-
-    //         NumberAnimation {
-    //             target: renderer
-    //             properties: "y"
-    //             from: root.height - renderer.height
-    //             to: 100
-    //             duration: 4000
-    //         }
-
-    //     }
-
-    //     SequentialAnimation {
-    //         loops: Animation.Infinite
-
-    //         PauseAnimation {
-    //             duration: 10000
-    //         }
-
-    //         RotationAnimation {
-    //             target: renderer
-    //             properties: "rotation"
-    //             from: 0
-    //             to: 45
-    //             duration: 500
-    //             easing.type: Easing.OutBack
-    //         }
-
-    //         RotationAnimation {
-    //             target: renderer
-    //             properties: "rotation"
-    //             to: -45
-    //             duration: 1000
-    //             easing.type: Easing.OutBack
-    //         }
-
-    //         RotationAnimation {
-    //             target: renderer
-    //             properties: "rotation"
-    //             to: 0
-    //             duration: 500
-    //             easing.type: Easing.OutBack
-    //         }
-    //     }
-
-    // }
 }
 

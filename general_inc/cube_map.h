@@ -7,6 +7,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <general_inc/shader.h>
+#include <general_inc/paths.h>
 
 float skybox_vertices[] = {
     // positions          
@@ -62,8 +63,8 @@ public:
     CubeMap(std::string cube_map_path){
 
         // Point shader
-        const char* vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/cubemap.vs";
-        const char* fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/cubemap.fs";
+        const char* vertex_shader_path = CUBEMAP_VS.c_str();
+        const char* fragment_shader_path = CUBEMAP_FS.c_str();
         m_cubemap_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         initializeOpenGLFunctions();   // Initialise current context  (required)
@@ -73,12 +74,12 @@ public:
         // Cube map images need to have following names
         vector<std::string> faces
         {
-            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/right.jpg",
-            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/left.jpg",
-            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/top.jpg",
-            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/bottom.jpg",
-            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/front.jpg",
-            "/home/tclar/Repos/openGLQt/resources/cubemaps/universe/back.jpg"
+            CUBEMAP_PATH / "right.jpg",
+            CUBEMAP_PATH / "left.jpg",
+            CUBEMAP_PATH / "top.jpg",
+            CUBEMAP_PATH / "bottom.jpg",
+            CUBEMAP_PATH / "front.jpg",
+            CUBEMAP_PATH / "back.jpg"
         };
         
         // Load texture 

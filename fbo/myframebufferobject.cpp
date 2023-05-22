@@ -28,6 +28,7 @@
 #include <QTimer>
 
 // #include <meshrenderer.h>
+#include <paths.h>
 #include <model.h>
 #include <camera_two.h>
 #include <orbital_camera.h>
@@ -106,18 +107,17 @@ public:
     MyFrameBufferObjectRenderer()
     {
         initializeOpenGLFunctions();   // Initialises current context
-        // m_render.initialize();
 
         // Create shaders
-        const char* vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/1.model_loading.vs";
-        const char* fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/1.model_loading.fs";
+        const char* vertex_shader_path = MODEL_VS.c_str(); 
+        const char* fragment_shader_path = MODEL_FS.c_str();
         m_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
         stbi_set_flip_vertically_on_load(true);
         
         // Create models
-        std::string model_path = "/home/tclar/Repos/openGLQt/resources/objects/natural_earth/natural_earth_110m.obj";
+        std::string model_path = ASSETS_PATH / "natural_earth/natural_earth_110m.obj"; 
         m_model = new Model(model_path);
 
         // Ellipsoid earth 
@@ -127,7 +127,7 @@ public:
         small_earth = new Model(model_path);
 
         // Get our rocket
-        std::string rocket_path = "/home/tclar/Repos/openGLQt/resources/objects/rocket_v1/12217_rocket_v1_l1.obj";
+        std::string rocket_path = ASSETS_PATH / "/rocket_v1/12217_rocket_v1_l1.obj";
         m_rocket = new Model(rocket_path);
 
         // Ellipsoid
@@ -193,23 +193,6 @@ public:
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
         m_points = new Point(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
-        // Delaunay triangulation test
-        // std::vector<ConstrainedDelaunayContourEdges> contour_edges;
-
-        // std::vector<std::vector<std::pair<double, double>>> delaunay_edges_1;
-        // // TO-DO: FIX ME lat, long not in order issue
-        // delaunay_edges_1.push_back({std::make_pair(0, 0), std::make_pair(10, 0), std::make_pair(10, -10)});  // lat, -long 
-        // ConstrainedDelaunayContourEdges contour_edges_1(delaunay_edges_1, false);
-        // contour_edges.push_back(contour_edges_1);
-
-        // std::vector<std::vector<std::pair<double, double>>> delaunay_edges_2;
-        // delaunay_edges_2.push_back({std::make_pair(50, 0), std::make_pair(70, 0), std::make_pair(70, -30), std::make_pair(80, -40),
-        //                             std::make_pair(50, -30), std::make_pair(50, 0)});
-        // ConstrainedDelaunayContourEdges contour_edges_2(delaunay_edges_2, false);
-
-        // contour_edges.push_back(contour_edges_2);
-        // m_projected_shapes = new Delaunay2_5D(contour_edges, 1, 1, 5000);
-
         std::vector<double> lats;
         std::vector<double> longs;
         std::vector<int> indexes;
@@ -271,9 +254,6 @@ public:
         m_window = item->window();
 
         MyFrameBufferObject *i = static_cast<MyFrameBufferObject *>(item);
-        // m_render.setAzimuth(i->azimuth());
-        // m_render.setElevation(i->elevation());
-        // m_render.setDistance(i->distance());
 
         m_delta_x = i->delta_x();
         m_delta_y = -i->delta_y(); 
@@ -419,6 +399,7 @@ public:
         /// Draw rocket
         // std::cout << theta << std::endl;
 
+        // Change this to quaternion one day
         glm::mat4 model_rocket = glm::mat4(1.0f);
         model_rocket = glm::translate(model_rocket, glm::vec3(cord_r[0], cord_r[1], cord_r[2]));  // translate it
         model_rocket = glm::scale(model_rocket, glm::vec3(1000.0f)); // glm::vec3(0.1f)); // (0.001f));	// scale it down

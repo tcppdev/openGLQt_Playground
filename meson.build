@@ -27,24 +27,11 @@ eigen_dep = dependency('eigen', fallback : ['eigen', 'eigen_dep'])
 # Freetype dependency for text
 freetype_dep = subproject('freetype').get_variable('freetype_dep')
 
-# Get 2D delaunay library
-# cmake = import('cmake')
-# delaunay_dep = cmake.subproject('delaunator')
-# inc_delaunay = include_directories('subprojects/delaunator/include')
-
-# Get 2D polygon triangulation library
 cmake = import('cmake')
-#earcut_dep = cmake.subproject('earcut')
-#inc_earcut = include_directories('subprojects/earcut/include')
 
-# Get cgal graphics library
+# Get Constrained Delaunay Triangulation library
 # cdt_dep = cmake.subproject('cdt')
 inc_cdt = include_directories('subprojects/CDT/CDT/include')
-
-#poly2tri_dep = cmake.subproject('poly2tri')
-#inc_poly2tri = include_directories('subprojects/poly2tri')
-
-# FSA dependencies
 
 deps_common = [
   qt5_dep,
@@ -53,27 +40,7 @@ deps_common = [
   freetype_dep
   ]
 
-
-## FSA dependencies
-# geomancer_proj = subproject('geomancer')
-
-# Build Mahjong
-# geomancer_lib = static_library('geomancer',
-#                              sources : src,
-#                              include_directories : includes,
-#                              link_args : link_args,
-#                              dependencies : mahjong_deps)
-
-# mahjong_dep = declare_dependency(link_with : mahjong_lib,
-#                                  include_directories : includes,
-#                                  dependencies: mahjong_deps)
-
-# geomancer_dep = mahjong_proj.get_variable('mahjong_dep')
-
-### Includes:
-
-inc_common = [include_directories('lib')] #, include_directories('glad'), 
-              #include_directories('KHR')]   # common
+inc_common = [include_directories('lib')] 
 inc_underlay = [include_directories('underlay')]   # underlay
 inc_fbo = [include_directories('fbo')]   # fbo
 inc_render = [include_directories('rendercontrol')]   # render-control
@@ -100,8 +67,6 @@ sources_common = [
   'lib/camera.cpp',
   'lib/meshrenderer.cpp',
   'lib/objloader.cpp'] 
- # 'glad/glad.c'   # ADDED
- # ]
 
 sources_underlay = ['underlay/myquickview.cpp']
 sources_fbo = ['fbo/myframebufferobject.cpp', 'fbo/chartwrapper.cpp']
@@ -113,21 +78,6 @@ sources_general = ['ext_inc/stb_image.cpp']
 # Preprocess qt header and qml files to handle Qt's C++ extension
 # using the meta-object compiler (moc) 
 
-## Underlay binary
-if get_option('underlay')
-processed_moc_files_underlay = qt5_bin.preprocess(
-    moc_headers: headers_to_moc_common + headers_to_moc_underlay,
-    qresources: qresources_common + qresources_underlay,
-    dependencies: qt5_dep
-)
-
-application_underlay = executable('underlay',
-                        sources: ['underlay/main.cpp'] + sources_common + sources_underlay + processed_moc_files_underlay,
-                        dependencies: deps_common,
-                        include_directories: inc_common + inc_underlay,
-                        link_args: ['-lstdc++fs'])
-endif
-
 ## FBO binary
 if get_option('fbo')
 processed_moc_files_fbo = qt5_bin.preprocess(
@@ -136,26 +86,9 @@ processed_moc_files_fbo = qt5_bin.preprocess(
     dependencies: qt5_dep
 )
 
-
-
 application_fbo = executable('fbo',
                         sources: ['fbo/main.cpp'] + sources_common + sources_fbo + processed_moc_files_fbo + sources_general,
                         dependencies: deps_common,
                         include_directories: inc_common + inc_fbo + inc_ext + inc_general + inc_cdt, #+ inc_delaunay + inc_earcut + inc_poly2tri,
                         link_args: ['-lstdc++fs'])
-endif
-
-## Render control binary
-if get_option('render')
-  processed_moc_files_render = qt5_bin.preprocess(
-      moc_headers: headers_to_moc_common,
-      qresources: qresources_common + qresources_render,
-      dependencies: qt5_dep
-  )
-
-  application_render = executable('render-control',
-                          sources: ['rendercontrol/main.cpp'] + sources_common + sources_render + processed_moc_files_render,
-                          dependencies: deps_common,
-                          include_directories: inc_common + inc_render,
-                          link_args: ['-lstdc++fs'])
 endif

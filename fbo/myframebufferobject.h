@@ -26,7 +26,6 @@
 
 #include <QQuickFramebufferObject>
 #include <glm/glm.hpp>
-// #include <QQuickView>
 
 #include <iostream>
 

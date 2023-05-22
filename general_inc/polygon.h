@@ -35,8 +35,8 @@ public:
         linecolor_ = linecolor;
 
         // Polygon shader
-        const char* polygon_vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/polygon.vs";
-        const char* polygon_fragment_shader_path = "/home/tclar/Repos/openGLQt/shaders/polygon.fs";
+        const char* polygon_vertex_shader_path = POLYGON_VS.c_str();
+        const char* polygon_fragment_shader_path = POLYGON_FS.c_str();
         m_polygon_shader = new Shader(polygon_vertex_shader_path, polygon_fragment_shader_path);
 
         // // Create the outline lines

@@ -65,62 +65,11 @@ int main(int argc, char **argv)
     QQuickWindow* graphics_window = engine.rootObjects()[0]->findChild<QQuickWindow*>("graphics_window");
     graphics_window->show();
 
-    // 
+    // Test chart view object
     QQuickItem *test_chart_view = graphics_window->findChild<QQuickItem*>("test_chart");
-
-    // Initialise pointers
-    // QtCharts::QAbstractAxis *axis_x = nullptr;
-    // QtCharts::QAbstractAxis *axis_y = nullptr;
-    // QtCharts::QAbstractSeries *serie = nullptr;
-
-    // Fetch correct line type
-    // const QMetaObject *meta_object = test_chart_view->metaObject();
-    // if(std::strcmp(meta_object->className(), "QtCharts::DeclarativeChart") != 0)
-    //     return;
-    // int series_type_enum_index = meta_object->indexOfEnumerator("SeriesType");
-    // QMetaEnum series_type_enum = meta_object->enumerator(series_type_enum_index);
-    // int line_type = series_type_enum.keyToValue("SeriesTypeLine");
-
     // This = chartview wrapper
     ChartWrapper chart_object = ChartWrapper(test_chart_view);
-    // ChartLine* line_ptr = chart_object->create_line(std::string unique_id, std::string label, std::vector<float> x, std::vector<float> y);
     chart_object.create_line("my_test_line", "this is a line");
-    // ChartLine* line_ptr = chart_object->get_line_ptr(std::string unique_id);
-    // line_ptr->update_line();
-
-    // this->create_lines(std::vector<std::string> line_labels);
-    // this->update_line(std::string line_label, float x, float y) // mode append
-    // this->update_line(std::string line_label, std::vector<float> x, std::vector<float> y, append=True); // 
-    // this->resize_plot(); // Resize to fit lines
-
-    // Create series and fill with data
-    // QMetaObject::invokeMethod(test_chart_view, "createSeries", Qt::DirectConnection,
-    //                           Q_RETURN_ARG(QtCharts::QAbstractSeries *, serie),
-    //                           Q_ARG(int, line_type),
-    //                           Q_ARG(QString, "serie from c++"),
-    //                           Q_ARG(QtCharts::QAbstractAxis *, axis_x),
-    //                           Q_ARG(QtCharts::QAbstractAxis *, axis_y));
-
-    // if(QtCharts::QLineSeries *line_serie = qobject_cast<QtCharts::QLineSeries *>(serie)){
-    //     static std::default_random_engine e;
-    //     static std::uniform_real_distribution<> dis(0, 3);
-    //     for(int i=0; i < 14; i++){
-    //         line_serie->append(i, dis(e));
-    //     }
-    // }
-    
-    // Pull the generated axes
-    // QMetaObject::invokeMethod(test_chart_view, "axisX", Qt::DirectConnection,
-    //                         Q_RETURN_ARG(QtCharts::QAbstractAxis *, axis_x));
-    // QMetaObject::invokeMethod(test_chart_view, "axisY", Qt::DirectConnection,
-    //                           Q_RETURN_ARG(QtCharts::QAbstractAxis *, axis_y));
-    // axis_x->setRange(0, 14);
-    // axis_y->setRange(0, 5);
-
-    // Connections
-    // QObject::connect(backend, SIGNAL(compass_mode_changed(bool)),
-    //                  heading_dial_pilot_object_ptr, SLOT(set_compass_mode(bool)));  
-
     QTimer* timer_ = new QTimer();
     timer_->setInterval(500);
 
@@ -129,10 +78,6 @@ int main(int argc, char **argv)
 
     // // Start update timer
     timer_->start();
-
-
-    // Let's create the chart
-
     
     return app.exec();
 }

@@ -45,8 +45,8 @@ public:
         fill_color_ = fill_color;
 
         // Polygon shader
-        const char* delaunay_2_5D_vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.vs";
-        const char* delaunay_2_5D_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.fs";
+        const char* delaunay_2_5D_vertex_shader_path = DELAUNAY_2_5D_VS.c_str();
+        const char* delaunay_2_5D_shader_path = DELAUNAY_2_5D_FS.c_str();
         m_delaunay_shader = new Shader(delaunay_2_5D_vertex_shader_path, delaunay_2_5D_shader_path);
 
         // 
@@ -63,9 +63,6 @@ public:
     {
         fill_color_ = fill_color;
         include_wireframe_ = include_wireframe;
-        const char* delaunay_2_5D_vertex_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.vs";
-        const char* delaunay_2_5D_shader_path = "/home/tclar/Repos/openGLQt/shaders/delaunay_2_5D.fs";
-        m_delaunay_shader = new Shader(delaunay_2_5D_vertex_shader_path, delaunay_2_5D_shader_path);
 
         // Draw 2D Lat/Lon surface on a 3D WGS84 Ellipsoid
         // Create steiners points
