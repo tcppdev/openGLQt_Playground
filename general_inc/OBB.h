@@ -104,8 +104,16 @@ public:
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)0);
     }
 
+    void set_fill_color(Color fill_color)
+    {
+        fill_color_ = fill_color;
+    }
+
     void draw(glm::mat4 view_matrix = glm::mat4(1.0f), glm::mat4 projection_matrix = glm::mat4(1.0f), glm::mat4 model_matrix = glm::mat4(1.0f))
     {
+        glEnable(GL_BLEND);  // enabling blending 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  // setting blending function
+
         obb_shader_->use();  // Bind shader
 
         // Set the uniforms:
@@ -135,6 +143,7 @@ public:
         glDrawElements(GL_LINES, (unsigned int)line_indices_.size(), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);  // Unbind vao
+        glDisable(GL_BLEND);  
     }
 
     // ray_ndc: incoming ray in normalised device coordinates

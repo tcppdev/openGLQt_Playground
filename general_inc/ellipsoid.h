@@ -67,6 +67,10 @@ class Ellipsoid: protected QOpenGLFunctions_3_3_Core
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)0);
     }
 
+    void set_fill_color(Color fill_color) {
+        fill_color_ = fill_color;
+    };
+
     ///////////////////////////////////////////////////////////////////////////////
     // draw a sphere in VertexArray mode
     // OpenGL RC must be set before calling it

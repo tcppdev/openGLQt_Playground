@@ -133,11 +133,11 @@ public:
         m_rocket =  std::make_unique<Model>(rocket_path);
 
         // Ellipsoid
-        m_ellipsoid =  std::make_unique<Ellipsoid>(glm::vec3(0.4*EARTH_RADIUS, 1.2*EARTH_RADIUS, 0.2*EARTH_RADIUS), 40, 40);
+        m_ellipsoid =  std::make_unique<Ellipsoid>(glm::vec3(0.2*EARTH_RADIUS, 0.2*EARTH_RADIUS, 0.2*EARTH_RADIUS), 40, 40);
 
         // OBB 
-        m_obb =  std::make_unique<OBB>(glm::vec3(-0.75*EARTH_RADIUS, -EARTH_RADIUS, -0.5*EARTH_RADIUS), 
-                        glm::vec3(0.75*EARTH_RADIUS, EARTH_RADIUS, 0.5*EARTH_RADIUS));
+        m_obb =  std::make_unique<OBB>(glm::vec3(-0.02*EARTH_RADIUS, -0.02*EARTH_RADIUS, -0.1*EARTH_RADIUS), 
+                                       glm::vec3(0.02*EARTH_RADIUS, 0.02*EARTH_RADIUS, 0.25*EARTH_RADIUS), Color::TRANSPARENT_BLUE);
 
 
         // Camera 
@@ -189,8 +189,8 @@ public:
 
         // My points
         std::vector<GeoPoint> the_points;
-        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS), "Heks\nnewstuff\nthis one is a long line"));
-        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This point 2"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS), "Ok\nnewthing\nthis one is a long line"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This is point 2"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "eifjewi"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
         m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
@@ -328,8 +328,7 @@ public:
         // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
         float earth_scaling = 1.0f;
         model = glm::scale(model, glm::vec3(earth_scaling, earth_scaling, earth_scaling));	// it's a bit too big for our scene, so scale it down
-        model = glm::rotate(model, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
-        model = glm::rotate(model, glm::radians(m_current_elevation + 90), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
         m_model->Draw(*m_shader);
@@ -365,34 +364,36 @@ public:
         m_projected_shapes->draw(view, projection); 
 
         // Draw ellipsoid
-        glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.5*EARTH_RADIUS, 0.0f));  // 
+        Eigen::Vector3f cord_ellipsoid = sph_to_cart(m_radius, theta, 135);
+        glm::mat4 model_ellipsoid = glm::translate(glm::mat4(1.0f), glm::vec3(cord_ellipsoid[0], cord_ellipsoid[1], cord_ellipsoid[2]));  // 
+        model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
+        model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
+        model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f));  // theta-rotation
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
-        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(1.0, 0.7, 0.2));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
+        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(theta/360, 2*theta/360, theta/360));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
         m_ellipsoid->draw(view, projection, model_ellipsoid);
 
-        // Draw earth ellispoid
-        m_ellipsoid_earth->draw(view, projection);
-
+        // Draw ellispoid
         if (m_click_toggle.first) {
             if(m_ellipsoid->test_ray_tracing(ray_world_origin, ray_direction_world, model_ellipsoid)) {
+                ellipse_toggled_ = true;
                 std::cout << "Intersected Ellipse!" << std::endl;
             }
             else {
+                ellipse_toggled_ = false;
                 std::cout << "Did not intersect Ellipse "  << std::endl;
             }
         }
 
-        // Draw OBB
-        m_obb->draw(view, projection, model_ellipsoid);
-        if (m_click_toggle.first) {
-            if(m_obb->test_ray_tracing(glm::vec3(ray_world_origin), glm::vec3(ray_direction_world), model_ellipsoid)) {
-                std::cout << "Intersected OBB!" << std::endl;
-            }
-            else {
-                std::cout << "Did not intersect OBB "  << std::endl;
-            }
+        if (ellipse_toggled_) { 
+            m_ellipsoid->set_fill_color(Color::RED);
         }
+        else {
+            m_ellipsoid->set_fill_color(Color::BLUE);
+        }
+
+        m_ellipsoid_earth->draw(view, projection);
 
         /// Draw rocket
         // std::cout << theta << std::endl;
@@ -405,6 +406,25 @@ public:
         model_rocket = glm::rotate(model_rocket, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
         model_rocket = glm::rotate(model_rocket, glm::radians(-m_inc), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
         model_rocket = glm::rotate(model_rocket, glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f));  // theta-rotation
+
+        glm::mat4 model_obb = glm::mat4(1.0f);
+        model_obb = glm::translate(model_obb, glm::vec3(cord_r[0], cord_r[1], cord_r[2]));  // translate it
+        model_obb = glm::rotate(model_obb, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // y-rotation
+        model_obb = glm::rotate(model_obb, glm::radians(-m_inc), glm::vec3(1.0f, 0.0f, 0.0f));  // inclination-rotation
+        model_obb = glm::rotate(model_obb, glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f));  // theta-rotation
+
+        // Draw OBB
+        if (m_click_toggle.first) {
+            if(m_obb->test_ray_tracing(glm::vec3(ray_world_origin), glm::vec3(ray_direction_world), model_obb)) {
+                std::cout << "Intersected OBB!" << std::endl;
+                obb_toggled_ = true;
+            }
+            else {
+                std::cout << "Did not intersect OBB "  << std::endl;
+                obb_toggled_ = false;
+            }
+        }
+        if (obb_toggled_) { m_obb->draw(view, projection, model_obb); };
 
         // Set shader properties
         m_shader->use();  
@@ -465,6 +485,8 @@ private:
 
     // Line toggle
     bool m_draw_line = true;
+    bool obb_toggled_ = false;  // control obb visibility control
+    bool ellipse_toggled_ = false; // control ellipsoid color
 
     // Mouse clicking 
     std::pair<bool, glm::vec3> m_click_toggle = std::make_pair(false, glm::vec3(0.0f));
