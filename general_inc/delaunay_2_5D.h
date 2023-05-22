@@ -17,6 +17,33 @@
 
 //#include "lagan/transform.h"
 
+
+// Constants for the WGS84 ellipsoid
+const double a = 6378137.0;          // Semi-major axis in meters
+const double b = 6356752.314245;     // Semi-minor axis in meters
+const double f = (a - b) / a;        // Flattening
+const double e2 = 2 * f - f * f;     // Eccentricity squared
+constexpr double pi_ = 3.14159265359;
+
+// Convert LLA coordinates to ECEF coordinates
+Eigen::Vector3d lla_to_ecef(Eigen::Vector3d point_lla) {
+    // Convert latitude and longitude to radians
+    double lat = point_lla.y()*(pi_ / 180.0);
+    double lon = point_lla.x()*(pi_ / 180.0);
+    double alt = point_lla.z();
+
+    // Compute the radius of curvature in the prime vertical
+    double N = a / std::sqrt(1 - e2 * std::sin(lat) * std::sin(lat));
+
+    // Compute ECEF coordinates
+    double x = (N + alt) * std::cos(lat) * std::cos(lon);
+    double y = (N + alt) * std::cos(lat) * std::sin(lon);
+    double z = ((1 - e2) * N + alt) * std::sin(lat);
+
+    return Eigen::Vector3d(x, y, z);
+}
+
+
 struct ConstrainedDelaunayContourEdges 
 {
     std::vector<std::vector<std::pair<double, double>>> closed_contours; 
@@ -210,7 +237,7 @@ public:
             // Project vertex on 3D WGS84 sphere?
             for (auto vertex: vertx){
                 Eigen::Vector3d point_lla = {static_cast<double>(vertex.x), static_cast<double>(vertex.y), altitude};
-                Eigen::Vector3d ecef_point = {0, 0, 0}; // lagan::lla2ecef(point_lla);
+                Eigen::Vector3d ecef_point = lla_to_ecef(point_lla) ; // {0, 0, 0}; // lagan::lla2ecef(point_lla);
                 transformed_vertices.push_back(ecef_point);
             }
 

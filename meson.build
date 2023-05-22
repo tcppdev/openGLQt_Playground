@@ -6,8 +6,10 @@
 project('Qt', ['cpp', 'c'],  # Allow compiling for both c++ and c files
         default_options : ['cpp_std=c++17'])
 
+cmake = import('cmake')
+
 # Dependencies for the gui
-qt5_bin = import('qt5')
+qt5_bin = import('qt5')  # cmake.subproject('qt5')
 qt5_dep = dependency('qt5', 
                      modules: ['Core', 'Gui', 'Qml', 'Widgets',
                                'Quick', 'Location', 'Network', 'Charts',

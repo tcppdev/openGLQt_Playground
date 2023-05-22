@@ -74,17 +74,17 @@ ApplicationWindow {
         legend.visible: true
     }
 
-//    MyFrame {
-//        id: rendererVeh
-//        width: 900
-//        height: 900
-//        anchors.left: renderer.right
-//        anchors.top: renderer.top
-//        anchors.leftMargin: 25
-//        // anchors.topMargin: 25
-//        smooth: true
-//        center_to_vehicle: true
-//    }
+   MyFrame {
+       id: rendererVeh
+       width: 900
+       height: 900
+       anchors.left: renderer.right
+       anchors.top: renderer.top
+       anchors.leftMargin: 25
+       // anchors.topMargin: 25
+       smooth: true
+       center_to_vehicle: true
+   }
 
     Timer {
         id: render_control  // control refresh rate of our scene
@@ -94,13 +94,13 @@ ApplicationWindow {
         onTriggered: { renderer.request_redraw() } 
     }
 
-    // Timer {
-    //     id: render_control_veh  // control refresh rate of our scene
-    //     interval: 10 // [ms]
-    //     running: true
-    //     repeat: true
-    //     onTriggered: { rendererVeh.request_redraw() } 
-    // }
+    Timer {
+        id: render_control_veh  // control refresh rate of our scene
+        interval: 10 // [ms]
+        running: true
+        repeat: true
+        onTriggered: { rendererVeh.request_redraw() } 
+    }
 
     Switch {
         id: my_toggle

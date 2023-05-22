@@ -38,9 +38,10 @@ void main()
         {   // draw circle
             gl_Position = center_pos;  // bit of heck but works without needing to implement a batching method
             EmitVertex();
-
-            float x = center_pos.x + size*cos(radians(i));
-            float y = center_pos.y + size*sin(radians(i));
+            
+            float angle = i;
+            float x = center_pos.x + size*cos(radians(angle));
+            float y = center_pos.y + size*sin(radians(angle));
             vec4 new_pos = vec4(x, y, center_pos.z, center_pos.w);
             gl_Position = new_pos;
             EmitVertex();

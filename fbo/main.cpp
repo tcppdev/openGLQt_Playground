@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     ChartWrapper chart_object = ChartWrapper(test_chart_view);
     chart_object.create_line("my_test_line", "this is a line");
     QTimer* timer_ = new QTimer();
-    timer_->setInterval(500);
+    timer_->setInterval(50);
 
     // // Setup timer trigger to plot update method
     QObject::connect(timer_, SIGNAL(timeout()), &chart_object, SLOT(update_line_data()));  
