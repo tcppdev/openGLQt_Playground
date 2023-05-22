@@ -14,7 +14,7 @@ ApplicationWindow {
     MyFrame {
         id: renderer
         width: root.width
-        height: root.height*0.9
+        height: root.height
         anchors.left: root.left
         anchors.top: root.top
         anchors.leftMargin: 25
@@ -36,10 +36,10 @@ ApplicationWindow {
         objectName: "test_chart"
         anchors.top: renderer.top
         anchors.right: renderer.right
-        width: renderer.width/3
-        height: renderer.height/3
+        width: renderer.width/4
+        height: renderer.height/4
         animationOptions: ChartView.NoAnimation
-        backgroundColor: "red" // "transparent"
+        backgroundColor: "#CCFFFFFF"
         legend.font.pointSize: 14
         legend.visible: true
     }

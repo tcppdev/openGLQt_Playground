@@ -190,9 +190,9 @@ public:
 
         // My points
         std::vector<GeoPoint> the_points;
-        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS), "Ok\nnew line\nthis one is a long line"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, EARTH_RADIUS, -EARTH_RADIUS), "This is a\nnew line\nthis one is a long line"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This is point 2"));
-        the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "eifjewi"));
+        the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "This is another point"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
         m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
@@ -375,7 +375,7 @@ public:
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f));  // theta-rotation
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
-        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(theta/360, 2*theta/360, theta/360));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
+        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(0.5*theta/360, theta/360, 0.5*theta/360));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
         m_ellipsoid->draw(view, projection, model_ellipsoid);
 
         // Draw ellispoid

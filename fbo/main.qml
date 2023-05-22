@@ -5,7 +5,7 @@ Item {
 
     GraphicsWindow {
         id: graphicsWindow
-        title: "Flotsam"
+        title: "Application FBO"
     }
 
 }
