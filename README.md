@@ -18,7 +18,7 @@ Welcome to my OpenGL QT playground. The code here has been written as a demonstr
 * Interaction with UI components created in the QML based QT framework to control rotations and visibility of components defined in the framebuffer object
 * Multiple methods of using various stages of the shader graphics pipeline to allow special graphics effects such as fixed billboards and text relative to camera, geometry shaders to contruct meshes from vertex coordinates, using clip to space increase thickness of lines etc
 
-Using the combined raw openGL graphics API and the powerful user interface QT framework, a large set of graphically application can be constructed from the implemations demonstrated here. 
+Using the combined raw openGL graphics API and the powerful user interface QT framework, a large set of graphics application can be constructed from the impementations demonstrated here. 
 
 # Demos and snapshots
 
@@ -41,7 +41,7 @@ You will also need the assimp library which you can install using:
 
 `sudo apt install libassimp-dev`
 
-The last requirement is the installation of the QT framework. QT contains a large set of libraries and can be installed most easily using the offline from https://www.qt.io/offline-installers (5.12.x Offline Installers). If you opt to install QT using the offline installer you will need to link it to your package config and library path by adding the following to your `~/.bashrc`:
+The last requirement is the installation of the QT framework. QT contains a large set of libraries and can be installed most easily using the offline installer from https://www.qt.io/offline-installers (5.12.x Offline Installers). If you opt to install QT using the offline installer you will need to link it to your package config and library path by adding the following to your `~/.bashrc`:
 
 ```
 # QT
