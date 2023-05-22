@@ -1,6 +1,6 @@
 # OpenGL QT Playground
 
-Welcome to my OpenGL QT playground. The code here has been written as a demonstrator and test platform for OpenGL components rendered inside the QT framework. The repository being a test platform lacks a lot of documentation, functionality and is not optimised. However it displays a wide variety of raw openGL 3.3 code implementations that can be used in a vast array of 3D based applications. Some of the main features include:
+Welcome to my OpenGL QT playground. The code here has been written as a demonstrator and test platform for OpenGL components rendered inside the QT framework. The repository being a test platform lacks a lot of documentation, functionality and is far more clean or optimised. However it displays a wide variety of raw openGL 3.3 code implementations that can be used in a vast array of 3D based applications. Some of the main features include:
 
 * An openGL framebuffer environment hosted inside the QT windowing system
 * Complete implementation of the C++ openGL geometry pipeline from vertex arrays, array buffers, vertex attribute pointers, vertex/geometry/fragment shader programs, uniforms, blending functions and face culling.
@@ -23,8 +23,9 @@ Using the combined raw openGL graphics API and the powerful user interface QT fr
 # Demos and snapshots
 
 ![](screenshots/screenshot_1.png)
-![](screenshots/screenshot_3.png)
 ![](screenshots/screenshot_2.png)
+
+[![](http://share.gifyoutube.com/h2WeD9wGdfo.gif)](https://youtu.be/h2WeD9wGdfo)
 
 # Building application on Linux based environment (tested on Ubuntu 18 and 22)
 The build system used for this project is meson. A few requisites packages and libraries are required to compile this project. To install these I recomend using a conda environment and installing the necessary packages using:
