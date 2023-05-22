@@ -39,7 +39,6 @@ The last requirement is the installation of the QT framework. QT contains a larg
 
 ```
 # QT
-
 export PATH=$PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/bin/
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/pkgconfig/
 export LIBRARY_PATH=$LIBRARY_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/
