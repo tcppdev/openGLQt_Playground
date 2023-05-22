@@ -382,11 +382,9 @@ public:
         if (m_click_toggle.first) {
             if(m_ellipsoid->test_ray_tracing(ray_world_origin, ray_direction_world, model_ellipsoid)) {
                 ellipse_toggled_ = true;
-                std::cout << "Intersected Ellipse!" << std::endl;
             }
             else {
                 ellipse_toggled_ = false;
-                std::cout << "Did not intersect Ellipse "  << std::endl;
             }
         }
 
@@ -420,11 +418,9 @@ public:
         // Draw OBB
         if (m_click_toggle.first) {
             if(m_obb->test_ray_tracing(glm::vec3(ray_world_origin), glm::vec3(ray_direction_world), model_obb)) {
-                std::cout << "Intersected OBB!" << std::endl;
                 obb_toggled_ = true;
             }
             else {
-                std::cout << "Did not intersect OBB "  << std::endl;
                 obb_toggled_ = false;
             }
         }

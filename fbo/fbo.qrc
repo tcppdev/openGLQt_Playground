@@ -2,5 +2,6 @@
     <qresource prefix="/qml">
         <file>main.qml</file>
         <file>GraphicsWindow.qml</file>
+        <file>CameraControls.qml</file>
     </qresource>
 </RCC>

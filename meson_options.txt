@@ -1,3 +1,1 @@
-option('underlay', type : 'boolean', value : 'false', yield : true)
 option('fbo', type : 'boolean', value : 'true', yield : true)
-option('render', type : 'boolean', value : 'false', yield : true)

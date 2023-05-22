@@ -158,7 +158,7 @@ class Ellipsoid: protected QOpenGLFunctions_3_3_Core
         float c = glm::dot(w, w) - 1;
 
         float determinant = b*b - 4*a*c;
-        std::cout << determinant << std::endl;
+        // std::cout << determinant << std::endl;
 
         if (determinant < 0) {
             return false;
