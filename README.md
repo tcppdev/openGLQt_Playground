@@ -23,7 +23,7 @@ Using the combined raw openGL graphics API and the powerful user interface QT fr
 # Demos and snapshots
 
 ![](screenshots/screenshot_1.png)
-
+![](screenshots/screenshot_3.png)
 ![](screenshots/screenshot_2.png)
 
 # Building application on Linux based environment (tested on Ubuntu 18 and 22)
