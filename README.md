@@ -16,9 +16,9 @@ Welcome to my OpenGL QT playground. The code here has been written as a demonstr
 * A class implemented to create and render cubemaps for an immersive environment
 * Automatic graphics resizing implementation through scaling of the projection matrix from the QT window properties
 * Interaction with UI components created in the QML based QT framework to control rotations and visibility of components defined in the framebuffer object
-* Multiple methods of using various stages of the shader graphics pipeline to allow special graphics effects such as fixed billboards and text relative to camera, geometry shaders to contruct meshes from vertex coordinates, using clip to space increase thickness of lines etc
+* Multiple methods of using various stages of the shader graphics pipeline to allow special graphics effects such as fixed billboards and text relative to camera, geometry shaders to contruct meshes from vertex coordinates, using clip space to increase thickness of lines etc
 
-Using the combined raw openGL graphics API and the powerful user interface QT framework, a large set of graphics application can be constructed from the impementations demonstrated here. 
+Using the combined raw openGL graphics API and the powerful user interface QT framework, a large set of graphics applications can be constructed from the implementations demonstrated here. 
 
 # Demos and snapshots
 
