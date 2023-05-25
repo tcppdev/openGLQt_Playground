@@ -1,1 +1,2 @@
 option('fbo', type : 'boolean', value : 'true', yield : true)
+option('msys2', type: 'boolean', value: 'false', yield: true)

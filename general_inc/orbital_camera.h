@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <cmath>
+#include "general_inc/utilities.h"
 
 const float ORBITAL_MOUSE_SENSITIVITY_START =  0.01f; 
 const float ORBITAL_MOUSE_SENSITIVITY_END =  0.0001f;

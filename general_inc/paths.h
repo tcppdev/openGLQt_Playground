@@ -1,8 +1,14 @@
 #ifndef PATHS_H_
 #define PATHS_H_
 
+#ifdef _WIN32
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+namespace fs = boost::filesystem;
+#else
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
+#endif
 
 fs::path ROOT_PROJECT_DIRECTORY = fs::current_path();
 fs::path SHADERS_PATH = ROOT_PROJECT_DIRECTORY / "shaders";  

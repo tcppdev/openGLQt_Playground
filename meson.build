@@ -71,9 +71,22 @@ processed_moc_files_fbo = qt5_bin.preprocess(
     dependencies: qt5_dep
 )
 
+# Now boost and filesystem magic for our different compilers:
+if get_option('msys2')
+  # This case is when we're using msys2 to build on windows:
+  boost_dep = dependency('boost', modules : ['thread', 'system', 'filesystem', 'coroutine', 'context'])
+  link_args = ['-Wl,-subsystem,windows','-lws2_32']
+else
+  # regular g++ linux:
+  boost_dep = dependency('boost', modules : ['thread', 'system', 'coroutine', 'context'])
+  link_args = ['-lstdc++fs']
+endif
+
+deps_common += boost_dep
+
 application_fbo = executable('application',
                         sources: ['fbo/main.cpp'] + sources_fbo + processed_moc_files_fbo + sources_general,
                         dependencies: deps_common,
                         include_directories:  inc_fbo + inc_ext + inc_general + inc_cdt,
-                        link_args: ['-lstdc++fs'])
+                        link_args: link_args)
 endif

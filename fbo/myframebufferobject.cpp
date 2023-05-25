@@ -89,26 +89,26 @@ public:
         initializeOpenGLFunctions();   // Initialises current context
 
         // Create shaders
-        const char* vertex_shader_path = MODEL_VS.c_str(); 
-        const char* fragment_shader_path = MODEL_FS.c_str();
+        const char* vertex_shader_path = MODEL_VS.string().c_str(); 
+        const char* fragment_shader_path = MODEL_FS.string().c_str();
         m_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
         stbi_set_flip_vertically_on_load(true);
         
         // Create models
-        std::string model_path = ASSETS_PATH / "natural_earth/natural_earth_110m.obj"; 
+        std::string model_path = (ASSETS_PATH / "natural_earth/natural_earth_110m.obj").string(); 
         m_model =  std::make_unique<Model>(model_path);
 
         // Ellipsoid earth 
         m_ellipsoid_earth = std::make_unique<Ellipsoid>(glm::vec3(0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS), 40, 40);
 
         // 
-        model_path = ASSETS_PATH / "backpack/backpack.obj"; 
+        model_path = (ASSETS_PATH / "backpack/backpack.obj").string(); 
         other_model =  std::make_unique<Model>(model_path);
 
         // Get our rocket
-        std::string rocket_path = ASSETS_PATH / "/rocket_v1/12217_rocket_v1_l1.obj";
+        std::string rocket_path = (ASSETS_PATH / "/rocket_v1/12217_rocket_v1_l1.obj").string();
         m_rocket =  std::make_unique<Model>(rocket_path);
 
         // Ellipsoid
@@ -150,7 +150,7 @@ public:
         polygon_2_coordinates.emplace_back(0, 0, EARTH_RADIUS);
         the_polygons.push_back(polygon_2_coordinates);
 
-        m_polygon =  std::make_unique<Polygon>(the_polygons); 
+        m_polygon =  std::make_unique<Polygon3D>(the_polygons); 
 
         // Draw circle on sphere?
         // Method 1: Flat circle
@@ -177,7 +177,7 @@ public:
         std::vector<double> lats;
         std::vector<double> longs;
         std::vector<int> indexes;
-        getMapCoords(ROOT_PROJECT_DIRECTORY / "filtered_coast.csv", lats, longs, indexes);
+        getMapCoords((ROOT_PROJECT_DIRECTORY / "filtered_coast.csv").string(), lats, longs, indexes);
         int current_index = -999;
 
         std::vector<ConstrainedDelaunayContourEdges> contour_edges;
@@ -438,7 +438,7 @@ private:
     std::unique_ptr<Ellipsoid> m_ellipsoid_earth;
     std::unique_ptr<OBB> m_obb;
     std::unique_ptr<Line> m_circular_line;
-    std::unique_ptr<Polygon> m_polygon;
+    std::unique_ptr<Polygon3D> m_polygon;
     std::unique_ptr<Delaunay2_5D> m_projected_shapes;
     std::unique_ptr<Point> m_points;
     std::unique_ptr<Text3D> m_text;

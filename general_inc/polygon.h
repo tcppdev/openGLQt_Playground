@@ -21,22 +21,22 @@
 // to original coordinates) 
 // or could try the stencil buffers hacks
 // https://stackoverflow.com/questions/25463015/black-out-everything-outside-a-polygon/25463682#25463682
-class Polygon: protected QOpenGLFunctions_3_3_Core
+class Polygon3D: protected QOpenGLFunctions_3_3_Core
 {
 public:
     
-    Polygon() = delete; // need to at least give some coordinates
+    Polygon3D() = delete; // need to at least give some coordinates
 
-    Polygon(std::vector<std::vector<Eigen::Vector3f>> polygons, Color fill_color = Color::GREEN,
+    Polygon3D(std::vector<std::vector<Eigen::Vector3f>> polygons, Color fill_color = Color::GREEN,
             float linewidth = DEFAULT_LINE_WIDTH, Color linecolor = Color::BLACK, bool is_concave = false)
     {
         linewidth_ = linewidth;
         fill_color_ = fill_color;
         linecolor_ = linecolor;
 
-        // Polygon shader
-        const char* polygon_vertex_shader_path = POLYGON_VS.c_str();
-        const char* polygon_fragment_shader_path = POLYGON_FS.c_str();
+        // Polygon3D shader
+        const char* polygon_vertex_shader_path = POLYGON_VS.string().c_str();
+        const char* polygon_fragment_shader_path = POLYGON_FS.string().c_str();
         m_polygon_shader = new Shader(polygon_vertex_shader_path, polygon_fragment_shader_path);
 
         // // Create the outline lines
@@ -102,7 +102,7 @@ public:
         setup(); 
     }
 
-    ~Polygon() {
+    ~Polygon3D() {
         // delete m_outline_lines;
         delete m_polygon_shader;
     }

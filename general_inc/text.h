@@ -46,12 +46,12 @@ public:
         initializeOpenGLFunctions();   // Initialise current context  (required)
 
         // Text shaders
-        const char* vertex_text = TEXT_VS.c_str();
-        const char* fragment_text = TEXT_FS.c_str();
+        const char* vertex_text = TEXT_VS.string().c_str();
+        const char* fragment_text = TEXT_FS.string().c_str();
         m_text_shader = new Shader(vertex_text, fragment_text);
 
         // Front 
-        std::string font_path = TEXT_FONT_PATH;
+        std::string font_path = TEXT_FONT_PATH.string();
         
         setup(font_path);
     }
