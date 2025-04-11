@@ -92,7 +92,7 @@ First create a public key using:
 It will get saved a location such as:  `/home/<user>/.ssh/<id>.pub` (`C:\msys64\home\<user>\.ssh`)
 Copy public key to https://github.com/settings/keys
 ```
-cd /c/Users/thiba/Documents/ && mkdir Repos && cd Repos
+cd /c/Users/<user>/Documents/ && mkdir Repos && cd Repos
 git clone https://github.com/tcppdev/openGLQt_Playground.git
 ```
 
