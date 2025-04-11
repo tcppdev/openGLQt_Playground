@@ -24,7 +24,11 @@ endif
 assimp_dep = dependency('assimp')
 
 # Getting eigen from wrap (but first tries locally)
-eigen_dep = dependency('eigen', fallback : ['eigen', 'eigen_dep'])
+if get_option('msys2')
+  eigen_dep = dependency('eigen3')
+else
+  eigen_dep = dependency('eigen', fallback : ['eigen', 'eigen_dep'])
+endif
 
 # Freetype dependency for text
 freetype_dep = subproject('freetype').get_variable('freetype_dep')
@@ -74,7 +78,7 @@ processed_moc_files_fbo = qt5_bin.preprocess(
 # Now boost and filesystem magic for our different compilers:
 if get_option('msys2')
   # This case is when we're using msys2 to build on windows:
-  boost_dep = dependency('boost', modules : ['thread', 'system', 'filesystem', 'coroutine', 'context'])
+  boost_dep = dependency('boost', modules : ['thread', 'filesystem', 'coroutine', 'context'])
   link_args = ['-Wl,-subsystem,windows','-lws2_32']
 else
   # regular g++ linux:

@@ -62,3 +62,48 @@ meson build -Dbuildtype=release
 ninja -C build
 ./build/application
 ```
+
+# Building application on Windows environment using msys2
+
+Download Msys2 from https://www.msys2.org/
+
+Install it on your `C:/` Drive and launch msys2: 
+
+`C:\msys64\msys2.exe`
+
+Install packages:
+```
+pacman -S mingw-w64-x86_64-qt5
+pacman -S mingw-w64-x86_64-gcc
+pacman -S mingw-w64-x86_64-meson
+pacman -S mingw-w64-x86_64-boost
+pacman -S mingw-w64-x86_64-assimp
+pacman -S git
+pacman -S mingw-w64-x86_64-eigen3
+pacman -S mingw-w64-x86_64-cmake
+```
+
+Export Paths:
+`export PATH=$PATH:/c/msys64/mingw64/bin`
+
+Clone Repository
+First create a public key using:
+`ssh-keygen -o`
+It will get saved a location such as:  `/home/<user>/.ssh/<id>.pub` (`C:\msys64\home\<user>\.ssh`)
+Copy public key to https://github.com/settings/keys
+```
+cd /c/Users/thiba/Documents/ && mkdir Repos && cd Repos
+git clone https://github.com/tcppdev/openGLQt_Playground.git
+```
+
+Build binary:
+```
+cd openGLQt_Playground/
+meson build -Dmsys2=true
+ninja -C build/
+```
+
+If you have issues with cmake version:
+Go to subproject (eg: `subprojects/CDT`) and update cmake minimum version to (for example):
+`cmake_minimum_required(VERSION 3.5)`
+Do this for all cmake files in subproject (eg: `subprojects/CDT/CMakeLists.txt` and `subprojects/CDT/CDT/CMakeLists.txt`)
