@@ -100,10 +100,71 @@ Build binary:
 ```
 cd openGLQt_Playground/
 meson build -Dmsys2=true
-ninja -C build/
+meson build -Dmsys2=true -Dbuildtype=release
 ```
 
 If you have issues with cmake version:
 Go to subproject (eg: `subprojects/CDT`) and update cmake minimum version to (for example):
 `cmake_minimum_required(VERSION 3.5)`
 Do this for all cmake files in subproject (eg: `subprojects/CDT/CMakeLists.txt` and `subprojects/CDT/CDT/CMakeLists.txt`)
+
+# Debug using VScode on Windows 11 (and/or generate release folder + binary):
+Generate a debug binary in a new build directory (called 'debug'):
+```
+meson debug -Dmsys2=true -Dbuildtype=debug
+ninja -C debug
+```
+
+% TO-DO and note to self: Improve all the steps below so that it's less painful and manual (eg: bash deploy script or use proper path setting using set "QT_PLUGIN_PATH=C:\msys64\mingw64\share\qt5\plugins" for Qt plugins for example)
+
+Copy all the contents of `C:\msys64\mingw64\bin` into your build directory.
+Run the windeployqt executable found inside `C:\msys64\mingw64\bin` with your binary location. 
+`windeployqt.exe --qmldir C:\Users\<user>\Documents\Repos\openGLQt_Playground\fbo C:\Users\<user>\Documents\Repos\openGLQt_Playground\release\application.exe`
+
+Copy the `platforms` directory located in `C:\msys64\mingw64\share\qt5\plugins` to your build directory.
+Copy all subdirectories of `C:\msys64\mingw64\share\qt5\qml` to build directory.
+Add resources directory in `C:\Users\<user>\Documents\Repos\openGLQt_Playground\resources` to build directory.
+Add  `C:\Users\<user>\Documents\Repos\openGLQt_Playground\filtered_coast.csv` to build directory.
+
+## Debugging setup:
+
+Install C/C++ extension on VSCode marketplace.
+Install json extension on VSCode marketplace.
+
+Install gdb on msys2:
+`pacman -S mingw-w64-x86_64-gdb`
+Find location of gdb (Should be on `C:\msys64\mingw64\bin\gdb`)
+
+Add this launch.json configuration file to your `.vscode` directory inside your repository:
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FBO Debugging",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/release/application_debug.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            // "env": {
+            //     "Path": "${env:Path};C:\\msys64\\mingw64\\bin" 
+            // },
+            "MIDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
+```
+
+Enjoy debugging with VScode, breakpoints and variable explorer!
