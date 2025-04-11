@@ -93,7 +93,7 @@ It will get saved a location such as:  `/home/<user>/.ssh/<id>.pub` (`C:\msys64\
 Copy public key to https://github.com/settings/keys
 ```
 cd /c/Users/<user>/Documents/ && mkdir Repos && cd Repos
-git clone https://github.com/tcppdev/openGLQt_Playground.git
+git clone git@github.com:tcppdev/openGLQt_Playground.git
 ```
 
 Build binary:
