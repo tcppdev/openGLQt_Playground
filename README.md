@@ -117,18 +117,15 @@ ninja -C debug
 
 % TO-DO and note to self: Improve all the steps below so that it's less painful and manual (eg: bash deploy script or use proper path setting using set "QT_PLUGIN_PATH=C:\msys64\mingw64\share\qt5\plugins" for Qt plugins for example)
 
-Copy all the contents of `C:\msys64\mingw64\bin` into your build directory.
-
-Run the windeployqt executable found inside `C:\msys64\mingw64\bin` with your binary location. 
-```windeployqt.exe --qmldir C:\Users\<user>\Documents\Repos\openGLQt_Playground\fbo C:\Users\<user>\Documents\Repos\openGLQt_Playground\release\application.exe```
-
-Copy the `platforms` directory located in `C:\msys64\mingw64\share\qt5\plugins` to your build directory.
-
-Copy all subdirectories of `C:\msys64\mingw64\share\qt5\qml` to build directory.
-
-Add resources directory in `C:\Users\<user>\Documents\Repos\openGLQt_Playground\resources` to build directory.
-
-Add  `C:\Users\<user>\Documents\Repos\openGLQt_Playground\filtered_coast.csv` to build directory.
+* Copy all the contents of `C:\msys64\mingw64\bin` into your build directory.
+* Run the windeployqt executable found inside `C:\msys64\mingw64\bin` with your binary location. 
+```
+windeployqt.exe --qmldir C:\Users\<user>\Documents\Repos\openGLQt_Playground\fbo C:\Users\<user>\Documents\Repos\openGLQt_Playground\release\application.exe
+```
+* Copy the `platforms` directory located in `C:\msys64\mingw64\share\qt5\plugins` to your build directory.
+* Copy all subdirectories of `C:\msys64\mingw64\share\qt5\qml` to build directory.
+* Add resources directory in `C:\Users\<user>\Documents\Repos\openGLQt_Playground\resources` to build directory.
+* Add  `C:\Users\<user>\Documents\Repos\openGLQt_Playground\filtered_coast.csv` to build directory.
 
 ## Debugging setup:
 
