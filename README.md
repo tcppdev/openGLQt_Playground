@@ -43,33 +43,10 @@ You will also need the assimp library which you can install using:
 
 For Qt, boost and libpng:
 ```bash 
-sudo apt install libgl1-mesa-dev libglu1-mesa-dev`
+sudo apt install libgl1-mesa-dev libglu1-mesa-dev
 sudo apt update
 sudo apt install qtbase5-dev qtdeclarative5-dev qtlocation5-dev qtpositioning5-dev libqt5charts5-dev libboost-all-dev libpng-dev
 sudo apt install qml-module-qtquick-window2 qml-module-qtquick2 qml-module-qtquick-controls2 qml-module-qtcharts qml-module-qtquick-layouts
-```
-
-Section below is not required anymore:
-The last requirement is the installation of the QT framework. QT contains a large set of libraries and can be installed most easily using the offline installer from https://www.qt.io/offline-installers (5.12.x Offline Installers). If you opt to install QT using the offline installer you will need to link it to your package config and library path by adding the following to your `~/.bashrc`:
-
-```
-# QT
-export PATH=$PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/bin/
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/pkgconfig/
-export LIBRARY_PATH=$LIBRARY_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_INSTALLATION_PATH/Qt/5.12.12/gcc_64/lib/
-```
-
-Alternatively you can use you conda environment to install QT using
-`conda install -c conda-forge qt`
-
-Finally you can build and run the final application and external dependencies using the meson build system by running the following commands:
-
-```
-cd <project_directory>
-meson build -Dbuildtype=release
-ninja -C build
-./build/application
 ```
 
 # Building application on Windows environment using msys2
