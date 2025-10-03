@@ -83,7 +83,7 @@ if get_option('msys2')
 else
   # regular g++ linux:
   boost_dep = dependency('boost', modules : ['thread', 'system', 'coroutine', 'context'])
-  link_args = ['-lstdc++fs']
+  link_args = ['-lstdc++fs', '-lpng']
 endif
 
 deps_common += boost_dep

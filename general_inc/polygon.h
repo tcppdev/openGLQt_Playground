@@ -35,8 +35,10 @@ public:
         linecolor_ = linecolor;
 
         // Polygon3D shader
-        const char* polygon_vertex_shader_path = POLYGON_VS.string().c_str();
-        const char* polygon_fragment_shader_path = POLYGON_FS.string().c_str();
+        std::string vertex_path = POLYGON_VS.string();
+        std::string fragment_path = POLYGON_FS.string();
+        const char* polygon_vertex_shader_path = vertex_path.c_str();
+        const char* polygon_fragment_shader_path = fragment_path.c_str();
         m_polygon_shader = new Shader(polygon_vertex_shader_path, polygon_fragment_shader_path);
 
         // // Create the outline lines

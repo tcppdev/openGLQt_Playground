@@ -72,8 +72,10 @@ public:
         fill_color_ = fill_color;
 
         // Polygon shader
-        const char* delaunay_2_5D_vertex_shader_path = DELAUNAY_2_5D_VS.string().c_str();
-        const char* delaunay_2_5D_shader_path = DELAUNAY_2_5D_FS.string().c_str();
+        std::string vertex_path = DELAUNAY_2_5D_VS.string();
+        std::string fragment_path = DELAUNAY_2_5D_FS.string();
+        const char* delaunay_2_5D_vertex_shader_path = vertex_path.c_str();
+        const char* delaunay_2_5D_shader_path = fragment_path.c_str();
         m_delaunay_shader = new Shader(delaunay_2_5D_vertex_shader_path, delaunay_2_5D_shader_path);
 
         // 
@@ -92,8 +94,10 @@ public:
         include_wireframe_ = include_wireframe;
 
         // Polygon shader
-        const char* delaunay_2_5D_vertex_shader_path = DELAUNAY_2_5D_VS.string().c_str();
-        const char* delaunay_2_5D_shader_path = DELAUNAY_2_5D_FS.string().c_str();
+        std::string vertex_path = DELAUNAY_2_5D_VS.string();
+        std::string fragment_path = DELAUNAY_2_5D_FS.string();
+        const char* delaunay_2_5D_vertex_shader_path = vertex_path.c_str();
+        const char* delaunay_2_5D_shader_path = fragment_path.c_str();
         m_delaunay_shader = new Shader(delaunay_2_5D_vertex_shader_path, delaunay_2_5D_shader_path);
 
         // Draw 2D Lat/Lon surface on a 3D WGS84 Ellipsoid

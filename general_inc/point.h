@@ -46,9 +46,12 @@ public:
         fixed_size_ = fixed_size;
         
         // Point shader
-        const char* vertex_shader_path = POINT_VS.string().c_str();
-        const char* fragment_shader_path = POINT_FS.string().c_str();
-        const char* geometry_shader_path = POINT_GS.string().c_str();
+        std::string vertex_path = POINT_VS.string();
+        std::string fragment_path = POINT_FS.string();
+        std::string geometry_path = POINT_GS.string();
+        const char* vertex_shader_path = vertex_path.c_str();
+        const char* fragment_shader_path = fragment_path.c_str();
+        const char* geometry_shader_path = geometry_path.c_str();
         m_point_shader = new Shader(vertex_shader_path, fragment_shader_path, geometry_shader_path);
 
         VertexP vertex;

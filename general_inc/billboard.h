@@ -30,9 +30,12 @@ public:
         initializeOpenGLFunctions();   // Initialise current context  (required)
 
         // Text shaders
-        const char* vertex_billboard = BILLBOARD_VS.string().c_str();
-        const char* fragment_billboard = BILLBOARD_FS.string().c_str();
-        const char* geometry_billboard = BILLBOARD_GS.string().c_str();
+        std::string vertex_path = BILLBOARD_VS.string();
+        std::string fragment_path = BILLBOARD_FS.string();
+        std::string geometry_path = BILLBOARD_GS.string();
+        const char* vertex_billboard = vertex_path.c_str();
+        const char* fragment_billboard = fragment_path.c_str();
+        const char* geometry_billboard = geometry_path.c_str();
         m_shader = new Shader(vertex_billboard, fragment_billboard, geometry_billboard);
 
         // positions

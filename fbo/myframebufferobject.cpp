@@ -89,8 +89,10 @@ public:
         initializeOpenGLFunctions();   // Initialises current context
 
         // Create shaders
-        const char* vertex_shader_path = MODEL_VS.string().c_str(); 
-        const char* fragment_shader_path = MODEL_FS.string().c_str();
+        std::string vertex_path = MODEL_VS.string();
+        std::string fragment_path = MODEL_FS.string();
+        const char* vertex_shader_path = vertex_path.c_str(); 
+        const char* fragment_shader_path = fragment_path.c_str();
         m_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).

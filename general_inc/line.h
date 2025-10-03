@@ -27,9 +27,12 @@ public:
         lines_count_ = lines.size();
         
         // Line shader
-        const char* vertex_line_path = LINE_VS.string().c_str();
-        const char* fragment_line_path = LINE_FS.string().c_str();
-        const char* geometry_line_path = LINE_GS.string().c_str();
+        std::string vertex_path = LINE_VS.string();
+        std::string fragment_path = LINE_FS.string();
+        std::string geometry_path = LINE_GS.string();
+        const char* vertex_line_path = vertex_path.c_str();
+        const char* fragment_line_path = fragment_path.c_str();
+        const char* geometry_line_path = geometry_path.c_str();
         m_line_shader = new Shader(vertex_line_path, fragment_line_path, geometry_line_path);
 
         SimpleVertex vertex;

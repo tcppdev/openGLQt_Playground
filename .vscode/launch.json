@@ -5,13 +5,17 @@
             "name": "FBO Debugging",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/debug/fbo",
+            "program": "${workspaceFolder}/debug/application.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
+            // "env": {
+            //     "Path": "${env:Path};C:\\msys64\\mingw64\\bin" 
+            // },
+            "MIDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

@@ -24,8 +24,10 @@ class Ellipsoid: protected QOpenGLFunctions_3_3_Core
     Ellipsoid(glm::vec3 radius_abc, int sectors, int stacks, Color fill_color = Color::BLUE)
     {
         // Ellipsoid shader
-        const char* ellipsoid_vertex_shader_path = ELLIPSOID_VS.string().c_str();
-        const char* ellipsoid_fragment_shader_path = ELLIPSOID_FS.string().c_str();
+        std::string vertex_path = ELLIPSOID_VS.string();
+        std::string fragment_path = ELLIPSOID_FS.string();
+        const char* ellipsoid_vertex_shader_path = vertex_path.c_str();
+        const char* ellipsoid_fragment_shader_path = fragment_path.c_str();
         ellipsoid_shader_ = new Shader(ellipsoid_vertex_shader_path, ellipsoid_fragment_shader_path);
 
         // First and last element of contour may be 

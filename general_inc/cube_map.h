@@ -63,8 +63,10 @@ public:
     CubeMap(std::string cube_map_path){
 
         // Point shader
-        const char* vertex_shader_path = CUBEMAP_VS.string().c_str();
-        const char* fragment_shader_path = CUBEMAP_FS.string().c_str();
+        std::string vertex_path = CUBEMAP_VS.string();
+        std::string fragment_path = CUBEMAP_FS.string();
+        const char* vertex_shader_path = vertex_path.c_str();
+        const char* fragment_shader_path = fragment_path.c_str();
         m_cubemap_shader = new Shader(vertex_shader_path, fragment_shader_path);
 
         initializeOpenGLFunctions();   // Initialise current context  (required)

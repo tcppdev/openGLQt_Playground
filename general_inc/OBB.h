@@ -29,8 +29,10 @@ public:
         aabb_max_ = aabb_max;
 
         // OBB shader
-        const char* obb_vertex_shader_path = OBB_VS.string().c_str();
-        const char* obb_fragment_shader_path = OBB_FS.string().c_str();
+        std::string vertex_path = OBB_VS.string();
+        std::string fragment_path = OBB_FS.string();
+        const char* obb_vertex_shader_path = vertex_path.c_str();
+        const char* obb_fragment_shader_path = fragment_path.c_str();
         obb_shader_ = new Shader(obb_vertex_shader_path, obb_fragment_shader_path);
 
         // Lets create the vertex position array
