@@ -42,10 +42,12 @@ You will also need the assimp library which you can install using:
 `sudo apt install libassimp-dev`
 
 For Qt, boost and libpng:
-`sudo apt install libgl1-mesa-dev libglu1-mesa-dev`
-`sudo apt update`
-`sudo apt install qtbase5-dev qtdeclarative5-dev qtlocation5-dev qtpositioning5-dev libqt5charts5-dev libboost-all-dev libpng-dev`
-`sudo apt install qml-module-qtquick-window2 qml-module-qtquick2 qml-module-qtquick-controls2 qml-module-qtcharts qml-module-qtquick-layouts`
+```bash 
+sudo apt install libgl1-mesa-dev libglu1-mesa-dev`
+sudo apt update
+sudo apt install qtbase5-dev qtdeclarative5-dev qtlocation5-dev qtpositioning5-dev libqt5charts5-dev libboost-all-dev libpng-dev
+sudo apt install qml-module-qtquick-window2 qml-module-qtquick2 qml-module-qtquick-controls2 qml-module-qtcharts qml-module-qtquick-layouts
+```
 
 Section below is not required anymore:
 The last requirement is the installation of the QT framework. QT contains a large set of libraries and can be installed most easily using the offline installer from https://www.qt.io/offline-installers (5.12.x Offline Installers). If you opt to install QT using the offline installer you will need to link it to your package config and library path by adding the following to your `~/.bashrc`:
