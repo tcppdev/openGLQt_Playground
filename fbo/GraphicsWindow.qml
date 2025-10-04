@@ -1,6 +1,6 @@
-import QtQuick 2.0
-import QtQuick.Controls 2.12
-import QtCharts 2.1
+import QtQuick 6.0
+import QtQuick.Controls 6.0
+import QtCharts 6.0
 import MyRenderLibrary 42.0
 
 ApplicationWindow {
@@ -92,4 +92,3 @@ ApplicationWindow {
         anchors.horizontalCenter: renderer.horizontalCenter
     }
 }
-

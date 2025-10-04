@@ -1,14 +1,19 @@
 
 #include <Eigen/Core>
 #include <QObject>
-
 #include <QMetaObject>
-#include <QAbstractAxis>
-#include <QAbstractSeries>
-#include <QLineSeries>
 #include <QQuickItem>
 
 #include <unordered_map>
+
+// Forward declarations
+QT_BEGIN_NAMESPACE
+namespace QtCharts {
+    class QAbstractSeries;
+    class QAbstractAxis;
+    class QLineSeries;
+}
+QT_END_NAMESPACE
 
 /// Wrapper class used to handle plot data
 class ChartWrapper : public QObject {

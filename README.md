@@ -41,12 +41,30 @@ You will also need the assimp library which you can install using:
 
 `sudo apt install libassimp-dev`
 
-For Qt, boost and libpng:
+For Qt6, boost and libpng:
 ```bash 
 sudo apt install libgl1-mesa-dev libglu1-mesa-dev
 sudo apt update
-sudo apt install qtbase5-dev qtdeclarative5-dev qtlocation5-dev qtpositioning5-dev libqt5charts5-dev libboost-all-dev libpng-dev
-sudo apt install qml-module-qtquick-window2 qml-module-qtquick2 qml-module-qtquick-controls2 qml-module-qtcharts qml-module-qtquick-layouts
+sudo apt install qt6-base-dev qt6-declarative-dev qt6-positioning-dev libqt6charts6-dev libboost-all-dev libpng-dev
+sudo apt install qml6-module-qtquick-window qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtcharts qml6-module-qtquick-layouts
+sudo apt install qt6-wayland qt6-qmltooling-plugins qml6-module-qtqml-workerscript
+sudo apt install qml6-module-qtquick-templates
+```
+
+Add the `libexec`directory to your path and add `qmake6`:
+```bash 
+vim ~/.bashrc
+export QMAKE=/usr/bin/qmake6
+export QT6_BINDIR=/usr/lib/qt6/libexec
+export PATH=/usr/lib/qt6/libexec:$PATH
+source ~/.bashrc
+```
+
+Note: Qt6 Location module may not be available as a separate package in Ubuntu 22.04 repositories. If needed, it can be built from source or installed via other means.
+
+```bash
+meson <build_dir>
+ninja -C <build_dir>
 ```
 
 # Building application on Windows environment using msys2
@@ -59,7 +77,7 @@ Install it on your `C:/` Drive and launch msys2:
 
 Install packages:
 ```
-pacman -S mingw-w64-x86_64-qt5
+pacman -S mingw-w64-x86_64-qt6
 pacman -S mingw-w64-x86_64-gcc
 pacman -S mingw-w64-x86_64-meson
 pacman -S mingw-w64-x86_64-boost
@@ -108,8 +126,8 @@ ninja -C debug
 ```
 windeployqt.exe --qmldir C:\Users\<user>\Documents\Repos\openGLQt_Playground\fbo C:\Users\<user>\Documents\Repos\openGLQt_Playground\release\application.exe
 ```
-* Copy the `platforms` directory located in `C:\msys64\mingw64\share\qt5\plugins` to your build directory.
-* Copy all subdirectories of `C:\msys64\mingw64\share\qt5\qml` to build directory.
+* Copy the `platforms` directory located in `C:\msys64\mingw64\share\qt6\plugins` to your build directory.
+* Copy all subdirectories of `C:\msys64\mingw64\share\qt6\qml` to build directory.
 * Add resources directory in `C:\Users\<user>\Documents\Repos\openGLQt_Playground\resources` to build directory.
 * Add  `C:\Users\<user>\Documents\Repos\openGLQt_Playground\filtered_coast.csv` to build directory.
 

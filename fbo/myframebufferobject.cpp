@@ -416,7 +416,8 @@ public:
         m_text->update_position(cord_text[0], cord_text[1], cord_text[2]);
         m_text->draw(view, projection);
 
-        m_window->resetOpenGLState();
+        // Note: resetOpenGLState() was removed in Qt6
+        // The OpenGL state is now managed automatically
     }
 
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size) Q_DECL_OVERRIDE

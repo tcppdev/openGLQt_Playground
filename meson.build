@@ -9,16 +9,23 @@ project('Qt', ['cpp', 'c'],  # Allow compiling for both c++ and c files
 cmake = import('cmake')
 
 # Dependencies for the gui
-qt5_bin = import('qt5')  
-qt5_dep = dependency('qt5', 
-                     modules: ['Core', 'Gui', 'Qml', 'Widgets',
-                               'Quick', 'Location', 'Network', 'Charts',
-                               'Positioning', 'Test', 'QuickTest'], 
-                     required : false)
+qt6_core = dependency('Qt6Core', required : false)
+qt6_gui = dependency('Qt6Gui', required : false)
+qt6_widgets = dependency('Qt6Widgets', required : false)
+qt6_qml = dependency('Qt6Qml', required : false)
+qt6_quick = dependency('Qt6Quick', required : false)
+qt6_network = dependency('Qt6Network', required : false)
+qt6_charts = dependency('Qt6Charts', required : false)
+qt6_positioning = dependency('Qt6Positioning', required : false)
+qt6_test = dependency('Qt6Test', required : false)
 
-if not qt5_dep.found()
-  message('Did not find qt5 dependency')
-  qt5_dep = disabler()
+qt6_found = qt6_core.found() and qt6_gui.found() and qt6_widgets.found() and qt6_qml.found() and qt6_quick.found()
+
+if not qt6_found
+  message('Did not find qt6 dependencies')
+  qt6_dep = disabler()
+else
+  qt6_dep = [qt6_core, qt6_gui, qt6_widgets, qt6_qml, qt6_quick, qt6_network, qt6_charts, qt6_positioning, qt6_test]
 endif
 
 assimp_dep = dependency('assimp')
@@ -40,7 +47,7 @@ cdt_dep = cmake.subproject('cdt')
 inc_cdt = include_directories('subprojects/CDT/CDT/include')
 
 deps_common = [
-  qt5_dep,
+  qt6_dep,
   assimp_dep,
   eigen_dep,
   freetype_dep
@@ -69,10 +76,11 @@ sources_general = ['ext_inc/stb_image.cpp']
 
 ## FBO binary
 if get_option('fbo')
-processed_moc_files_fbo = qt5_bin.preprocess(
+qt6_tools = import('qt6')
+processed_moc_files_fbo = qt6_tools.preprocess(
     moc_headers: headers_to_moc_fbo,
     qresources: qresources_fbo,
-    dependencies: qt5_dep
+    dependencies: qt6_core
 )
 
 # Now boost and filesystem magic for our different compilers:

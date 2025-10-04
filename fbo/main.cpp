@@ -52,11 +52,10 @@ int main(int argc, char **argv)
     timer_->setInterval(50);
 
     // // Setup timer trigger to plot update method
-    QObject::connect(timer_, SIGNAL(timeout()), &chart_object, SLOT(update_line_data()));  
+    QObject::connect(timer_, &QTimer::timeout, &chart_object, &ChartWrapper::update_line_data);  
 
     // // Start update timer
     timer_->start();
     
     return app.exec();
 }
-
