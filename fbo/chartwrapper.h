@@ -3,17 +3,9 @@
 #include <QObject>
 #include <QMetaObject>
 #include <QQuickItem>
+#include <QtCharts>
 
 #include <unordered_map>
-
-// Forward declarations
-QT_BEGIN_NAMESPACE
-namespace QtCharts {
-    class QAbstractSeries;
-    class QAbstractAxis;
-    class QLineSeries;
-}
-QT_END_NAMESPACE
 
 /// Wrapper class used to handle plot data
 class ChartWrapper : public QObject {
@@ -33,7 +25,7 @@ class ChartWrapper : public QObject {
         void create_line(std::string unique_id, std::string label);
 
         // Get pointer to a lineseries
-        QtCharts::QAbstractSeries* get_line_ptr(std::string unique_id);
+        QAbstractSeries* get_line_ptr(std::string unique_id);
         
         // Resize the plot
         void resize_plot(float y_max);
@@ -46,11 +38,11 @@ class ChartWrapper : public QObject {
     private:
         
         QQuickItem* const qml_chart_object_ = nullptr;
-        QtCharts::QAbstractAxis* axis_x_ = nullptr;
-        QtCharts::QAbstractAxis* axis_y_ = nullptr;
+        QAbstractAxis* axis_x_ = nullptr;
+        QAbstractAxis* axis_y_ = nullptr;
 
         int line_type_;
 
         // Line inside chart
-        std::unordered_map<std::string, QtCharts::QAbstractSeries*> line_series_;
+        std::unordered_map<std::string, QAbstractSeries*> line_series_;
 };

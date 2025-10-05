@@ -9,17 +9,17 @@ project('Qt', ['cpp', 'c'],  # Allow compiling for both c++ and c files
 cmake = import('cmake')
 
 # Dependencies for the gui
-qt6_core = dependency('Qt6Core', required : false)
-qt6_gui = dependency('Qt6Gui', required : false)
-qt6_widgets = dependency('Qt6Widgets', required : false)
-qt6_qml = dependency('Qt6Qml', required : false)
-qt6_quick = dependency('Qt6Quick', required : false)
-qt6_network = dependency('Qt6Network', required : false)
-qt6_charts = dependency('Qt6Charts', required : false)
-qt6_positioning = dependency('Qt6Positioning', required : false)
-qt6_test = dependency('Qt6Test', required : false)
+qt6_core = dependency('Qt6Core', required : true)
+qt6_gui = dependency('Qt6Gui', required : true)
+qt6_widgets = dependency('Qt6Widgets', required : true)
+qt6_qml = dependency('Qt6Qml', required : true)
+qt6_quick = dependency('Qt6Quick', required : true)
+qt6_network = dependency('Qt6Network', required : true)
+qt6_charts = dependency('Qt6Charts', required : true)
+qt6_positioning = dependency('Qt6Positioning', required : true)
+qt6_test = dependency('Qt6Test', required : true)
 
-qt6_found = qt6_core.found() and qt6_gui.found() and qt6_widgets.found() and qt6_qml.found() and qt6_quick.found()
+qt6_found = qt6_core.found() and qt6_gui.found() and qt6_widgets.found() and qt6_qml.found() and qt6_quick.found() and qt6_charts.found() and qt6_network.found() and qt6_positioning.found() and qt6_test.found()
 
 if not qt6_found
   message('Did not find qt6 dependencies')
