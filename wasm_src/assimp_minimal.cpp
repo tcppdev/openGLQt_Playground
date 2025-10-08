@@ -57,7 +57,7 @@ public:
 private:
     aiScene* m_scene;
     std::string m_error;
-    bool LoadOBJ(const std::string& path);
+    bool LoadOBJ(const std::string& path, unsigned int flags);
     bool LoadMTL(const std::string& mtlPath, std::vector<aiMaterial*>& materials, std::map<std::string, int>& materialMap);
     std::string GetDirectory(const std::string& path);
 };
@@ -546,12 +546,21 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
 }
 
 // Simple OBJ loader implementation
-bool Assimp::Importer::LoadOBJ(const std::string& path) {
+bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
     std::ifstream file(path);
     if (!file.is_open()) {
         m_error = "Cannot open file: " + path;
         return false;
     }
+    
+    // Log which flags are active
+    EM_ASM_({
+        console.log('LOADOBJ DEBUG: Processing flags:');
+        if ($0 & 0x8) console.log('  - aiProcess_Triangulate');
+        if ($0 & 0x40) console.log('  - aiProcess_GenSmoothNormals');
+        if ($0 & 0x800000) console.log('  - aiProcess_FlipUVs');
+        if ($0 & 0x1) console.log('  - aiProcess_CalcTangentSpace');
+    }, static_cast<int>(flags));
     
     std::vector<aiVector3D> vertices;
     std::vector<aiVector3D> normals;
@@ -696,10 +705,14 @@ bool Assimp::Importer::LoadOBJ(const std::string& path) {
                 mesh->mVertices[vertIdx] = vertices[vIdx];
             }
             
-            // Texture coordinates
+            // Texture coordinates (apply aiProcess_FlipUVs if set)
             int vtIdx = faces[i][j*3 + 1];
             if (vtIdx >= 0 && vtIdx < texCoords.size()) {
                 mesh->mTextureCoords[0][vertIdx] = texCoords[vtIdx];
+                // Flip V coordinate if aiProcess_FlipUVs flag is set
+                if (flags & aiProcess_FlipUVs) {
+                    mesh->mTextureCoords[0][vertIdx].y = 1.0f - mesh->mTextureCoords[0][vertIdx].y;
+                }
             }
             
             // Normal
@@ -771,10 +784,14 @@ bool Assimp::Importer::LoadOBJ(const std::string& path) {
                         matMesh->mVertices[vertIdx] = vertices[vIdx];
                     }
                     
-                    // Texture coordinates
+                    // Texture coordinates (apply aiProcess_FlipUVs if set)
                     int vtIdx = faces[faceIdx][j*3 + 1];
                     if (vtIdx >= 0 && vtIdx < texCoords.size()) {
                         matMesh->mTextureCoords[0][vertIdx] = texCoords[vtIdx];
+                        // Flip V coordinate if aiProcess_FlipUVs flag is set
+                        if (flags & aiProcess_FlipUVs) {
+                            matMesh->mTextureCoords[0][vertIdx].y = 1.0f - matMesh->mTextureCoords[0][vertIdx].y;
+                        }
                     }
                     
                     // Normal
@@ -870,9 +887,10 @@ const aiScene* Assimp::Importer::ReadFile(const char* path, unsigned int flags) 
     EM_ASM_({
         console.log('ASSIMP DEBUG: Path received: ' + UTF8ToString($0));
         console.log('ASSIMP DEBUG: Path length: ' + $1);
-    }, path, static_cast<int>(path_str.length()));
+        console.log('ASSIMP DEBUG: Flags = 0x' + $2.toString(16));
+    }, path, static_cast<int>(path_str.length()), static_cast<int>(flags));
     
-    if (LoadOBJ(path_str)) {
+    if (LoadOBJ(path_str, flags)) {
         EM_ASM_({
             console.log('ASSIMP DEBUG: Successfully loaded OBJ file');
         });
