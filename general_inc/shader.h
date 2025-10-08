@@ -2,7 +2,12 @@
 #define SHADER_H
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 #include <glm/glm.hpp>
 
 #include <string>
@@ -10,7 +15,15 @@
 #include <sstream>
 #include <iostream>
 
+#ifdef __EMSCRIPTEN__
+#include <cstdio>  // for FILE*, fopen, fread, etc.
+#endif
+
+#ifdef __EMSCRIPTEN__
+class Shader: protected QOpenGLExtraFunctions
+#else
 class Shader: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     unsigned int ID;
@@ -33,7 +46,44 @@ public:
         gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         try 
         {
-            // open files
+#ifdef __EMSCRIPTEN__
+            // WebAssembly: Use FILE* for preloaded virtual filesystem
+            FILE* vFile = fopen(vertexPath, "r");
+            FILE* fFile = fopen(fragmentPath, "r");
+            
+            if (vFile == nullptr) {
+                std::cout << "ERROR::SHADER::VERTEX_FILE_NOT_FOUND: " << vertexPath << std::endl;
+                return;
+            }
+            if (fFile == nullptr) {
+                std::cout << "ERROR::SHADER::FRAGMENT_FILE_NOT_FOUND: " << fragmentPath << std::endl;
+                fclose(vFile);
+                return;
+            }
+            
+            // Read vertex shader
+            fseek(vFile, 0, SEEK_END);
+            long vSize = ftell(vFile);
+            fseek(vFile, 0, SEEK_SET);
+            vertexCode.resize(vSize);
+            fread(&vertexCode[0], 1, vSize, vFile);
+            fclose(vFile);
+            
+            // Read fragment shader  
+            fseek(fFile, 0, SEEK_END);
+            long fSize = ftell(fFile);
+            fseek(fFile, 0, SEEK_SET);
+            fragmentCode.resize(fSize);
+            fread(&fragmentCode[0], 1, fSize, fFile);
+            fclose(fFile);
+            
+            // Read geometry shader if provided (but warn it's not supported)
+            if(geometryPath != nullptr)
+            {
+                std::cout << "WARNING: Geometry shaders not supported in WebGL - ignoring: " << geometryPath << std::endl;
+            }
+#else
+            // Native: Use std::ifstream
             vShaderFile.open(vertexPath);
             fShaderFile.open(fragmentPath);
             std::stringstream vShaderStream, fShaderStream;
@@ -55,10 +105,11 @@ public:
                 gShaderFile.close();
                 geometryCode = gShaderStream.str();
             }
+#endif
         }
         catch (std::ifstream::failure& e)
         {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << std::endl;
         }
         const char* vShaderCode = vertexCode.c_str();
         const char * fShaderCode = fragmentCode.c_str();
@@ -78,25 +129,34 @@ public:
         unsigned int geometry;
         if(geometryPath != nullptr)
         {
+#ifndef __EMSCRIPTEN__
             const char * gShaderCode = geometryCode.c_str();
             geometry = glCreateShader(GL_GEOMETRY_SHADER);
             glShaderSource(geometry, 1, &gShaderCode, NULL);
             glCompileShader(geometry);
             checkCompileErrors(geometry, "GEOMETRY");
+#else
+            // Geometry shaders not supported in WebGL
+            std::cout << "WARNING: Geometry shaders not supported in WebGL - ignoring" << std::endl;
+#endif
         }
         // shader Program
         ID = glCreateProgram();
         glAttachShader(ID, vertex);
         glAttachShader(ID, fragment);
+#ifndef __EMSCRIPTEN__
         if(geometryPath != nullptr)
             glAttachShader(ID, geometry);
+#endif
         glLinkProgram(ID);
         checkCompileErrors(ID, "PROGRAM");
         // delete the shaders as they're linked into our program now and no longer necessery
         glDeleteShader(vertex);
         glDeleteShader(fragment);
+#ifndef __EMSCRIPTEN__
         if(geometryPath != nullptr)
             glDeleteShader(geometry);
+#endif
 
     }
     // activate the shader

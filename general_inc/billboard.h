@@ -7,14 +7,21 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
-#include <general_inc/utilities.h> // colors
+#include <shader.h>
+#include <utilities.h> // colors
 
-#include <ft2build.h>
-
+#ifdef __EMSCRIPTEN__
+class BillboardPolygon: protected QOpenGLExtraFunctions
+#else
 class BillboardPolygon: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     

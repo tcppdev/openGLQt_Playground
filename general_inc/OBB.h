@@ -7,13 +7,22 @@
 #include <vector>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
-#include <general_inc/utilities.h> // colors
+#include <shader.h>
+#include <utilities.h> // colors
 
 
+#ifdef __EMSCRIPTEN__
+class OBB: protected QOpenGLExtraFunctions
+#else
 class OBB: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     

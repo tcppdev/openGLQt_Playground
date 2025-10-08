@@ -27,7 +27,13 @@
 
 // ADDED
 #include <QOpenGLContext>  // Optional
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#include <emscripten.h>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
 #include <QQuickWindow>
 #include <QQuickView>
@@ -81,7 +87,11 @@ void getMapCoords(const std::string& coastLinePath,
     }
 };
 
+#ifdef __EMSCRIPTEN__
+class MyFrameBufferObjectRenderer : public QQuickFramebufferObject::Renderer, protected QOpenGLExtraFunctions
+#else
 class MyFrameBufferObjectRenderer : public QQuickFramebufferObject::Renderer, protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     MyFrameBufferObjectRenderer()
@@ -98,20 +108,48 @@ public:
         // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
         stbi_set_flip_vertically_on_load(true);
         
-        // Create models
-        std::string model_path = (ASSETS_PATH / "natural_earth/natural_earth_110m.obj").string(); 
-        m_model =  std::make_unique<Model>(model_path);
+#ifdef __EMSCRIPTEN__
+        // Debug logging for WebAssembly - check path constants
+        std::string earth_path = EARTH_OBJ.string();
+        std::string backpack_path = BACKPACK_OBJ.string();
+        std::string rocket_path = ROCKET_OBJ.string();
+        
+        EM_ASM_({
+            console.log('DEBUG: Earth path: ' + UTF8ToString($0));
+            console.log('DEBUG: Backpack path: ' + UTF8ToString($1));  
+            console.log('DEBUG: Rocket path: ' + UTF8ToString($2));
+        }, earth_path.c_str(), backpack_path.c_str(), rocket_path.c_str());
+#endif
+
+        // Create 3D models (now enabled for WebAssembly!)
+        std::string model_path = EARTH_OBJ.string(); 
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('DEBUG: About to create Earth model with path: ' + UTF8ToString($0));
+        }, model_path.c_str());
+#endif
+        // m_model =  std::make_unique<Model>(model_path);
+
+        // 
+        model_path = BACKPACK_OBJ.string(); 
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('DEBUG: About to create Backpack model with path: ' + UTF8ToString($0));
+        }, model_path.c_str());
+#endif
+        // other_model =  std::make_unique<Model>(model_path);
+
+        // Get our rocket
+        std::string rocket_model_path = ROCKET_OBJ.string();
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('DEBUG: About to create Rocket model with path: ' + UTF8ToString($0));
+        }, rocket_model_path.c_str());
+#endif
+        m_rocket =  std::make_unique<Model>(rocket_model_path);
 
         // Ellipsoid earth 
         m_ellipsoid_earth = std::make_unique<Ellipsoid>(glm::vec3(0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS, 0.98*EARTH_RADIUS), 40, 40);
-
-        // 
-        model_path = (ASSETS_PATH / "backpack/backpack.obj").string(); 
-        other_model =  std::make_unique<Model>(model_path);
-
-        // Get our rocket
-        std::string rocket_path = (ASSETS_PATH / "/rocket_v1/12217_rocket_v1_l1.obj").string();
-        m_rocket =  std::make_unique<Model>(rocket_path);
 
         // Ellipsoid
         m_ellipsoid =  std::make_unique<Ellipsoid>(glm::vec3(0.2*EARTH_RADIUS, 0.2*EARTH_RADIUS, 0.2*EARTH_RADIUS), 40, 40);
@@ -176,6 +214,8 @@ public:
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
         m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
+#ifndef __EMSCRIPTEN__
+        // CSV file loading disabled for WebAssembly
         std::vector<double> lats;
         std::vector<double> longs;
         std::vector<int> indexes;
@@ -211,6 +251,19 @@ public:
         contour_edges.push_back(contour_edge);
 
         m_projected_shapes = std::make_unique<Delaunay2_5D>(contour_edges, 1, 1, 5000, Color::RED, true);
+#else
+        // Create simple test geometry for WebAssembly instead of CSV data
+        std::vector<ConstrainedDelaunayContourEdges> contour_edges;
+        std::vector<std::vector<std::pair<double, double>>> delaunay_edges;
+        std::vector<std::pair<double, double>> simple_square = {
+            {-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0}, {-1.0, -1.0}
+        };
+        delaunay_edges.push_back(simple_square);
+        ConstrainedDelaunayContourEdges contour_edge(delaunay_edges, false);
+        contour_edges.push_back(contour_edge);
+        
+        m_projected_shapes = std::make_unique<Delaunay2_5D>(contour_edges, 1, 1, 5000, Color::RED, true);
+#endif
 
         // My text
         m_text = std::make_unique<Text3D>("Awesome moving rocket", 0.0f, 0.0f, 0.0f, 1.0f/1200.0f);//1.0f/600.0f); 
@@ -314,10 +367,11 @@ public:
         model = glm::scale(model, glm::vec3(earth_scaling, earth_scaling, earth_scaling));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
 
+        // Draw EARTH_OBJ model (now enabled for WebAssembly!)
         m_shader->setMat4("model", model);
-        m_model->Draw(*m_shader);
+        // m_model->Draw(*m_shader);
 
-        // render small earth
+        // render BACKPACK_OBJ model
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-1.5*EARTH_RADIUS, 0.0f, 0.0f));  // elevation rotation
         // model = glm::translate(model, glm::vec3(0.0f, 0.0f, m_current_distance)); // translate it down so it's at the center of the scene
@@ -327,7 +381,7 @@ public:
         // model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
-        other_model->Draw(*m_shader);
+        // other_model->Draw(*m_shader);
 
         // Lets draw the line
         if (m_draw_line) {
@@ -344,8 +398,13 @@ public:
         }
         m_points->draw(view, projection);
 
-        // Draw delaunay projection
-        m_projected_shapes->draw(view, projection); 
+#ifndef __EMSCRIPTEN__
+        // Draw delaunay projection (full version)
+        m_projected_shapes->draw(view, projection);
+#else
+        // Draw delaunay projection (WebAssembly simplified version)
+        m_projected_shapes->draw(view, projection);
+#endif
 
         // Draw ellipsoid
         Eigen::Vector3f cord_ellipsoid = sph_to_cart(m_radius, theta/2, 135);
@@ -406,7 +465,7 @@ public:
         }
         if (obb_toggled_) { m_obb->draw(view, projection, model_obb); };
 
-        // Set shader properties
+        // Draw ROCKET_OBJ model (now enabled for WebAssembly!)
         m_shader->use();  
         m_shader->setMat4("model", model_rocket);
         m_rocket->Draw(*m_shader);

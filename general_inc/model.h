@@ -8,11 +8,17 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <general_inc/mesh.h>
-#include <general_inc/shader.h>
+#include "mesh.h"
+#include "shader.h"
 
 #include <QOpenGLContext>
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#include <emscripten.h>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
 #include <string>
 #include <fstream>
@@ -36,39 +42,112 @@ public:
     // constructor, expects a filepath to a 3D model.
     Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
     {
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MODEL CONSTRUCTOR DEBUG: Starting Model constructor with path: ' + UTF8ToString($0));
+        }, path.c_str());
+#endif
         loadModel(path);
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MODEL CONSTRUCTOR DEBUG: Model constructor completed successfully');
+        });
+#endif
     }
 
     // draws the model, and thus all its meshes
     void Draw(Shader &shader)
     {
-        for(unsigned int i = 0; i < meshes.size(); i++)
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MODEL DRAW DEBUG: Drawing model with ' + $0 + ' meshes');
+        }, static_cast<int>(meshes.size()));
+#endif
+        for(unsigned int i = 0; i < meshes.size(); i++) {
+#ifdef __EMSCRIPTEN__
+            EM_ASM_({
+                console.log('MODEL DRAW DEBUG: Drawing mesh ' + $0);
+            }, static_cast<int>(i));
+#endif
             meshes[i].Draw(shader);
+        }
     }
     
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-    void loadModel(string const &path)
+    void loadModel(string path)  // Take by value to ensure string data is preserved in WebAssembly
     {
-        // read file via ASSIMP
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        // **CRITICAL FIX**: Keep importer alive throughout entire model loading process
+        // to prevent scene corruption in WebAssembly
+        Assimp::Importer* importer = new Assimp::Importer();
+        const aiScene* scene = nullptr;
+        
+#ifdef __EMSCRIPTEN__
+        // WebAssembly Fix: Copy string to prevent corruption during function call
+        std::string path_copy = path;  // Explicit copy to maintain string validity
+        const char* path_char = path_copy.c_str(); 
+        
+        // Debug logging in Model constructor
+        EM_ASM_({
+            console.log('MODEL DEBUG: Original path: ' + UTF8ToString($0));
+            console.log('MODEL DEBUG: Path copy: ' + UTF8ToString($1));
+            console.log('MODEL DEBUG: Path char: ' + UTF8ToString($2));
+        }, path.c_str(), path_copy.c_str(), path_char);
+        
+        scene = importer->ReadFile(path_char, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+#else
+        scene = importer->ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+#endif
         // check for errors
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('SCENE DEBUG: scene pointer = ' + $0);
+            console.log('SCENE DEBUG: scene flags = ' + $1);  
+            console.log('SCENE DEBUG: rootNode pointer = ' + $2);
+        }, (scene ? 1 : 0), (scene ? static_cast<int>(scene->mFlags) : -1), (scene && scene->mRootNode ? 1 : 0));
+#endif
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
-            cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
+            cout << "ERROR::ASSIMP:: " << importer->GetErrorString() << endl;
+#ifdef __EMSCRIPTEN__
+            if (!scene) {
+                EM_ASM_({ console.log('SCENE DEBUG: scene is null'); });
+            }
+            if (scene && (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)) {
+                EM_ASM_({ console.log('SCENE DEBUG: scene has incomplete flag'); });
+            }
+            if (scene && !scene->mRootNode) {
+                EM_ASM_({ console.log('SCENE DEBUG: rootNode is null'); });
+            }
+#endif
+            delete importer;  // Clean up on error
             return;
         }
         // retrieve the directory path of the filepath
         directory = path.substr(0, path.find_last_of('/'));
 
-        // process ASSIMP's root node recursively
+        // process ASSIMP's root node recursively - importer stays alive during this process
         processNode(scene->mRootNode, scene);
+        
+        // Clean up importer after processing is complete
+        delete importer;
     }
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
     void processNode(aiNode *node, const aiScene *scene)
     {
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('PROCESS NODE MEMORY DEBUG: aiNode pointer = 0x' + $0.toString(16));
+            console.log('PROCESS NODE MEMORY DEBUG: Node has ' + $1 + ' meshes and ' + $2 + ' children');
+            console.log('PROCESS NODE MEMORY DEBUG: mMeshes pointer = 0x' + $3.toString(16));
+            console.log('PROCESS NODE MEMORY DEBUG: mChildren pointer = 0x' + $4.toString(16));
+        }, reinterpret_cast<uintptr_t>(node), 
+           static_cast<int>(node->mNumMeshes), 
+           static_cast<int>(node->mNumChildren),
+           reinterpret_cast<uintptr_t>(node->mMeshes),
+           reinterpret_cast<uintptr_t>(node->mChildren));
+#endif
         // process each mesh located at the current node
         for(unsigned int i = 0; i < node->mNumMeshes; i++)
         {
@@ -94,6 +173,12 @@ private:
         vector<Vertex> vertices;
         vector<unsigned int> indices;
         vector<Texture> textures;
+
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('PROCESS MESH DEBUG: Processing mesh with ' + $0 + ' vertices and ' + $1 + ' faces');
+        }, static_cast<int>(mesh->mNumVertices), static_cast<int>(mesh->mNumFaces));
+#endif
 
         // walk through each of the mesh's vertices
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -209,8 +294,12 @@ private:
 
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma)
 {
+#ifdef __EMSCRIPTEN__
+    QOpenGLExtraFunctions *functions = QOpenGLContext::currentContext()->extraFunctions();
+#else
     QOpenGLFunctions_3_3_Core *functions = new QOpenGLFunctions_3_3_Core;
     functions->initializeOpenGLFunctions();
+#endif
     
     string filename = string(path);
     filename = directory + '/' + filename;
@@ -247,7 +336,9 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
         stbi_image_free(data);
     }
 
+#ifndef __EMSCRIPTEN__
     delete functions;
+#endif
     
     return textureID;
 }

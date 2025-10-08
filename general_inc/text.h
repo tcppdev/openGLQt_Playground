@@ -7,12 +7,19 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
+#include <shader.h>
 
+#ifndef __EMSCRIPTEN__
 #include <ft2build.h>
 #include FT_FREETYPE_H  
+#endif
 
 /// Holds all state information relevant to a character as loaded using FreeType
 struct Character {
@@ -25,7 +32,11 @@ struct Character {
 const char NEWLINE_CHARACTER = '\n';
 const float MULTILINE_TEXT_HEIGHT_OFFSET_FACTOR = 1.2;
 
+#ifdef __EMSCRIPTEN__
+class Text3D: protected QOpenGLExtraFunctions
+#else
 class Text3D: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     
@@ -78,6 +89,12 @@ public:
             std::cout << "ERROR::FREETYPE: Failed to load font_name" << std::endl;
         }
 
+#ifdef __EMSCRIPTEN__
+        std::cout << "WARNING: FreeType text rendering disabled for WebAssembly builds" << std::endl;
+        // Create a dummy character for 'A' to avoid crashes
+        Character character = {0, glm::ivec2(12, 16), glm::ivec2(0, 16), 12 << 6};
+        m_characters.insert(std::pair<char, Character>('A', character));
+#else
         // FreeType
         // --------
         FT_Library ft;
@@ -142,6 +159,7 @@ public:
         // destroy FreeType once we're finished
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
+#endif
 
         // configure VAO/VBO for (text) texture quads
         // -----------------------------------

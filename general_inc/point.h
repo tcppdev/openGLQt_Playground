@@ -6,12 +6,17 @@
 #include <stdexcept>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
+#include <shader.h>
 
-#include <general_inc/text.h>
-#include <general_inc/billboard.h>
+#include <text.h>
+#include <billboard.h>
 
 struct VertexP {   // just want to make sure 
     // position
@@ -29,7 +34,11 @@ struct GeoPoint {
 
 enum class Symbol { CIRCLE, SQUARE, TRIANGLE };
 
+#ifdef __EMSCRIPTEN__
+class Point: protected QOpenGLExtraFunctions
+#else
 class Point: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     

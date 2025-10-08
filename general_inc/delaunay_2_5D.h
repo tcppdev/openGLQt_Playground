@@ -6,14 +6,21 @@
 #include <stdexcept>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
-#include <general_inc/line.h>
-#include <general_inc/utilities.h> // colors
+#include <shader.h>
+#include <line.h>
+#include <utilities.h> // colors
 
+#ifndef __EMSCRIPTEN__
 #include "CDT.h"
 #include "Triangulation.h"
+#endif
 
 //#include "lagan/transform.h"
 
@@ -58,7 +65,11 @@ struct ConstrainedDelaunayContourEdges
 /// Class for drawing plane 2D surfaces or 2D surfaces projected on a 3D sphere using Delaunay triangulation
 /// This class allows for use of the Constrained Delaunay Algorithm to draw almost arbritrary 2D shapes 
 /// Assumes the polyline contour is defined along the vertex order provided
+#ifdef __EMSCRIPTEN__
+class Delaunay2_5D: protected QOpenGLExtraFunctions
+#else
 class Delaunay2_5D: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     
@@ -133,6 +144,11 @@ public:
 
         }
 
+#ifdef __EMSCRIPTEN__
+        // std::cout << "WARNING: Delaunay triangulation constructor disabled for WebAssembly builds" << std::endl;
+        initializeOpenGLFunctions();   // Initialise current context  (required)
+        setup();
+#else
         // Do the triangulation 
         std::vector<CDT::Triangulation<double>> cdts = do_triangulation(contour_edges);
 
@@ -142,6 +158,7 @@ public:
         // Setup buffer data
         initializeOpenGLFunctions();   // Initialise current context  (required)
         setup();
+#endif
     }
 
     ~Delaunay2_5D() {
@@ -149,6 +166,12 @@ public:
         delete m_delaunay_shader;
     }
 
+#ifdef __EMSCRIPTEN__
+    // Dummy WebAssembly implementation
+    void do_triangulation_stub(std::vector<ConstrainedDelaunayContourEdges> contours) {
+        std::cout << "WARNING: Delaunay triangulation disabled for WebAssembly builds" << std::endl;
+    }
+#else
     std::vector<CDT::Triangulation<double>> do_triangulation(std::vector<ConstrainedDelaunayContourEdges> contours)
     {
         std::vector<CDT::Triangulation<double>> cdts;
@@ -223,8 +246,14 @@ public:
         std::cout << "The mesh contains: " << total_number_of_triangles_ << " triangles" << std::endl;
 
         return cdts;
-    };
+    }
+#endif
 
+#ifdef __EMSCRIPTEN__
+    void setup_buffer_info_stub() {
+        // WebAssembly stub - do nothing
+    }
+#else
     void setup_buffer_info(std::vector<CDT::Triangulation<double>> cdts, bool project_on_sphere, double altitude)
     {
 
@@ -278,6 +307,7 @@ public:
         }
 
     }
+#endif
     
     void setup()
     {
@@ -307,6 +337,10 @@ public:
         m_delaunay_shader->setMat4("view", view_matrix);
         m_delaunay_shader->setMat4("projection", projection_matrix);
     
+#ifdef __EMSCRIPTEN__
+        // WebAssembly: Simplified drawing without advanced features
+        // std::cout << "WARNING: Delaunay drawing disabled for WebAssembly builds" << std::endl;
+#else
         // Draw polygons
         glEnable(GL_MULTISAMPLE);  // Antialiasing
         // glEnable(GL_CULL_FACE); 
@@ -325,6 +359,7 @@ public:
             // Turn off wireframe mode
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
+#endif
 
         // glDisable(GL_CULL_FACE); 
         glBindVertexArray(0);  // Unbind vao

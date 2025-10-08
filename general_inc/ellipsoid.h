@@ -11,13 +11,22 @@
 #include <vector>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
 // constants //////////////////////////////////////////////////////////////////
 const int MIN_SECTOR_COUNT = 3;
 const int MIN_STACK_COUNT  = 2;
 
+#ifdef __EMSCRIPTEN__
+class Ellipsoid: protected QOpenGLExtraFunctions
+#else
 class Ellipsoid: protected QOpenGLFunctions_3_3_Core
+#endif
 {
  public:
 

@@ -25,20 +25,30 @@ int main(int argc, char **argv)
 
     // Q_INIT_RESOURCE(assets);
 
+    // Configure surface format for WebAssembly compatibility
     QSurfaceFormat format;
+#ifdef __EMSCRIPTEN__
+    // WebAssembly/WebGL specific settings
+    format.setMajorVersion(2);
+    format.setMinorVersion(0);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
+#else
     format.setMajorVersion(3);
     format.setMinorVersion(3);
     format.setProfile(QSurfaceFormat::CompatibilityProfile);
+#endif
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
     format.setSamples(4);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     QSurfaceFormat::setDefaultFormat(format);
 
     qmlRegisterType<MyFrameBufferObject>("MyRenderLibrary", 42, 0, "MyFrame");
 
     // Load window(s)
     QQmlApplicationEngine engine;
-    engine.load(QUrl("qrc:///qml/main.qml"));
+    engine.load(QUrl("qrc:/fbo/main.qml"));
 
     QQuickWindow* graphics_window = engine.rootObjects()[0]->findChild<QQuickWindow*>("graphics_window");
     graphics_window->show();

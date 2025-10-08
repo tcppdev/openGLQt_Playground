@@ -4,10 +4,15 @@
 #include <stdexcept>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
-#include <general_inc/paths.h>
+#include <shader.h>
+#include <paths.h>
 
 float skybox_vertices[] = {
     // positions          
@@ -55,7 +60,11 @@ float skybox_vertices[] = {
 };
 
 
+#ifdef __EMSCRIPTEN__
+class CubeMap: protected QOpenGLExtraFunctions
+#else
 class CubeMap: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     

@@ -5,9 +5,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
+#include "shader.h"
 
 #include <string>
 #include <vector>
@@ -61,9 +66,12 @@ public:
     // render the mesh
     void Draw(Shader &shader) 
     {
-
+#ifdef __EMSCRIPTEN__
+        QOpenGLExtraFunctions *functions = QOpenGLContext::currentContext()->extraFunctions();
+#else
         QOpenGLFunctions_3_3_Core *functions = new QOpenGLFunctions_3_3_Core;
         functions->initializeOpenGLFunctions();
+#endif
 
         // bind appropriate textures
         unsigned int diffuseNr  = 1;
@@ -99,7 +107,9 @@ public:
         // always good practice to set everything back to defaults once configured.
         functions->glActiveTexture(GL_TEXTURE0);
 
+#ifndef __EMSCRIPTEN__
         delete functions;
+#endif
     }
 
 private:
@@ -109,8 +119,12 @@ private:
     // initializes all the buffer objects/arrays
     void setupMesh()
     {
+#ifdef __EMSCRIPTEN__
+        QOpenGLExtraFunctions *functions = QOpenGLContext::currentContext()->extraFunctions();
+#else
         QOpenGLFunctions_3_3_Core *functions = new QOpenGLFunctions_3_3_Core;
         functions->initializeOpenGLFunctions();
+#endif
 
         // create buffers/arrays
         functions->glGenVertexArrays(1, &VAO);
@@ -153,7 +167,9 @@ private:
 		functions->glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
         functions->glBindVertexArray(0);
 
+#ifndef __EMSCRIPTEN__
         delete functions;
+#endif
     }
 };
 #endif

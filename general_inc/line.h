@@ -8,12 +8,21 @@
 #include <stdexcept>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
-#include <general_inc/utilities.h>
+#include <shader.h>
+#include <utilities.h>
 
+#ifdef __EMSCRIPTEN__
+class Line: protected QOpenGLExtraFunctions
+#else
 class Line: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     
@@ -109,9 +118,18 @@ public:
         m_line_shader->setFloat("thickness", linewidth_*LINEWIDTH_SCALING_FACTOR);
 
         // Draw lines
+#ifndef __EMSCRIPTEN__
         glEnable(GL_MULTISAMPLE);  
+#endif
         glBindVertexArray(vao_);
+#ifdef __EMSCRIPTEN__
+        // WebGL doesn't support glMultiDrawArrays, use multiple draw calls
+        for(GLuint i = 0; i < lines_count_; ++i) {
+            glDrawArrays(GL_LINE_STRIP, elements_start_indexes_[i], element_vertex_count_[i]);
+        }
+#else
         glMultiDrawArrays(GL_LINE_STRIP, elements_start_indexes_, element_vertex_count_, lines_count_); //
+#endif
         // glDrawArrays(GL_LINE_STRIP, 0, vertices_.size()); 
         glBindVertexArray(0);  // Unbind vao
     }

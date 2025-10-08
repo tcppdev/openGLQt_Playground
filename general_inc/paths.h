@@ -5,16 +5,41 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 namespace fs = boost::filesystem;
+#elif defined(__EMSCRIPTEN__)
+// WebAssembly/Emscripten - use simple string paths
+#include <string>
+namespace fs {
+    class path {
+        std::string p;
+    public:
+        path() = default;
+        path(const std::string& s) : p(s) {}
+        path(const char* s) : p(s) {}
+        path operator/(const path& other) const {
+            return path(p + "/" + other.p);
+        }
+        std::string string() const { return p; }
+        operator std::string() const { return p; }
+    };
+    path current_path() { return path("."); }
+}
 #else
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #endif
 
+#ifdef __EMSCRIPTEN__
+// WebAssembly - use preloaded virtual filesystem paths
+fs::path ROOT_PROJECT_DIRECTORY = fs::path("/");
+fs::path SHADERS_PATH = fs::path("/shaders");  
+fs::path RESOURCES_PATH = fs::path("/resources");  
+fs::path ASSETS_PATH = RESOURCES_PATH / "objects";
+#else
 fs::path ROOT_PROJECT_DIRECTORY = fs::current_path();
 fs::path SHADERS_PATH = ROOT_PROJECT_DIRECTORY / "shaders";  
-
 fs::path RESOURCES_PATH = ROOT_PROJECT_DIRECTORY / "resources";  
 fs::path ASSETS_PATH = RESOURCES_PATH / "objects";
+#endif
 
 
 // Shaders
@@ -67,5 +92,11 @@ fs::path CUBEMAP_PATH = RESOURCES_PATH / "cubemaps" / "universe";
 
 // Text font
 fs::path TEXT_FONT_PATH = RESOURCES_PATH / "fonts" / "Antonio-Bold.ttf";
+
+// Assets
+fs::path BACKPACK_OBJ = ASSETS_PATH / "backpack" / "backpack.obj";
+fs::path EARTH_OBJ = ASSETS_PATH / "natural_earth" / "natural_earth_110m.obj";
+fs::path ROCKET_OBJ = ASSETS_PATH / "rocket_v1" / "12217_rocket_v1_l1.obj";
+fs::path COASTLINE_CSV = RESOURCES_PATH / "filtered_coast.csv";
 
 #endif

@@ -5,11 +5,16 @@
 #include <stdexcept>
 
 #include <QOpenGLContext> 
+#ifdef __EMSCRIPTEN__
+#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 
-#include <general_inc/shader.h>
-#include <general_inc/line.h>
-#include <general_inc/utilities.h> // colors
+#include <shader.h>
+#include <line.h>
+#include <utilities.h> // colors
 
 //#include "delaunator.hpp"
 //#include "mapbox/earcut.hpp"
@@ -21,7 +26,11 @@
 // to original coordinates) 
 // or could try the stencil buffers hacks
 // https://stackoverflow.com/questions/25463015/black-out-everything-outside-a-polygon/25463682#25463682
+#ifdef __EMSCRIPTEN__
+class Polygon3D: protected QOpenGLExtraFunctions
+#else
 class Polygon3D: protected QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     
@@ -138,10 +147,19 @@ public:
         m_polygon_shader->setMat4("projection", projection_matrix);
     
         // Draw polygons
+#ifndef __EMSCRIPTEN__
         glEnable(GL_MULTISAMPLE);  // Antialiasing
+#endif
         glBindVertexArray(vao_);
         
+#ifdef __EMSCRIPTEN__
+        // WebGL doesn't support glMultiDrawArrays, use multiple draw calls
+        for(GLuint i = 0; i < polygons_count_; ++i) {
+            glDrawArrays(GL_TRIANGLE_FAN, elements_start_indexes_[i], element_vertex_count_[i]);
+        }
+#else
         glMultiDrawArrays(GL_TRIANGLE_FAN, elements_start_indexes_, element_vertex_count_, polygons_count_); //
+#endif
         glBindVertexArray(0);  // Unbind vao
 
         // Draw outline lines
