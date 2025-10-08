@@ -114,37 +114,37 @@ public:
         std::string backpack_path = BACKPACK_OBJ.string();
         std::string rocket_path = ROCKET_OBJ.string();
         
-        EM_ASM_({
-            console.log('DEBUG: Earth path: ' + UTF8ToString($0));
-            console.log('DEBUG: Backpack path: ' + UTF8ToString($1));  
-            console.log('DEBUG: Rocket path: ' + UTF8ToString($2));
-        }, earth_path.c_str(), backpack_path.c_str(), rocket_path.c_str());
+        // EM_ASM_({
+        //     console.log('DEBUG: Earth path: ' + UTF8ToString($0));
+        //     console.log('DEBUG: Backpack path: ' + UTF8ToString($1));  
+        //     console.log('DEBUG: Rocket path: ' + UTF8ToString($2));
+        // }, earth_path.c_str(), backpack_path.c_str(), rocket_path.c_str());
 #endif
 
         // Create 3D models (now enabled for WebAssembly!)
         std::string model_path = EARTH_OBJ.string(); 
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('DEBUG: About to create Earth model with path: ' + UTF8ToString($0));
-        }, model_path.c_str());
+        // EM_ASM_({
+        //     console.log('DEBUG: About to create Earth model with path: ' + UTF8ToString($0));
+        // }, model_path.c_str());
 #endif
         m_model =  std::make_unique<Model>(model_path);
 
         // 
         model_path = BACKPACK_OBJ.string(); 
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('DEBUG: About to create Backpack model with path: ' + UTF8ToString($0));
-        }, model_path.c_str());
+        // EM_ASM_({
+        //     console.log('DEBUG: About to create Backpack model with path: ' + UTF8ToString($0));
+        // }, model_path.c_str());
 #endif
         other_model =  std::make_unique<Model>(model_path);
 
         // Get our rocket
         std::string rocket_model_path = ROCKET_OBJ.string();
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('DEBUG: About to create Rocket model with path: ' + UTF8ToString($0));
-        }, rocket_model_path.c_str());
+        // EM_ASM_({
+        //     console.log('DEBUG: About to create Rocket model with path: ' + UTF8ToString($0));
+        // }, rocket_model_path.c_str());
 #endif
         m_rocket =  std::make_unique<Model>(rocket_model_path);
 
@@ -170,7 +170,7 @@ public:
             the_coordinates.push_back(coordinate);
         }
         the_lines.push_back(the_coordinates);
-        m_circular_line =  std::make_unique<Line>(the_lines, 10); 
+        // m_circular_line =  std::make_unique<Line>(the_lines, 10); 
 
         // 
         // My polygon
@@ -190,7 +190,7 @@ public:
         polygon_2_coordinates.emplace_back(0, 0, EARTH_RADIUS);
         the_polygons.push_back(polygon_2_coordinates);
 
-        m_polygon =  std::make_unique<Polygon3D>(the_polygons); 
+        // m_polygon =  std::make_unique<Polygon3D>(the_polygons); 
 
         // Draw circle on sphere?
         // Method 1: Flat circle
@@ -212,7 +212,7 @@ public:
         the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This is point 2"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "This is another point"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
-        m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
+        // m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
 #ifndef __EMSCRIPTEN__
         // CSV file loading disabled for WebAssembly
@@ -250,7 +250,7 @@ public:
         ConstrainedDelaunayContourEdges contour_edge(delaunay_edges, false);
         contour_edges.push_back(contour_edge);
 
-        m_projected_shapes = std::make_unique<Delaunay2_5D>(contour_edges, 1, 1, 5000, Color::RED, true);
+        // m_projected_shapes = std::make_unique<Delaunay2_5D>(contour_edges, 1, 1, 5000, Color::RED, true);
 #else
         // Create simple test geometry for WebAssembly instead of CSV data
         std::vector<ConstrainedDelaunayContourEdges> contour_edges;
@@ -262,7 +262,7 @@ public:
         ConstrainedDelaunayContourEdges contour_edge(delaunay_edges, false);
         contour_edges.push_back(contour_edge);
         
-        m_projected_shapes = std::make_unique<Delaunay2_5D>(contour_edges, 1, 1, 5000, Color::RED, true);
+        // m_projected_shapes = std::make_unique<Delaunay2_5D>(contour_edges, 1, 1, 5000, Color::RED, true);
 #endif
 
         // My text
@@ -385,26 +385,26 @@ public:
 
         // Lets draw the line
         if (m_draw_line) {
-            m_circular_line->draw(view, projection);
+            // m_circular_line->draw(view, projection);
         }
 
         // Lets draw the polygon
-        m_polygon->draw(view, projection);
+        // m_polygon->draw(view, projection);
         
         // Draw points
         if (m_click_toggle.first) {
-            m_points->test_ray_tracing(view, projection, m_click_toggle.second);
+            // m_points->test_ray_tracing(view, projection, m_click_toggle.second);
             // m_click_toggle.first = false;  // desactivate mouse click
         }
-        m_points->draw(view, projection);
+        // m_points->draw(view, projection);
 
-#ifndef __EMSCRIPTEN__
-        // Draw delaunay projection (full version)
-        m_projected_shapes->draw(view, projection);
-#else
-        // Draw delaunay projection (WebAssembly simplified version)
-        m_projected_shapes->draw(view, projection);
-#endif
+// #ifndef __EMSCRIPTEN__
+//         // Draw delaunay projection (full version)
+//         m_projected_shapes->draw(view, projection);
+// #else
+//         // Draw delaunay projection (WebAssembly simplified version)
+//         m_projected_shapes->draw(view, projection);
+// #endif
 
         // Draw ellipsoid
         Eigen::Vector3f cord_ellipsoid = sph_to_cart(m_radius, theta/2, 135);
@@ -499,9 +499,9 @@ private:
     std::unique_ptr<Ellipsoid> m_ellipsoid;
     std::unique_ptr<Ellipsoid> m_ellipsoid_earth;
     std::unique_ptr<OBB> m_obb;
-    std::unique_ptr<Line> m_circular_line;
+    // std::unique_ptr<Line> m_circular_line;
     std::unique_ptr<Polygon3D> m_polygon;
-    std::unique_ptr<Delaunay2_5D> m_projected_shapes;
+    // std::unique_ptr<Delaunay2_5D> m_projected_shapes;
     std::unique_ptr<Point> m_points;
     std::unique_ptr<Text3D> m_text;
     std::unique_ptr<CubeMap> m_cubemap;

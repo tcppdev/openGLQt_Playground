@@ -271,42 +271,42 @@ struct aiMaterial {
     
     // Methods that Model.h expects
     unsigned int GetTextureCount(aiTextureType type) const {
-        EM_ASM_({
-            console.log('===== GET_TEXTURE_COUNT CALLED =====');
-            console.log('GET_TEXTURE_COUNT: mNumProperties = ' + $0);
-        }, static_cast<int>(mNumProperties));
+        // EM_ASM_({
+        //     console.log('===== GET_TEXTURE_COUNT CALLED =====');
+        //     console.log('GET_TEXTURE_COUNT: mNumProperties = ' + $0);
+        // }, static_cast<int>(mNumProperties));
         
         if (mNumProperties == 0) {
-            EM_ASM_({
-                console.log('GET_TEXTURE_COUNT: WARNING - Material has ZERO properties! Returning 0.');
-            });
+            // EM_ASM_({
+            //     console.log('GET_TEXTURE_COUNT: WARNING - Material has ZERO properties! Returning 0.');
+            // });
             return 0;
         }
         unsigned int count = 0;
         for (unsigned int i = 0; i < mNumProperties; i++) {
             aiMaterialProperty* prop = mProperties[i];
 #ifdef __EMSCRIPTEN__
-            EM_ASM_({
-                console.log('GET_TEXTURE_COUNT DEBUG: Property ' + $0 + ': key="' + UTF8ToString($1) + 
-                           '", semantic=' + $2 + ', index=' + $3 + ', type=' + $4);
-            }, static_cast<int>(i), prop->mKey.data, static_cast<int>(prop->mSemantic), 
-               static_cast<int>(prop->mIndex), static_cast<int>(prop->mType));
+            // EM_ASM_({
+            //     console.log('GET_TEXTURE_COUNT DEBUG: Property ' + $0 + ': key="' + UTF8ToString($1) + 
+            //                '", semantic=' + $2 + ', index=' + $3 + ', type=' + $4);
+            // }, static_cast<int>(i), prop->mKey.data, static_cast<int>(prop->mSemantic), 
+            //    static_cast<int>(prop->mIndex), static_cast<int>(prop->mType));
 #endif
             if (strcmp(prop->mKey.data, AI_MATKEY_TEXTURE_BASE) == 0 && 
                 prop->mSemantic == static_cast<unsigned int>(type) &&
                 prop->mType == aiPTI_String) {
                 count++;
 #ifdef __EMSCRIPTEN__
-                EM_ASM_({
-                    console.log('GET_TEXTURE_COUNT DEBUG: Found matching texture property!');
-                });
+                // EM_ASM_({
+                //     console.log('GET_TEXTURE_COUNT DEBUG: Found matching texture property!');
+                // });
 #endif
             }
         }
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('GET_TEXTURE_COUNT DEBUG: Returning count = ' + $0);
-        }, static_cast<int>(count));
+        // EM_ASM_({
+        //     console.log('GET_TEXTURE_COUNT DEBUG: Returning count = ' + $0);
+        // }, static_cast<int>(count));
 #endif
         return count;
     }
@@ -444,9 +444,9 @@ std::string Assimp::Importer::GetDirectory(const std::string& path) {
 bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMaterial*>& materials, std::map<std::string, int>& materialMap) {
     std::ifstream file(mtlPath);
     if (!file.is_open()) {
-        EM_ASM_({
-            console.log('MTL DEBUG: Cannot open MTL file: ' + UTF8ToString($0));
-        }, mtlPath.c_str());
+        // EM_ASM_({
+        //     console.log('MTL DEBUG: Cannot open MTL file: ' + UTF8ToString($0));
+        // }, mtlPath.c_str());
         return false;
     }
     
@@ -467,9 +467,9 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             materials.push_back(currentMaterial);
             materialMap[materialName] = materials.size() - 1;
             
-            EM_ASM_({
-                console.log('MTL DEBUG: Created material: ' + UTF8ToString($0) + ' at index ' + $1);
-            }, materialName.c_str(), static_cast<int>(materials.size() - 1));
+            // EM_ASM_({
+            //     console.log('MTL DEBUG: Created material: ' + UTF8ToString($0) + ' at index ' + $1);
+            // }, materialName.c_str(), static_cast<int>(materials.size() - 1));
         }
         else if (type == "Kd" && currentMaterial) {
             // Diffuse color
@@ -478,9 +478,9 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             aiColor3D diffuseColor(r, g, b);
             currentMaterial->AddProperty(&diffuseColor, AI_MATKEY_COLOR_DIFFUSE);
             
-            EM_ASM_({
-                console.log('MTL DEBUG: Set diffuse color (' + $0 + ', ' + $1 + ', ' + $2 + ')');
-            }, r, g, b);
+            // EM_ASM_({
+            //     console.log('MTL DEBUG: Set diffuse color (' + $0 + ', ' + $1 + ', ' + $2 + ')');
+            // }, r, g, b);
         }
         else if (type == "Ka" && currentMaterial) {
             // Ambient color
@@ -502,9 +502,9 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             iss >> texturePath;
             currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
             
-            EM_ASM_({
-                console.log('MTL DEBUG: Added diffuse texture: ' + UTF8ToString($0));
-            }, texturePath.c_str());
+            // EM_ASM_({
+            //     console.log('MTL DEBUG: Added diffuse texture: ' + UTF8ToString($0));
+            // }, texturePath.c_str());
         }
         else if (type == "map_Ka" && currentMaterial) {
             // Ambient texture map
@@ -512,9 +512,9 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             iss >> texturePath;
             currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_AMBIENT, 0));
             
-            EM_ASM_({
-                console.log('MTL DEBUG: Added ambient texture: ' + UTF8ToString($0));
-            }, texturePath.c_str());
+            // EM_ASM_({
+            //     console.log('MTL DEBUG: Added ambient texture: ' + UTF8ToString($0));
+            // }, texturePath.c_str());
         }
         else if (type == "map_Ks" && currentMaterial) {
             // Specular texture map
@@ -522,9 +522,9 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             iss >> texturePath;
             currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, 0));
             
-            EM_ASM_({
-                console.log('MTL DEBUG: Added specular texture: ' + UTF8ToString($0));
-            }, texturePath.c_str());
+            // EM_ASM_({
+            //     console.log('MTL DEBUG: Added specular texture: ' + UTF8ToString($0));
+            // }, texturePath.c_str());
         }
         else if (type == "map_Bump" && currentMaterial) {
             // Normal/Bump texture map
@@ -532,15 +532,15 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             iss >> texturePath;
             currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
             
-            EM_ASM_({
-                console.log('MTL DEBUG: Added normal/bump texture: ' + UTF8ToString($0));
-            }, texturePath.c_str());
+            // EM_ASM_({
+            //     console.log('MTL DEBUG: Added normal/bump texture: ' + UTF8ToString($0));
+            // }, texturePath.c_str());
         }
     }
     
-    EM_ASM_({
-        console.log('MTL DEBUG: Loaded ' + $0 + ' materials from MTL file');
-    }, static_cast<int>(materials.size()));
+    // EM_ASM_({
+    //     console.log('MTL DEBUG: Loaded ' + $0 + ' materials from MTL file');
+    // }, static_cast<int>(materials.size()));
     
     return true;
 }
@@ -554,13 +554,13 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
     }
     
     // Log which flags are active
-    EM_ASM_({
-        console.log('LOADOBJ DEBUG: Processing flags:');
-        if ($0 & 0x8) console.log('  - aiProcess_Triangulate');
-        if ($0 & 0x40) console.log('  - aiProcess_GenSmoothNormals');
-        if ($0 & 0x800000) console.log('  - aiProcess_FlipUVs');
-        if ($0 & 0x1) console.log('  - aiProcess_CalcTangentSpace');
-    }, static_cast<int>(flags));
+    // EM_ASM_({
+    //     console.log('LOADOBJ DEBUG: Processing flags:');
+    //     if ($0 & 0x8) console.log('  - aiProcess_Triangulate');
+    //     if ($0 & 0x40) console.log('  - aiProcess_GenSmoothNormals');
+    //     if ($0 & 0x800000) console.log('  - aiProcess_FlipUVs');
+    //     if ($0 & 0x1) console.log('  - aiProcess_CalcTangentSpace');
+    // }, static_cast<int>(flags));
     
     std::vector<aiVector3D> vertices;
     std::vector<aiVector3D> normals;
@@ -599,9 +599,9 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
             iss >> mtlFile;
             std::string mtlPath = GetDirectory(path) + mtlFile;
             
-            EM_ASM_({
-                console.log('MTL DEBUG: Loading MTL file: ' + UTF8ToString($0));
-            }, mtlPath.c_str());
+            // EM_ASM_({
+            //     console.log('MTL DEBUG: Loading MTL file: ' + UTF8ToString($0));
+            // }, mtlPath.c_str());
             
             LoadMTL(mtlPath, materials, materialMap);
         }
@@ -612,9 +612,9 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
             auto it = materialMap.find(materialName);
             if (it != materialMap.end()) {
                 currentMaterial = it->second;
-                EM_ASM_({
-                    console.log('MTL DEBUG: Using material: ' + UTF8ToString($0) + ' (index ' + $1 + ')');
-                }, materialName.c_str(), currentMaterial);
+                // EM_ASM_({
+                //     console.log('MTL DEBUG: Using material: ' + UTF8ToString($0) + ' (index ' + $1 + ')');
+                // }, materialName.c_str(), currentMaterial);
             }
         }
         else if (type == "f") {
@@ -662,10 +662,10 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
     }
     
     // Debug OBJ parsing results
-    EM_ASM_({
-        console.log('OBJ PARSING DEBUG: vertices = ' + $0 + ', normals = ' + $1 + ', texCoords = ' + $2 + ', faces = ' + $3);
-    }, static_cast<int>(vertices.size()), static_cast<int>(normals.size()), 
-       static_cast<int>(texCoords.size()), static_cast<int>(faces.size()));
+    // EM_ASM_({
+    //     console.log('OBJ PARSING DEBUG: vertices = ' + $0 + ', normals = ' + $1 + ', texCoords = ' + $2 + ', faces = ' + $3);
+    // }, static_cast<int>(vertices.size()), static_cast<int>(normals.size()), 
+    //    static_cast<int>(texCoords.size()), static_cast<int>(faces.size()));
     
     // Create aiScene
     m_scene = new aiScene();
@@ -678,10 +678,10 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
     
     // Set up vertices
     mesh->mNumVertices = faces.size() * 3;
-    EM_ASM_({
-        console.log('LOADOBJ DEBUG: After assignment, mesh->mNumVertices = ' + $0);
-        console.log('LOADOBJ DEBUG: Expected: faces.size() * 3 = ' + $1 + ' * 3 = ' + $2);
-    }, static_cast<int>(mesh->mNumVertices), static_cast<int>(faces.size()), static_cast<int>(faces.size() * 3));
+    // EM_ASM_({
+    //     console.log('LOADOBJ DEBUG: After assignment, mesh->mNumVertices = ' + $0);
+    //     console.log('LOADOBJ DEBUG: Expected: faces.size() * 3 = ' + $1 + ' * 3 = ' + $2);
+    // }, static_cast<int>(mesh->mNumVertices), static_cast<int>(faces.size()), static_cast<int>(faces.size() * 3));
     mesh->mVertices = new aiVector3D[mesh->mNumVertices];
     mesh->mNormals = new aiVector3D[mesh->mNumVertices];
     mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
@@ -740,10 +740,10 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
             materialFaceMap[matIdx].push_back(i);
         }
         
-        EM_ASM_({
-            console.log('MATERIAL DEBUG: Using ' + $0 + ' materials from MTL file');
-            console.log('MATERIAL DEBUG: Creating ' + $1 + ' separate meshes for material groups');
-        }, static_cast<int>(materials.size()), static_cast<int>(materialFaceMap.size()));
+        // EM_ASM_({
+        //     console.log('MATERIAL DEBUG: Using ' + $0 + ' materials from MTL file');
+        //     console.log('MATERIAL DEBUG: Creating ' + $1 + ' separate meshes for material groups');
+        // }, static_cast<int>(materials.size()), static_cast<int>(materialFaceMap.size()));
         
         // Delete the single mesh we created earlier
         delete mesh;
@@ -806,9 +806,9 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
             
             m_scene->mMeshes[meshIdx++] = matMesh;
             
-            EM_ASM_({
-                console.log('MATERIAL DEBUG: Created mesh ' + $0 + ' with material index ' + $1 + ' (' + $2 + ' faces)');
-            }, static_cast<int>(meshIdx - 1), matIdx, static_cast<int>(faceIndices.size()));
+            // EM_ASM_({
+            //     console.log('MATERIAL DEBUG: Created mesh ' + $0 + ' with material index ' + $1 + ' (' + $2 + ' faces)');
+            // }, static_cast<int>(meshIdx - 1), matIdx, static_cast<int>(faceIndices.size()));
         }
         
         // Update root node to reference all meshes
@@ -830,27 +830,27 @@ bool Assimp::Importer::LoadOBJ(const std::string& path, unsigned int flags) {
         aiColor3D defaultColor(0.8f, 0.8f, 0.8f);
         m_scene->mMaterials[0]->AddProperty(&defaultColor, AI_MATKEY_COLOR_DIFFUSE);
         
-        EM_ASM_({
-            console.log('MATERIAL DEBUG: No MTL file loaded, using default material');
-        });
+        // EM_ASM_({
+        //     console.log('MATERIAL DEBUG: No MTL file loaded, using default material');
+        // });
         
         // Create root node for single mesh (default material case)
         m_scene->mRootNode = new aiNode(1, 0);  // 1 mesh, mesh index 0
     }
     
     // Aggressive memory debugging for WebAssembly
-    EM_ASM_({
-        console.log('AINODE MEMORY DEBUG: aiNode size = ' + $0 + ' bytes');
-        console.log('AINODE MEMORY DEBUG: aiNode pointer = 0x' + $1.toString(16));
-        console.log('AINODE MEMORY DEBUG: After constructor - mNumMeshes = ' + $2 + ', mNumChildren = ' + $3);
-        console.log('AINODE MEMORY DEBUG: mMeshes pointer = 0x' + $4.toString(16));
-        console.log('AINODE MEMORY DEBUG: mChildren pointer = 0x' + $5.toString(16));
-    }, static_cast<int>(sizeof(aiNode)), 
-       reinterpret_cast<uintptr_t>(m_scene->mRootNode),
-       static_cast<int>(m_scene->mRootNode->mNumMeshes), 
-       static_cast<int>(m_scene->mRootNode->mNumChildren),
-       reinterpret_cast<uintptr_t>(m_scene->mRootNode->mMeshes),
-       reinterpret_cast<uintptr_t>(m_scene->mRootNode->mChildren));
+    // EM_ASM_({
+    //     console.log('AINODE MEMORY DEBUG: aiNode size = ' + $0 + ' bytes');
+    //     console.log('AINODE MEMORY DEBUG: aiNode pointer = 0x' + $1.toString(16));
+    //     console.log('AINODE MEMORY DEBUG: After constructor - mNumMeshes = ' + $2 + ', mNumChildren = ' + $3);
+    //     console.log('AINODE MEMORY DEBUG: mMeshes pointer = 0x' + $4.toString(16));
+    //     console.log('AINODE MEMORY DEBUG: mChildren pointer = 0x' + $5.toString(16));
+    // }, static_cast<int>(sizeof(aiNode)), 
+    //    reinterpret_cast<uintptr_t>(m_scene->mRootNode),
+    //    static_cast<int>(m_scene->mRootNode->mNumMeshes), 
+    //    static_cast<int>(m_scene->mRootNode->mNumChildren),
+    //    reinterpret_cast<uintptr_t>(m_scene->mRootNode->mMeshes),
+    //    reinterpret_cast<uintptr_t>(m_scene->mRootNode->mChildren));
     
     // Mark scene as complete (clear incomplete flag)
     m_scene->mFlags = 0;  // Clear all flags to indicate successful loading
@@ -868,37 +868,37 @@ const aiScene* Assimp::Importer::ReadFile(const char* path, unsigned int flags) 
     
     // Enhanced debug logging with null checks
     if (path == nullptr) {
-        EM_ASM_({
-            console.log('ASSIMP DEBUG: NULL path received!');
-        });
+        // EM_ASM_({
+        //     console.log('ASSIMP DEBUG: NULL path received!');
+        // });
         m_error = "NULL path provided to ReadFile";
         return nullptr;
     }
     
     std::string path_str(path);
     if (path_str.empty()) {
-        EM_ASM_({
-            console.log('ASSIMP DEBUG: Empty path received!');
-        });
+        // EM_ASM_({
+        //     console.log('ASSIMP DEBUG: Empty path received!');
+        // });
         m_error = "Empty path provided to ReadFile";
         return nullptr;
     }
     
-    EM_ASM_({
-        console.log('ASSIMP DEBUG: Path received: ' + UTF8ToString($0));
-        console.log('ASSIMP DEBUG: Path length: ' + $1);
-        console.log('ASSIMP DEBUG: Flags = 0x' + $2.toString(16));
-    }, path, static_cast<int>(path_str.length()), static_cast<int>(flags));
+    // EM_ASM_({
+    //     console.log('ASSIMP DEBUG: Path received: ' + UTF8ToString($0));
+    //     console.log('ASSIMP DEBUG: Path length: ' + $1);
+    //     console.log('ASSIMP DEBUG: Flags = 0x' + $2.toString(16));
+    // }, path, static_cast<int>(path_str.length()), static_cast<int>(flags));
     
     if (LoadOBJ(path_str, flags)) {
-        EM_ASM_({
-            console.log('ASSIMP DEBUG: Successfully loaded OBJ file');
-        });
+        // EM_ASM_({
+        //     console.log('ASSIMP DEBUG: Successfully loaded OBJ file');
+        // });
         return m_scene;
     } else {
-        EM_ASM_({
-            console.log('ASSIMP DEBUG: Failed to load OBJ file: ' + UTF8ToString($0));
-        }, m_error.c_str());
+        // EM_ASM_({
+        //     console.log('ASSIMP DEBUG: Failed to load OBJ file: ' + UTF8ToString($0));
+        // }, m_error.c_str());
         return nullptr;
     }
 }

@@ -10,7 +10,7 @@ uniform mat4 projection;
 uniform vec3 camera_right_worldspace;
 uniform vec3 camera_up_worldspace;
 uniform vec3 text_position; // Position of the center of the billboard
-uniform bool fixed_size = false;
+uniform bool fixed_size;
 
 void main()
 {

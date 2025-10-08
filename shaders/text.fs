@@ -9,9 +9,7 @@ uniform vec3 textColor;
 
 void main()
 {    
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);  // Because the texture's data is stored
-    // in just its red component, we sample the r component of the texture as the sampled alpha value.
-    //  By varying the output color's alpha value, the resulting pixel will be transparent for all the
-    // glyph's background colors and non-transparent for the actual character pixels. 
-    color = vec4(textColor, 1.0) * sampled;
+    // Texture data is stored in RGBA format with alpha channel containing glyph data
+    vec4 sampled = texture(text, TexCoords);
+    color = vec4(textColor, 1.0) * vec4(1.0, 1.0, 1.0, sampled.a);
 }

@@ -16,10 +16,8 @@
 
 #include <shader.h>
 
-#ifndef __EMSCRIPTEN__
 #include <ft2build.h>
-#include FT_FREETYPE_H  
-#endif
+#include FT_FREETYPE_H
 
 /// Holds all state information relevant to a character as loaded using FreeType
 struct Character {
@@ -41,7 +39,7 @@ class Text3D: protected QOpenGLFunctions_3_3_Core
 public:
     
     Text3D(std::string text_to_write, float x, float y, float z, float scale, 
-            glm::vec3 color = {0, 0, 0}, float offset_x_screen = 0, float offset_y_screen = 0)
+            glm::vec3 color = {1, 0, 0}, float offset_x_screen = 0, float offset_y_screen = 0)
     {
         process_text(text_to_write); 
         m_scale = scale;
@@ -89,12 +87,6 @@ public:
             std::cout << "ERROR::FREETYPE: Failed to load font_name" << std::endl;
         }
 
-#ifdef __EMSCRIPTEN__
-        std::cout << "WARNING: FreeType text rendering disabled for WebAssembly builds" << std::endl;
-        // Create a dummy character for 'A' to avoid crashes
-        Character character = {0, glm::ivec2(12, 16), glm::ivec2(0, 16), 12 << 6};
-        m_characters.insert(std::pair<char, Character>('A', character));
-#else
         // FreeType
         // --------
         FT_Library ft;
@@ -129,16 +121,27 @@ public:
                 unsigned int texture;
                 glGenTextures(1, &texture);
                 glBindTexture(GL_TEXTURE_2D, texture);  // Bind texture
+                
+                // Convert single-channel FreeType data to RGBA for universal compatibility
+                std::vector<unsigned char> rgba_data(face->glyph->bitmap.width * face->glyph->bitmap.rows * 4);
+                for (unsigned int i = 0; i < face->glyph->bitmap.width * face->glyph->bitmap.rows; i++) {
+                    rgba_data[i * 4 + 0] = 255; // R
+                    rgba_data[i * 4 + 1] = 255; // G
+                    rgba_data[i * 4 + 2] = 255; // B
+                    rgba_data[i * 4 + 3] = face->glyph->bitmap.buffer[i]; // A (glyph data)
+                }
+                
+                // Use sized internal format for WebGL 2.0 compatibility
                 glTexImage2D(
                     GL_TEXTURE_2D,
                     0,
-                    GL_RED,
+                    GL_RGBA8,
                     face->glyph->bitmap.width,
                     face->glyph->bitmap.rows,
                     0,
-                    GL_RED,
+                    GL_RGBA,
                     GL_UNSIGNED_BYTE,
-                    face->glyph->bitmap.buffer
+                    rgba_data.data()
                 );
                 // set texture options
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -159,7 +162,6 @@ public:
         // destroy FreeType once we're finished
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
-#endif
 
         // configure VAO/VBO for (text) texture quads
         // -----------------------------------

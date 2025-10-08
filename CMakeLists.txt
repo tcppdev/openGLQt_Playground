@@ -9,8 +9,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     Core Widgets OpenGL Qml Quick Charts
 )
 
-# Qt already bundles FreeType for WebAssembly builds
-
 # Enable Qt features
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -118,6 +116,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
         -sWASM=1
         -sALLOW_MEMORY_GROWTH=1
         -sASYNCIFY=1
+        -sUSE_FREETYPE=1
         --shell-file=${CMAKE_SOURCE_DIR}/wasm_shell.html
         -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']
         -sEXPORTED_FUNCTIONS=['_main']
@@ -129,14 +128,17 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
         -sMIN_WEBGL_VERSION=1
         "--preload-file=${CMAKE_SOURCE_DIR}/shaders@/shaders"
         "--preload-file=${CMAKE_SOURCE_DIR}/resources/objects@/resources/objects"
+        "--preload-file=${CMAKE_SOURCE_DIR}/resources/cubemaps@/resources/cubemaps"
+        "--preload-file=${CMAKE_SOURCE_DIR}/resources/fonts@/resources/fonts"
         -sASSERTIONS=1
         -sEXPORT_ALL=1
         -O2
     )
     
-    # Add compile flags for EM_ASM_ debug functions
+    # Add compile flags for EM_ASM_ debug functions and FreeType support
     target_compile_options(openGLQt_Qt6_WebAssembly PRIVATE
         -sASSERTIONS=1
+        -sUSE_FREETYPE=1
     )
     
     # Set Qt WebAssembly environment variables for better WebGL compatibility

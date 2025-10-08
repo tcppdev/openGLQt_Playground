@@ -43,15 +43,15 @@ public:
     Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
     {
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MODEL CONSTRUCTOR DEBUG: Starting Model constructor with path: ' + UTF8ToString($0));
-        }, path.c_str());
+        // EM_ASM_({
+        //     console.log('MODEL CONSTRUCTOR DEBUG: Starting Model constructor with path: ' + UTF8ToString($0));
+        // }, path.c_str());
 #endif
         loadModel(path);
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MODEL CONSTRUCTOR DEBUG: Model constructor completed successfully');
-        });
+        // EM_ASM_({
+        //     console.log('MODEL CONSTRUCTOR DEBUG: Model constructor completed successfully');
+        // });
 #endif
     }
 
@@ -88,11 +88,11 @@ private:
         const char* path_char = path_copy.c_str(); 
         
         // Debug logging in Model constructor
-        EM_ASM_({
-            console.log('MODEL DEBUG: Original path: ' + UTF8ToString($0));
-            console.log('MODEL DEBUG: Path copy: ' + UTF8ToString($1));
-            console.log('MODEL DEBUG: Path char: ' + UTF8ToString($2));
-        }, path.c_str(), path_copy.c_str(), path_char);
+        // EM_ASM_({
+        //     console.log('MODEL DEBUG: Original path: ' + UTF8ToString($0));
+        //     console.log('MODEL DEBUG: Path copy: ' + UTF8ToString($1));
+        //     console.log('MODEL DEBUG: Path char: ' + UTF8ToString($2));
+        // }, path.c_str(), path_copy.c_str(), path_char);
         
         scene = importer->ReadFile(path_char, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 #else
@@ -100,24 +100,24 @@ private:
 #endif
         // check for errors
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('SCENE DEBUG: scene pointer = ' + $0);
-            console.log('SCENE DEBUG: scene flags = ' + $1);  
-            console.log('SCENE DEBUG: rootNode pointer = ' + $2);
-        }, (scene ? 1 : 0), (scene ? static_cast<int>(scene->mFlags) : -1), (scene && scene->mRootNode ? 1 : 0));
+        // EM_ASM_({
+        //     console.log('SCENE DEBUG: scene pointer = ' + $0);
+        //     console.log('SCENE DEBUG: scene flags = ' + $1);  
+        //     console.log('SCENE DEBUG: rootNode pointer = ' + $2);
+        // }, (scene ? 1 : 0), (scene ? static_cast<int>(scene->mFlags) : -1), (scene && scene->mRootNode ? 1 : 0));
 #endif
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
             cout << "ERROR::ASSIMP:: " << importer->GetErrorString() << endl;
 #ifdef __EMSCRIPTEN__
             if (!scene) {
-                EM_ASM_({ console.log('SCENE DEBUG: scene is null'); });
+                // EM_ASM_({ console.log('SCENE DEBUG: scene is null'); });
             }
             if (scene && (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)) {
-                EM_ASM_({ console.log('SCENE DEBUG: scene has incomplete flag'); });
+                // EM_ASM_({ console.log('SCENE DEBUG: scene has incomplete flag'); });
             }
             if (scene && !scene->mRootNode) {
-                EM_ASM_({ console.log('SCENE DEBUG: rootNode is null'); });
+                // EM_ASM_({ console.log('SCENE DEBUG: rootNode is null'); });
             }
 #endif
             delete importer;  // Clean up on error
@@ -137,16 +137,16 @@ private:
     void processNode(aiNode *node, const aiScene *scene)
     {
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('PROCESS NODE MEMORY DEBUG: aiNode pointer = 0x' + $0.toString(16));
-            console.log('PROCESS NODE MEMORY DEBUG: Node has ' + $1 + ' meshes and ' + $2 + ' children');
-            console.log('PROCESS NODE MEMORY DEBUG: mMeshes pointer = 0x' + $3.toString(16));
-            console.log('PROCESS NODE MEMORY DEBUG: mChildren pointer = 0x' + $4.toString(16));
-        }, reinterpret_cast<uintptr_t>(node), 
-           static_cast<int>(node->mNumMeshes), 
-           static_cast<int>(node->mNumChildren),
-           reinterpret_cast<uintptr_t>(node->mMeshes),
-           reinterpret_cast<uintptr_t>(node->mChildren));
+        // EM_ASM_({
+        //     console.log('PROCESS NODE MEMORY DEBUG: aiNode pointer = 0x' + $0.toString(16));
+        //     console.log('PROCESS NODE MEMORY DEBUG: Node has ' + $1 + ' meshes and ' + $2 + ' children');
+        //     console.log('PROCESS NODE MEMORY DEBUG: mMeshes pointer = 0x' + $3.toString(16));
+        //     console.log('PROCESS NODE MEMORY DEBUG: mChildren pointer = 0x' + $4.toString(16));
+        // }, reinterpret_cast<uintptr_t>(node), 
+        //    static_cast<int>(node->mNumMeshes), 
+        //    static_cast<int>(node->mNumChildren),
+        //    reinterpret_cast<uintptr_t>(node->mMeshes),
+        //    reinterpret_cast<uintptr_t>(node->mChildren));
 #endif
         // process each mesh located at the current node
         for(unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -173,9 +173,9 @@ private:
         vector<Texture> textures;
 
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('PROCESS MESH DEBUG: Processing mesh with ' + $0 + ' vertices and ' + $1 + ' faces');
-        }, static_cast<int>(mesh->mNumVertices), static_cast<int>(mesh->mNumFaces));
+        // EM_ASM_({
+        //     console.log('PROCESS MESH DEBUG: Processing mesh with ' + $0 + ' vertices and ' + $1 + ' faces');
+        // }, static_cast<int>(mesh->mNumVertices), static_cast<int>(mesh->mNumFaces));
 #endif
 
         // Pre-reserve space to avoid reallocations (critical for WebAssembly with large meshes)
@@ -235,8 +235,8 @@ private:
         }
 
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('GOT HERE 1');});
+        // EM_ASM_({
+        //     console.log('GOT HERE 1');});
 #endif
         // process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];    
@@ -247,20 +247,20 @@ private:
         // specular: texture_specularN
         // normal: texture_normalN
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('GOT HERE 2');});
+        // EM_ASM_({
+        //     console.log('GOT HERE 2');});
 #endif
 
         // 1. diffuse maps
         vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('GOT HERE 3');});
+        // EM_ASM_({
+        //     console.log('GOT HERE 3');});
 #endif
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('GOT HERE 4');});
+        // EM_ASM_({
+        //     console.log('GOT HERE 4');});
 #endif
         // 2. specular maps
         vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
@@ -279,8 +279,8 @@ private:
         // Use C API to avoid template recursion issues in WebAssembly
         glm::vec3 matColor(0.8f, 0.8f, 0.8f); // default color
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('GOT HERE 5');});
+        // EM_ASM_({
+        //     console.log('GOT HERE 5');});
 #endif
         
         // Use aiGetMaterialColor C API instead of C++ template Get()
@@ -290,15 +290,15 @@ private:
         }
         
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('GOT HERE 6');});
+        // EM_ASM_({
+        //     console.log('GOT HERE 6');});
 #endif
         
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('PROCESS MESH DEBUG: Material color = (' + $0 + ', ' + $1 + ', ' + $2 + ')');
-            console.log('PROCESS MESH DEBUG: Diffuse textures = ' + $3);
-        }, matColor.r, matColor.g, matColor.b, static_cast<int>(diffuseMaps.size()));
+        // EM_ASM_({
+        //     console.log('PROCESS MESH DEBUG: Material color = (' + $0 + ', ' + $1 + ', ' + $2 + ')');
+        //     console.log('PROCESS MESH DEBUG: Diffuse textures = ' + $3);
+        // }, matColor.r, matColor.g, matColor.b, static_cast<int>(diffuseMaps.size()));
 #endif
         
         // return a mesh object created from the extracted mesh data
@@ -311,16 +311,16 @@ private:
     {
         vector<Texture> textures;
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('LOAD_MAT_TEX DEBUG: Called with type=' + $0 + ', typeName=' + UTF8ToString($1));
-            console.log('LOAD_MAT_TEX DEBUG: Material pointer=' + $2);
-        }, static_cast<int>(type), typeName.c_str(), reinterpret_cast<uintptr_t>(mat));
+        // EM_ASM_({
+        //     console.log('LOAD_MAT_TEX DEBUG: Called with type=' + $0 + ', typeName=' + UTF8ToString($1));
+        //     console.log('LOAD_MAT_TEX DEBUG: Material pointer=' + $2);
+        // }, static_cast<int>(type), typeName.c_str(), reinterpret_cast<uintptr_t>(mat));
 #endif
         unsigned int textureCount = mat->GetTextureCount(type);
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('LOAD_MAT_TEX DEBUG: GetTextureCount returned ' + $0);
-        }, static_cast<int>(textureCount));
+        // EM_ASM_({
+        //     console.log('LOAD_MAT_TEX DEBUG: GetTextureCount returned ' + $0);
+        // }, static_cast<int>(textureCount));
 #endif
         for(unsigned int i = 0; i < textureCount; i++)
         {
@@ -365,9 +365,9 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
     filename = directory + '/' + filename;
 
 #ifdef __EMSCRIPTEN__
-    EM_ASM_({
-        console.log('TEXTURE LOAD DEBUG: Attempting to load texture from: ' + UTF8ToString($0));
-    }, filename.c_str());
+    // EM_ASM_({
+    //     console.log('TEXTURE LOAD DEBUG: Attempting to load texture from: ' + UTF8ToString($0));
+    // }, filename.c_str());
 #endif
 
     unsigned int textureID;
@@ -397,9 +397,9 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
         stbi_image_free(data);
         
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('TEXTURE LOAD DEBUG: Successfully loaded texture - width: ' + $0 + ', height: ' + $1 + ', components: ' + $2);
-        }, width, height, nrComponents);
+        // EM_ASM_({
+        //     console.log('TEXTURE LOAD DEBUG: Successfully loaded texture - width: ' + $0 + ', height: ' + $1 + ', components: ' + $2);
+        // }, width, height, nrComponents);
 #endif
     }
     else
@@ -408,9 +408,9 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
         stbi_image_free(data);
         
 #ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('TEXTURE LOAD DEBUG: Failed to load texture from: ' + UTF8ToString($0));
-        }, filename.c_str());
+        // EM_ASM_({
+        //     console.log('TEXTURE LOAD DEBUG: Failed to load texture from: ' + UTF8ToString($0));
+        // }, filename.c_str());
 #endif
     }
 
