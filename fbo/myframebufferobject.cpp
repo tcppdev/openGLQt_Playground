@@ -128,7 +128,7 @@ public:
             console.log('DEBUG: About to create Earth model with path: ' + UTF8ToString($0));
         }, model_path.c_str());
 #endif
-        // m_model =  std::make_unique<Model>(model_path);
+        m_model =  std::make_unique<Model>(model_path);
 
         // 
         model_path = BACKPACK_OBJ.string(); 
@@ -137,7 +137,7 @@ public:
             console.log('DEBUG: About to create Backpack model with path: ' + UTF8ToString($0));
         }, model_path.c_str());
 #endif
-        // other_model =  std::make_unique<Model>(model_path);
+        other_model =  std::make_unique<Model>(model_path);
 
         // Get our rocket
         std::string rocket_model_path = ROCKET_OBJ.string();
@@ -369,7 +369,7 @@ public:
 
         // Draw EARTH_OBJ model (now enabled for WebAssembly!)
         m_shader->setMat4("model", model);
-        // m_model->Draw(*m_shader);
+        m_model->Draw(*m_shader);
 
         // render BACKPACK_OBJ model
         model = glm::mat4(1.0f);
@@ -381,7 +381,7 @@ public:
         // model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));  // elevation rotation
 
         m_shader->setMat4("model", model);
-        // other_model->Draw(*m_shader);
+        other_model->Draw(*m_shader);
 
         // Lets draw the line
         if (m_draw_line) {

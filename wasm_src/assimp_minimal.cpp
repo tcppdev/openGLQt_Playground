@@ -21,7 +21,8 @@ enum aiTextureType {
     aiTextureType_DIFFUSE = 1,
     aiTextureType_SPECULAR = 2,
     aiTextureType_AMBIENT = 3,
-    aiTextureType_HEIGHT = 5
+    aiTextureType_HEIGHT = 5,
+    aiTextureType_NORMALS = 6
 };
 
 // Process flags
@@ -270,12 +271,18 @@ struct aiMaterial {
     
     // Methods that Model.h expects
     unsigned int GetTextureCount(aiTextureType type) const {
-        unsigned int count = 0;
-#ifdef __EMSCRIPTEN__
         EM_ASM_({
-            console.log('GET_TEXTURE_COUNT DEBUG: Checking for type ' + $0 + ', total properties = ' + $1);
-        }, static_cast<int>(type), static_cast<int>(mNumProperties));
-#endif
+            console.log('===== GET_TEXTURE_COUNT CALLED =====');
+            console.log('GET_TEXTURE_COUNT: mNumProperties = ' + $0);
+        }, static_cast<int>(mNumProperties));
+        
+        if (mNumProperties == 0) {
+            EM_ASM_({
+                console.log('GET_TEXTURE_COUNT: WARNING - Material has ZERO properties! Returning 0.');
+            });
+            return 0;
+        }
+        unsigned int count = 0;
         for (unsigned int i = 0; i < mNumProperties; i++) {
             aiMaterialProperty* prop = mProperties[i];
 #ifdef __EMSCRIPTEN__
@@ -517,6 +524,16 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             
             EM_ASM_({
                 console.log('MTL DEBUG: Added specular texture: ' + UTF8ToString($0));
+            }, texturePath.c_str());
+        }
+        else if (type == "map_Bump" && currentMaterial) {
+            // Normal/Bump texture map
+            std::string texturePath;
+            iss >> texturePath;
+            currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
+            
+            EM_ASM_({
+                console.log('MTL DEBUG: Added normal/bump texture: ' + UTF8ToString($0));
             }, texturePath.c_str());
         }
     }
@@ -868,22 +885,62 @@ const aiScene* Assimp::Importer::ReadFile(const char* path, unsigned int flags) 
     }
 }
 
-// C API functions
+// C API functions - these are called by the real assimp C++ methods
+// CRITICAL: Do NOT call back to C++ methods or we get infinite recursion!
 extern "C" {
     unsigned int aiGetMaterialTextureCount(const aiMaterial* mat, int type) {
-        return 0; // Simplified - no textures for now
+        if (!mat) return 0;
+        
+        // Directly count textures in properties - do NOT call GetTextureCount()!
+        unsigned int count = 0;
+        for (unsigned int i = 0; i < mat->mNumProperties; i++) {
+            aiMaterialProperty* prop = mat->mProperties[i];
+            if (strcmp(prop->mKey.data, AI_MATKEY_TEXTURE_BASE) == 0 && 
+                prop->mSemantic == static_cast<unsigned int>(type) &&
+                prop->mType == aiPTI_String) {
+                count++;
+            }
+        }
+        return count;
     }
     
     int aiGetMaterialTexture(const aiMaterial* mat, int type, unsigned int index, 
                            aiString* path, int* mapping, unsigned int* uvindex,
                            float* blend, int* op, int* mapmode, unsigned int* flags) {
-        return 1; // Return error - no textures
+        if (!mat || !path) return 1; // aiReturn_FAILURE
+        
+        // Directly search properties - do NOT call GetTexture()!
+        for (unsigned int i = 0; i < mat->mNumProperties; i++) {
+            aiMaterialProperty* prop = mat->mProperties[i];
+            if (strcmp(prop->mKey.data, AI_MATKEY_TEXTURE_BASE) == 0 && 
+                prop->mSemantic == static_cast<unsigned int>(type) &&
+                prop->mIndex == index &&
+                prop->mType == aiPTI_String &&
+                prop->mDataLength >= sizeof(aiString)) {
+                
+                // Copy the aiString from the property data
+                memcpy(path, prop->mData, sizeof(aiString));
+                return 0; // aiReturn_SUCCESS
+            }
+        }
+        return 1; // aiReturn_FAILURE
     }
     
     int aiGetMaterialColor(const aiMaterial* mat, const char* pKey, unsigned int type, 
                           unsigned int index, aiColor3D* pOut) {
         if (!mat || !pOut) return 1; // aiReturn_FAILURE
-        return mat->Get(pKey, type, index, *pOut);
+        
+        // Directly search properties
+        for (unsigned int i = 0; i < mat->mNumProperties; i++) {
+            aiMaterialProperty* prop = mat->mProperties[i];
+            if (strcmp(prop->mKey.data, pKey) == 0 && prop->mSemantic == type && prop->mIndex == index) {
+                if (prop->mType == aiPTI_Float && prop->mDataLength >= sizeof(aiColor3D)) {
+                    memcpy(pOut, prop->mData, sizeof(aiColor3D));
+                    return 0; // aiReturn_SUCCESS
+                }
+            }
+        }
+        return 1; // aiReturn_FAILURE
     }
 }
 
