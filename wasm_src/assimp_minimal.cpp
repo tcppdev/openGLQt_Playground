@@ -169,6 +169,8 @@ enum aiReturn {
 #define AI_MATKEY_COLOR_DIFFUSE "$clr.diffuse",0,0
 #define AI_MATKEY_COLOR_AMBIENT "$clr.ambient",0,0
 #define AI_MATKEY_COLOR_SPECULAR "$clr.specular",0,0
+#define AI_MATKEY_TEXTURE_BASE "$tex.file"
+#define AI_MATKEY_TEXTURE(type, N) AI_MATKEY_TEXTURE_BASE,type,N
 
 struct aiMaterialProperty {
     aiString mKey;
@@ -223,6 +225,35 @@ struct aiMaterial {
         return aiReturn_SUCCESS;
     }
     
+    // Add a string (texture path) property to the material
+    aiReturn AddTextureProperty(const std::string& texturePath, const char* pKey, unsigned int type = 0, unsigned int index = 0) {
+        aiMaterialProperty* prop = new aiMaterialProperty();
+        prop->mKey = aiString(pKey);
+        prop->mSemantic = type;
+        prop->mIndex = index;
+        prop->mType = aiPTI_String;
+        
+        // Store aiString in the data buffer
+        aiString textureString(texturePath);
+        prop->mDataLength = sizeof(aiString);
+        prop->mData = new char[prop->mDataLength];
+        memcpy(prop->mData, &textureString, prop->mDataLength);
+        
+        // Resize array if needed
+        if (mNumProperties >= mNumAllocated) {
+            mNumAllocated = (mNumAllocated == 0) ? 4 : mNumAllocated * 2;
+            aiMaterialProperty** newProps = new aiMaterialProperty*[mNumAllocated];
+            for (unsigned int i = 0; i < mNumProperties; i++) {
+                newProps[i] = mProperties[i];
+            }
+            delete[] mProperties;
+            mProperties = newProps;
+        }
+        
+        mProperties[mNumProperties++] = prop;
+        return aiReturn_SUCCESS;
+    }
+    
     // Get a color property from the material
     aiReturn Get(const char* pKey, unsigned int type, unsigned int index, aiColor3D& pOut) const {
         for (unsigned int i = 0; i < mNumProperties; i++) {
@@ -238,8 +269,37 @@ struct aiMaterial {
     }
     
     // Methods that Model.h expects
-    unsigned int GetTextureCount(aiTextureType type) const { return 0; } // No textures for now
-    int GetTexture(aiTextureType type, unsigned int index, aiString* path) const { return 1; } // Error - no textures
+    unsigned int GetTextureCount(aiTextureType type) const {
+        unsigned int count = 0;
+        for (unsigned int i = 0; i < mNumProperties; i++) {
+            aiMaterialProperty* prop = mProperties[i];
+            if (strcmp(prop->mKey.data, AI_MATKEY_TEXTURE_BASE) == 0 && 
+                prop->mSemantic == static_cast<unsigned int>(type) &&
+                prop->mType == aiPTI_String) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    int GetTexture(aiTextureType type, unsigned int index, aiString* path) const {
+        if (!path) return 1; // aiReturn_FAILURE
+        
+        for (unsigned int i = 0; i < mNumProperties; i++) {
+            aiMaterialProperty* prop = mProperties[i];
+            if (strcmp(prop->mKey.data, AI_MATKEY_TEXTURE_BASE) == 0 && 
+                prop->mSemantic == static_cast<unsigned int>(type) &&
+                prop->mIndex == index &&
+                prop->mType == aiPTI_String &&
+                prop->mDataLength >= sizeof(aiString)) {
+                
+                // Copy the aiString from the property data
+                memcpy(path, prop->mData, sizeof(aiString));
+                return 0; // aiReturn_SUCCESS
+            }
+        }
+        return 1; // aiReturn_FAILURE - texture not found
+    }
 };
 
 struct aiMatrix4x4 {
@@ -406,6 +466,36 @@ bool Assimp::Importer::LoadMTL(const std::string& mtlPath, std::vector<aiMateria
             iss >> r >> g >> b;
             aiColor3D specularColor(r, g, b);
             currentMaterial->AddProperty(&specularColor, AI_MATKEY_COLOR_SPECULAR);
+        }
+        else if (type == "map_Kd" && currentMaterial) {
+            // Diffuse texture map
+            std::string texturePath;
+            iss >> texturePath;
+            currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+            
+            EM_ASM_({
+                console.log('MTL DEBUG: Added diffuse texture: ' + UTF8ToString($0));
+            }, texturePath.c_str());
+        }
+        else if (type == "map_Ka" && currentMaterial) {
+            // Ambient texture map
+            std::string texturePath;
+            iss >> texturePath;
+            currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_AMBIENT, 0));
+            
+            EM_ASM_({
+                console.log('MTL DEBUG: Added ambient texture: ' + UTF8ToString($0));
+            }, texturePath.c_str());
+        }
+        else if (type == "map_Ks" && currentMaterial) {
+            // Specular texture map
+            std::string texturePath;
+            iss >> texturePath;
+            currentMaterial->AddTextureProperty(texturePath, AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, 0));
+            
+            EM_ASM_({
+                console.log('MTL DEBUG: Added specular texture: ' + UTF8ToString($0));
+            }, texturePath.c_str());
         }
     }
     
@@ -691,6 +781,12 @@ extern "C" {
                            aiString* path, int* mapping, unsigned int* uvindex,
                            float* blend, int* op, int* mapmode, unsigned int* flags) {
         return 1; // Return error - no textures
+    }
+    
+    int aiGetMaterialColor(const aiMaterial* mat, const char* pKey, unsigned int type, 
+                          unsigned int index, aiColor3D* pOut) {
+        if (!mat || !pOut) return 1; // aiReturn_FAILURE
+        return mat->Get(pKey, type, index, *pOut);
     }
 }
 

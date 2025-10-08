@@ -50,14 +50,16 @@ public:
     vector<Vertex>       vertices;
     vector<unsigned int> indices;
     vector<Texture>      textures;
+    glm::vec3            materialColor; // Fallback color when no textures
     unsigned int VAO;
 
     // constructor
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures, glm::vec3 matColor = glm::vec3(0.8f, 0.8f, 0.8f))
     {
         this->vertices = vertices;
         this->indices = indices;
         this->textures = textures;
+        this->materialColor = matColor;
 
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
         setupMesh();
@@ -73,6 +75,9 @@ public:
         functions->initializeOpenGLFunctions();
 #endif
 
+        // Check if we have textures
+        bool hasDiffuseTexture = false;
+        
         // bind appropriate textures
         unsigned int diffuseNr  = 1;
         unsigned int specularNr = 1;
@@ -85,7 +90,10 @@ public:
             string number;
             string name = textures[i].type;
             if(name == "texture_diffuse")
+            {
                 number = std::to_string(diffuseNr++);
+                hasDiffuseTexture = true;
+            }
             else if(name == "texture_specular")
                 number = std::to_string(specularNr++); // transfer unsigned int to stream
             else if(name == "texture_normal")
@@ -98,6 +106,10 @@ public:
             // and finally bind the texture
             functions->glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
+        
+        // Set shader uniforms for material color fallback
+        shader.setBool("hasTexture", hasDiffuseTexture);
+        shader.setVec3("materialColor", materialColor);
         
         // draw mesh
         functions->glBindVertexArray(VAO);

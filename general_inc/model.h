@@ -154,10 +154,8 @@ private:
             // the node object only contains indices to index the actual objects in the scene. 
             // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            // meshes.push_back(processMesh(mesh, scene));
-            Mesh processed_mesh = processMesh(mesh, scene);
-            meshes.push_back(processed_mesh);
-            
+            // Push directly to avoid stack overflow in WebAssembly with large meshes
+            meshes.push_back(processMesh(mesh, scene));
         }
         // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
         for(unsigned int i = 0; i < node->mNumChildren; i++)
@@ -179,6 +177,10 @@ private:
             console.log('PROCESS MESH DEBUG: Processing mesh with ' + $0 + ' vertices and ' + $1 + ' faces');
         }, static_cast<int>(mesh->mNumVertices), static_cast<int>(mesh->mNumFaces));
 #endif
+
+        // Pre-reserve space to avoid reallocations (critical for WebAssembly with large meshes)
+        vertices.reserve(mesh->mNumVertices);
+        indices.reserve(mesh->mNumFaces * 3); // Assuming triangulated faces
 
         // walk through each of the mesh's vertices
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -231,6 +233,11 @@ private:
             for(unsigned int j = 0; j < face.mNumIndices; j++)
                 indices.push_back(face.mIndices[j]);        
         }
+
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GOT HERE 1');});
+#endif
         // process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];    
         // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -239,10 +246,22 @@ private:
         // diffuse: texture_diffuseN
         // specular: texture_specularN
         // normal: texture_normalN
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GOT HERE 2');});
+#endif
 
         // 1. diffuse maps
         vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GOT HERE 3');});
+#endif
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GOT HERE 4');});
+#endif
         // 2. specular maps
         vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
@@ -253,8 +272,34 @@ private:
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
         
+        // Extract material diffuse color for fallback when no textures
+        // Use C API to avoid template recursion issues in WebAssembly
+        glm::vec3 matColor(0.8f, 0.8f, 0.8f); // default color
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GOT HERE 5');});
+#endif
+        
+        // Use aiGetMaterialColor C API instead of C++ template Get()
+        aiColor4D color4d;
+        if (aiGetMaterialColor(material, "$clr.diffuse", 0, 0, &color4d) == 0) {
+            matColor = glm::vec3(color4d.r, color4d.g, color4d.b);
+        }
+        
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GOT HERE 6');});
+#endif
+        
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('PROCESS MESH DEBUG: Material color = (' + $0 + ', ' + $1 + ', ' + $2 + ')');
+            console.log('PROCESS MESH DEBUG: Diffuse textures = ' + $3);
+        }, matColor.r, matColor.g, matColor.b, static_cast<int>(diffuseMaps.size()));
+#endif
+        
         // return a mesh object created from the extracted mesh data
-        return Mesh(vertices, indices, textures);
+        return Mesh(vertices, indices, textures, matColor);
     }
 
     // checks all material textures of a given type and loads the textures if they're not loaded yet.
@@ -304,6 +349,12 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
     string filename = string(path);
     filename = directory + '/' + filename;
 
+#ifdef __EMSCRIPTEN__
+    EM_ASM_({
+        console.log('TEXTURE LOAD DEBUG: Attempting to load texture from: ' + UTF8ToString($0));
+    }, filename.c_str());
+#endif
+
     unsigned int textureID;
     functions->glGenTextures(1, &textureID);
 
@@ -329,11 +380,23 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
         functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
+        
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('TEXTURE LOAD DEBUG: Successfully loaded texture - width: ' + $0 + ', height: ' + $1 + ', components: ' + $2);
+        }, width, height, nrComponents);
+#endif
     }
     else
     {
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
+        
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('TEXTURE LOAD DEBUG: Failed to load texture from: ' + UTF8ToString($0));
+        }, filename.c_str());
+#endif
     }
 
 #ifndef __EMSCRIPTEN__
