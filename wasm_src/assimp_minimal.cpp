@@ -271,14 +271,36 @@ struct aiMaterial {
     // Methods that Model.h expects
     unsigned int GetTextureCount(aiTextureType type) const {
         unsigned int count = 0;
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GET_TEXTURE_COUNT DEBUG: Checking for type ' + $0 + ', total properties = ' + $1);
+        }, static_cast<int>(type), static_cast<int>(mNumProperties));
+#endif
         for (unsigned int i = 0; i < mNumProperties; i++) {
             aiMaterialProperty* prop = mProperties[i];
+#ifdef __EMSCRIPTEN__
+            EM_ASM_({
+                console.log('GET_TEXTURE_COUNT DEBUG: Property ' + $0 + ': key="' + UTF8ToString($1) + 
+                           '", semantic=' + $2 + ', index=' + $3 + ', type=' + $4);
+            }, static_cast<int>(i), prop->mKey.data, static_cast<int>(prop->mSemantic), 
+               static_cast<int>(prop->mIndex), static_cast<int>(prop->mType));
+#endif
             if (strcmp(prop->mKey.data, AI_MATKEY_TEXTURE_BASE) == 0 && 
                 prop->mSemantic == static_cast<unsigned int>(type) &&
                 prop->mType == aiPTI_String) {
                 count++;
+#ifdef __EMSCRIPTEN__
+                EM_ASM_({
+                    console.log('GET_TEXTURE_COUNT DEBUG: Found matching texture property!');
+                });
+#endif
             }
         }
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('GET_TEXTURE_COUNT DEBUG: Returning count = ' + $0);
+        }, static_cast<int>(count));
+#endif
         return count;
     }
     
@@ -681,13 +703,88 @@ bool Assimp::Importer::LoadOBJ(const std::string& path) {
             m_scene->mMaterials[i] = materials[i];
         }
         
-        // Use first material as default, or material 0 if no face materials assigned
-        mesh->mMaterialIndex = (!faceMaterials.empty() && faceMaterials[0] >= 0) ? faceMaterials[0] : 0;
+        // Group faces by material and create separate meshes
+        std::map<int, std::vector<size_t>> materialFaceMap;
+        for (size_t i = 0; i < faces.size(); i++) {
+            int matIdx = (i < faceMaterials.size() && faceMaterials[i] >= 0) ? faceMaterials[i] : 0;
+            materialFaceMap[matIdx].push_back(i);
+        }
         
         EM_ASM_({
             console.log('MATERIAL DEBUG: Using ' + $0 + ' materials from MTL file');
-            console.log('MATERIAL DEBUG: Mesh material index = ' + $1);
-        }, static_cast<int>(materials.size()), static_cast<int>(mesh->mMaterialIndex));
+            console.log('MATERIAL DEBUG: Creating ' + $1 + ' separate meshes for material groups');
+        }, static_cast<int>(materials.size()), static_cast<int>(materialFaceMap.size()));
+        
+        // Delete the single mesh we created earlier
+        delete mesh;
+        delete[] m_scene->mMeshes;
+        
+        // Create separate meshes for each material
+        m_scene->mNumMeshes = materialFaceMap.size();
+        m_scene->mMeshes = new aiMesh*[m_scene->mNumMeshes];
+        
+        size_t meshIdx = 0;
+        for (auto& pair : materialFaceMap) {
+            int matIdx = pair.first;
+            const auto& faceIndices = pair.second;
+            
+            aiMesh* matMesh = new aiMesh();
+            matMesh->mMaterialIndex = matIdx;
+            matMesh->mNumVertices = faceIndices.size() * 3;
+            matMesh->mVertices = new aiVector3D[matMesh->mNumVertices];
+            matMesh->mNormals = new aiVector3D[matMesh->mNumVertices];
+            matMesh->mTextureCoords[0] = new aiVector3D[matMesh->mNumVertices];
+            
+            matMesh->mNumFaces = faceIndices.size();
+            matMesh->mFaces = new aiFace[matMesh->mNumFaces];
+            
+            for (size_t i = 0; i < faceIndices.size(); i++) {
+                size_t faceIdx = faceIndices[i];
+                aiFace& face = matMesh->mFaces[i];
+                face.mNumIndices = 3;
+                face.mIndices = new unsigned int[3];
+                
+                for (int j = 0; j < 3; j++) {
+                    int vertIdx = i * 3 + j;
+                    face.mIndices[j] = vertIdx;
+                    
+                    // Vertex position
+                    int vIdx = faces[faceIdx][j*3];
+                    if (vIdx >= 0 && vIdx < vertices.size()) {
+                        matMesh->mVertices[vertIdx] = vertices[vIdx];
+                    }
+                    
+                    // Texture coordinates
+                    int vtIdx = faces[faceIdx][j*3 + 1];
+                    if (vtIdx >= 0 && vtIdx < texCoords.size()) {
+                        matMesh->mTextureCoords[0][vertIdx] = texCoords[vtIdx];
+                    }
+                    
+                    // Normal
+                    int vnIdx = faces[faceIdx][j*3 + 2];
+                    if (vnIdx >= 0 && vnIdx < normals.size()) {
+                        matMesh->mNormals[vertIdx] = normals[vnIdx];
+                    } else {
+                        matMesh->mNormals[vertIdx] = aiVector3D(0, 1, 0);
+                    }
+                }
+            }
+            
+            m_scene->mMeshes[meshIdx++] = matMesh;
+            
+            EM_ASM_({
+                console.log('MATERIAL DEBUG: Created mesh ' + $0 + ' with material index ' + $1 + ' (' + $2 + ' faces)');
+            }, static_cast<int>(meshIdx - 1), matIdx, static_cast<int>(faceIndices.size()));
+        }
+        
+        // Update root node to reference all meshes
+        delete m_scene->mRootNode;
+        m_scene->mRootNode = new aiNode();
+        m_scene->mRootNode->mNumMeshes = m_scene->mNumMeshes;
+        m_scene->mRootNode->mMeshes = new unsigned int[m_scene->mNumMeshes];
+        for (unsigned int i = 0; i < m_scene->mNumMeshes; i++) {
+            m_scene->mRootNode->mMeshes[i] = i;
+        }
     } else {
         // Create default material if no MTL loaded
         m_scene->mNumMaterials = 1;
@@ -702,10 +799,10 @@ bool Assimp::Importer::LoadOBJ(const std::string& path) {
         EM_ASM_({
             console.log('MATERIAL DEBUG: No MTL file loaded, using default material');
         });
+        
+        // Create root node for single mesh (default material case)
+        m_scene->mRootNode = new aiNode(1, 0);  // 1 mesh, mesh index 0
     }
-    
-    // Create root node using custom constructor for proper WebAssembly initialization
-    m_scene->mRootNode = new aiNode(1, 0);  // 1 mesh, mesh index 0
     
     // Aggressive memory debugging for WebAssembly
     EM_ASM_({

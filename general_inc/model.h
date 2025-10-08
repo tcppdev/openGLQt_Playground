@@ -58,17 +58,17 @@ public:
     // draws the model, and thus all its meshes
     void Draw(Shader &shader)
     {
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MODEL DRAW DEBUG: Drawing model with ' + $0 + ' meshes');
-        }, static_cast<int>(meshes.size()));
-#endif
+// #ifdef __EMSCRIPTEN__
+//         EM_ASM_({
+//             console.log('MODEL DRAW DEBUG: Drawing model with ' + $0 + ' meshes');
+//         }, static_cast<int>(meshes.size()));
+// #endif
         for(unsigned int i = 0; i < meshes.size(); i++) {
-#ifdef __EMSCRIPTEN__
-            EM_ASM_({
-                console.log('MODEL DRAW DEBUG: Drawing mesh ' + $0);
-            }, static_cast<int>(i));
-#endif
+// #ifdef __EMSCRIPTEN__
+//             EM_ASM_({
+//                 console.log('MODEL DRAW DEBUG: Drawing mesh ' + $0);
+//             }, static_cast<int>(i));
+// #endif
             meshes[i].Draw(shader);
         }
     }
@@ -307,7 +307,19 @@ private:
     vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
     {
         vector<Texture> textures;
-        for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('LOAD_MAT_TEX DEBUG: Called with type=' + $0 + ', typeName=' + UTF8ToString($1));
+            console.log('LOAD_MAT_TEX DEBUG: Material pointer=' + $2);
+        }, static_cast<int>(type), typeName.c_str(), reinterpret_cast<uintptr_t>(mat));
+#endif
+        unsigned int textureCount = mat->GetTextureCount(type);
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('LOAD_MAT_TEX DEBUG: GetTextureCount returned ' + $0);
+        }, static_cast<int>(textureCount));
+#endif
+        for(unsigned int i = 0; i < textureCount; i++)
         {
             aiString str;
             mat->GetTexture(type, i, &str);
