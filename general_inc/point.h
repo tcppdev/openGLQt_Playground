@@ -23,6 +23,14 @@ struct VertexP {   // just want to make sure
     glm::vec3 Position;
 };
 
+#ifdef __EMSCRIPTEN__
+// Extended vertex structure for WebAssembly points (includes offset for billboarding)
+struct VertexPWithOffset {
+    glm::vec3 Position;  // Point center
+    glm::vec2 Offset;    // 2D offset in shape-local coordinates
+};
+#endif
+
 struct GeoPoint {
 
     Eigen::Vector3f coordinate;
@@ -57,11 +65,13 @@ public:
         // Point shader
         std::string vertex_path = POINT_VS.string();
         std::string fragment_path = POINT_FS.string();
+#ifdef __EMSCRIPTEN__
+        // WebAssembly: no geometry shader
+        m_point_shader = new Shader(vertex_path.c_str(), fragment_path.c_str(), nullptr);
+#else
         std::string geometry_path = POINT_GS.string();
-        const char* vertex_shader_path = vertex_path.c_str();
-        const char* fragment_shader_path = fragment_path.c_str();
-        const char* geometry_shader_path = geometry_path.c_str();
-        m_point_shader = new Shader(vertex_shader_path, fragment_shader_path, geometry_shader_path);
+        m_point_shader = new Shader(vertex_path.c_str(), fragment_path.c_str(), geometry_path.c_str());
+#endif
 
         VertexP vertex;
 
@@ -105,14 +115,32 @@ public:
 
         glBindVertexArray(vao_);  
 
-        // load data into buffers
+#ifdef __EMSCRIPTEN__
+        // WebAssembly: Generate shape geometry with billboarding offsets
+        std::vector<VertexPWithOffset> shape_vertices;
+        generate_point_shapes(shape_vertices);
+        
+        // load shape data into buffers
         glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-        glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(VertexP), &vertices_[0], GL_STATIC_DRAW);  
-
-        // set the vertex attribute pointers:
-        // vertex Positions
+        glBufferData(GL_ARRAY_BUFFER, shape_vertices.size() * sizeof(VertexPWithOffset), &shape_vertices[0], GL_STATIC_DRAW);
+        
+        // Set vertex attribute pointers for WebAssembly
+        // Position (location = 0)
+        glEnableVertexAttribArray(0);	
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPWithOffset), (void*)0);
+        
+        // Offset (location = 1)
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPWithOffset), (void*)offsetof(VertexPWithOffset, Offset));
+#else
+        // Native: Use point vertices (geometry shader handles expansion)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+        glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(VertexP), &vertices_[0], GL_STATIC_DRAW);
+        
+        // Set vertex attribute pointers for native
         glEnableVertexAttribArray(0);	
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (void*)0);
+#endif
 
         // glBindVertexArray(0);  // Unbind vao
     }
@@ -192,6 +220,13 @@ public:
         m_point_shader->setBool("fixed_size", fixed_size_);
         m_point_shader->setFloat("size", size_);
 
+#ifdef __EMSCRIPTEN__
+        // WebAssembly: Pass camera vectors for billboarding
+        // Extract camera right and up vectors from view matrix
+        m_point_shader->setVec3("camera_right_worldspace", view_matrix[0][0], view_matrix[1][0], view_matrix[2][0]);
+        m_point_shader->setVec3("camera_up_worldspace", view_matrix[0][1], view_matrix[1][1], view_matrix[2][1]);
+#endif
+
         switch (symbol_) {
             case Symbol::SQUARE: {
                 m_point_shader->setBool("square", true);
@@ -211,9 +246,15 @@ public:
             }  // draw a triangle
         }
 
-        // Draw line
+        // Draw shapes
         glBindVertexArray(vao_);
-        glDrawArrays(GL_POINTS, 0, vertices_.size()); 
+#ifdef __EMSCRIPTEN__
+        // WebAssembly: Draw triangles (shapes generated on CPU)
+        glDrawArrays(GL_TRIANGLES, 0, wasm_vertex_count_);
+#else
+        // Native: Draw points (geometry shader expands to shapes)
+        glDrawArrays(GL_POINTS, 0, vertices_.size());
+#endif
         glBindVertexArray(0);  // Unbind vao
 
         // Draw text
@@ -227,6 +268,86 @@ public:
     }
 
 private:
+
+#ifdef __EMSCRIPTEN__
+    // Helper method to generate shape geometry for points in WebAssembly
+    // Generates billboarded shapes using 2D offsets that will be applied by vertex shader
+    void generate_point_shapes(std::vector<VertexPWithOffset>& shape_vertices)
+    {
+        const int circle_segments = 20; // Number of segments for circle approximation
+        
+        for (const auto& vertex : vertices_) {
+            glm::vec3 center = vertex.Position;
+            
+            switch (symbol_) {
+                case Symbol::CIRCLE: {
+                    // Generate circle as triangle fan with 2D offsets
+                    float angle_step = 2.0f * M_PI / circle_segments;
+                    for (int i = 0; i < circle_segments; ++i) {
+                        float angle1 = i * angle_step;
+                        float angle2 = (i + 1) * angle_step;
+                        
+                        // Triangle: center, point1, point2
+                        VertexPWithOffset v;
+                        
+                        v.Position = center;
+                        v.Offset = glm::vec2(0.0f, 0.0f);  // Center point
+                        shape_vertices.push_back(v);
+                        
+                        v.Position = center;
+                        v.Offset = glm::vec2(cos(angle1), sin(angle1));  // First edge point
+                        shape_vertices.push_back(v);
+                        
+                        v.Position = center;
+                        v.Offset = glm::vec2(cos(angle2), sin(angle2));  // Second edge point
+                        shape_vertices.push_back(v);
+                    }
+                    break;
+                }
+                case Symbol::SQUARE: {
+                    // Generate square as 2 triangles with 2D offsets
+                    VertexPWithOffset v;
+                    v.Position = center;
+                    
+                    // Triangle 1: bottom-left, bottom-right, top-left
+                    v.Offset = glm::vec2(-0.5f, -0.5f);
+                    shape_vertices.push_back(v);
+                    v.Offset = glm::vec2(0.5f, -0.5f);
+                    shape_vertices.push_back(v);
+                    v.Offset = glm::vec2(-0.5f, 0.5f);
+                    shape_vertices.push_back(v);
+                    
+                    // Triangle 2: bottom-right, top-right, top-left
+                    v.Offset = glm::vec2(0.5f, -0.5f);
+                    shape_vertices.push_back(v);
+                    v.Offset = glm::vec2(0.5f, 0.5f);
+                    shape_vertices.push_back(v);
+                    v.Offset = glm::vec2(-0.5f, 0.5f);
+                    shape_vertices.push_back(v);
+                    break;
+                }
+                case Symbol::TRIANGLE: {
+                    // Generate triangle with 2D offsets
+                    VertexPWithOffset v;
+                    v.Position = center;
+                    
+                    v.Offset = glm::vec2(-0.5f, -0.5f);
+                    shape_vertices.push_back(v);
+                    v.Offset = glm::vec2(0.5f, -0.5f);
+                    shape_vertices.push_back(v);
+                    v.Offset = glm::vec2(0.0f, 0.5f);
+                    shape_vertices.push_back(v);
+                    break;
+                }
+            }
+        }
+        
+        wasm_vertex_count_ = shape_vertices.size();
+    }
+    
+    size_t wasm_vertex_count_ = 0;
+#endif
+
     glm::vec4 color_ = glm::vec4(1.0, 0.0, 0.0, 1.0);
     float size_ = 5;
     bool fixed_size_ = false;

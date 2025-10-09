@@ -53,7 +53,11 @@ fs::path CUBEMAP_VS = SHADERS_PATH / "cubemap.vs";
 fs::path CUBEMAP_FS = SHADERS_PATH / "cubemap.fs";
 
 // Billboard
+#ifdef __EMSCRIPTEN__
+fs::path BILLBOARD_VS = SHADERS_PATH / "billboard_wasm.vs";
+#else
 fs::path BILLBOARD_VS = SHADERS_PATH / "billboard.vs";
+#endif
 fs::path BILLBOARD_FS = SHADERS_PATH / "billboard.fs";
 fs::path BILLBOARD_GS = SHADERS_PATH / "billboard.gs";
 
@@ -62,7 +66,11 @@ fs::path DELAUNAY_2_5D_VS = SHADERS_PATH / "delaunay_2_5D.vs";
 fs::path DELAUNAY_2_5D_FS = SHADERS_PATH / "delaunay_2_5D.fs";
 
 // Point
+#ifdef __EMSCRIPTEN__
+fs::path POINT_VS = SHADERS_PATH / "point_wasm.vs";
+#else
 fs::path POINT_VS = SHADERS_PATH / "point.vs";
+#endif
 fs::path POINT_FS = SHADERS_PATH / "point.fs";
 fs::path POINT_GS = SHADERS_PATH / "point.gs";
 
@@ -79,7 +87,11 @@ fs::path ELLIPSOID_VS = SHADERS_PATH / "ellipsoid.vs";
 fs::path ELLIPSOID_FS = SHADERS_PATH / "ellipsoid.fs";
 
 // Lines
+#ifdef __EMSCRIPTEN__
+fs::path LINE_VS = SHADERS_PATH / "line_shader_wasm.vs";
+#else
 fs::path LINE_VS = SHADERS_PATH / "line_shader.vs";
+#endif
 fs::path LINE_FS = SHADERS_PATH / "line_shader.fs";
 fs::path LINE_GS = SHADERS_PATH / "line_shader.gs";
 

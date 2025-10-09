@@ -170,7 +170,7 @@ public:
             the_coordinates.push_back(coordinate);
         }
         the_lines.push_back(the_coordinates);
-        // m_circular_line =  std::make_unique<Line>(the_lines, 10); 
+        m_circular_line =  std::make_unique<Line>(the_lines, 10); 
 
         // 
         // My polygon
@@ -190,7 +190,7 @@ public:
         polygon_2_coordinates.emplace_back(0, 0, EARTH_RADIUS);
         the_polygons.push_back(polygon_2_coordinates);
 
-        // m_polygon =  std::make_unique<Polygon3D>(the_polygons); 
+        m_polygon =  std::make_unique<Polygon3D>(the_polygons); 
 
         // Draw circle on sphere?
         // Method 1: Flat circle
@@ -212,7 +212,7 @@ public:
         the_points.push_back(GeoPoint(Eigen::Vector3f(EARTH_RADIUS, -EARTH_RADIUS, -EARTH_RADIUS), "This is point 2"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, EARTH_RADIUS, EARTH_RADIUS), "This is another point"));
         the_points.push_back(GeoPoint(Eigen::Vector3f(-EARTH_RADIUS, -EARTH_RADIUS, EARTH_RADIUS), "a\nb\nc"));
-        // m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
+        m_points = std::make_unique<Point>(the_points, 0.1*EARTH_RADIUS, Symbol::CIRCLE);
 
 #ifndef __EMSCRIPTEN__
         // CSV file loading disabled for WebAssembly
@@ -385,18 +385,18 @@ public:
 
         // Lets draw the line
         if (m_draw_line) {
-            // m_circular_line->draw(view, projection);
+            m_circular_line->draw(view, projection);
         }
 
         // Lets draw the polygon
-        // m_polygon->draw(view, projection);
+        m_polygon->draw(view, projection);
         
         // Draw points
         if (m_click_toggle.first) {
-            // m_points->test_ray_tracing(view, projection, m_click_toggle.second);
+            m_points->test_ray_tracing(view, projection, m_click_toggle.second);
             // m_click_toggle.first = false;  // desactivate mouse click
         }
-        // m_points->draw(view, projection);
+        m_points->draw(view, projection);
 
 // #ifndef __EMSCRIPTEN__
 //         // Draw delaunay projection (full version)
@@ -499,7 +499,7 @@ private:
     std::unique_ptr<Ellipsoid> m_ellipsoid;
     std::unique_ptr<Ellipsoid> m_ellipsoid_earth;
     std::unique_ptr<OBB> m_obb;
-    // std::unique_ptr<Line> m_circular_line;
+    std::unique_ptr<Line> m_circular_line;
     std::unique_ptr<Polygon3D> m_polygon;
     // std::unique_ptr<Delaunay2_5D> m_projected_shapes;
     std::unique_ptr<Point> m_points;
