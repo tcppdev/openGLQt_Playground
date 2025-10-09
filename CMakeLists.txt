@@ -120,7 +120,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
         --shell-file=${CMAKE_SOURCE_DIR}/wasm_shell.html
         -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']
         -sEXPORTED_FUNCTIONS=['_main']
-        -sTOTAL_MEMORY=268435456
+        # Mobile-friendly memory settings: start small, grow as needed
+        -sINITIAL_MEMORY=67108864
+        -sMAXIMUM_MEMORY=536870912
         -sSTACK_SIZE=65536
         -sFULL_ES2=1
         -sFULL_ES3=1
