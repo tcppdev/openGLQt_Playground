@@ -108,10 +108,33 @@ make -j$(nproc)
 
 And view it on your local server host:
 ```bash 
-mkdir <build_dir_webassembly> && python3 -m http.server 8080
+mkdir <build_dir_webassembly> && python3 -m http.server 8000 --bind 0.0.0.0
 
-# Open in browser (tested on chrome)
-http://localhost:8080/openGLQt_Qt6_WebAssembly.html
+# Open in your browser (tested on chrome)
+http://localhost:8000/openGLQt_Qt6_WebAssembly.html
+
+# Open in other devices on your local network
+ 
+# First get your local host IP -> returns <YOUR_IP>
+hostname -I
+
+# Allow firewall access on local network
+sudo ufw enable
+sudo ufw allow 8000/tcp
+
+# Access on device and open openGLQt_Qt6_WebAssembly.html
+http://<YOUR_IP>:8000/
+
+# Note: If you are on WSL2 Linux launch it from Windows instead
+# Open powershell as admistrator
+cd \\wsl.localhost\<distribution>\<Repos_dir>\openGLQt_Playground\<build_dir_webassembly>
+# Get your local IP (IPv4 Address) -> returns <YOUR_IP>
+ipconfig
+# Start server
+python -m http.server 8000 --bind 0.0.0.0
+
+# Access on device and open openGLQt_Qt6_WebAssembly.html
+http://<YOUR_IP>:8000/
 ```
 
 # Building native application on Windows environment using msys2
