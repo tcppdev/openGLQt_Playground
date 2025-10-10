@@ -302,6 +302,12 @@ public:
         // Process (right) click input
         m_click_toggle = i->mouse_click();
 
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('m_click_toggle fetched with value: ' + $0);
+        }, m_click_toggle.first);
+#endif
+
         m_window_width = i->get_window_width();
         m_window_height = i->get_window_height();
 
@@ -316,6 +322,13 @@ public:
         // glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
+        if (m_click_toggle.first) {
+            #ifdef __EMSCRIPTEN__
+                    EM_ASM_({
+                        console.log('CLICK TOGGLE TRIGGERED');
+                    });
+            #endif
+        }
         // Rocket Center 
         float nMilliseconds = static_cast<float>(timer_.elapsed());
         float theta = nMilliseconds/100;  //  aol [deg]
@@ -414,7 +427,15 @@ public:
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f));  // theta-rotation
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_azimuth), glm::vec3(0.0f, 1.0f, 0.0f));  // azimuth rotation 
         model_ellipsoid = glm::rotate(model_ellipsoid, glm::radians(m_current_elevation), glm::vec3(1.0f, 0.0f, 0.0f));  // elevation rotation
-        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(0.5*theta/360, theta/360, 0.5*theta/360));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
+        
+        
+        double scale_ellipsoid = 1.0;
+        if(theta < 720){
+            scale_ellipsoid = 0.5*theta/360;
+        }
+        model_ellipsoid = glm::scale(model_ellipsoid, glm::vec3(scale_ellipsoid, 0.5*scale_ellipsoid, scale_ellipsoid));  // Scale is last (order of operation is reversed! scale -> rotate -> translate)
+
+
         m_ellipsoid->draw(view, projection, model_ellipsoid);
 
         // Draw ellispoid

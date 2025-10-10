@@ -28,6 +28,54 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.leftMargin: 10
         }
+        
+        // Mobile pinch-to-zoom support (doesn't interfere with mouse)
+        PinchHandler {
+            id: pinchHandler
+            target: null  // Only detect pinch, don't transform the view
+            
+            property real lastScale: 1.0
+            
+            onActiveChanged: {
+                if (active) {
+                    lastScale = 1.0
+                    console.log("Pinch started")
+                }
+            }
+            
+            onScaleChanged: {
+                if (active) {
+                    // Calculate incremental scale change
+                    var scaleChange = scale / lastScale
+                    
+                    // Convert to mouse wheel delta (log scale for smooth zoom)
+                    // Conservative multiplier for gentle mobile zoom
+                    var wheelDelta = Math.log(scaleChange) * 80
+                    
+                    // Clamp to prevent extreme values
+                    wheelDelta = Math.max(-30, Math.min(30, wheelDelta))
+                    
+                    renderer.handlePinchZoom(wheelDelta)
+                    console.log("Pinch scale:", scale.toFixed(3), "delta:", wheelDelta.toFixed(2))
+                    
+                    lastScale = scale
+                }
+            }
+        }
+        
+        // Mobile tap-to-select support
+        // Note: Drag is handled automatically by Qt's touch-to-mouse synthesis
+        TapHandler {
+            id: tapHandler
+            acceptedDevices: PointerDevice.TouchScreen  // Only touch, not mouse
+            acceptedButtons: Qt.LeftButton
+            gesturePolicy: TapHandler.DragThreshold  // Won't fire if drag distance exceeded
+            
+            onTapped: function(eventPoint) {
+                console.log("Tap detected at:", eventPoint.position.x, eventPoint.position.y)
+                renderer.handleTouchTap(eventPoint.position.x, eventPoint.position.y)
+            }
+        }
 
     }
 

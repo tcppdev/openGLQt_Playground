@@ -8,6 +8,11 @@
 
 #include <iostream>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
+
 class MyFrameBufferObject : public QQuickFramebufferObject
 {
     Q_OBJECT
@@ -48,6 +53,53 @@ public slots:
     void set_center_to_vehicle(bool center_to_vehicle);
     void request_redraw() { update(); }
     void set_line_visibility(bool visibility);
+    
+    // Mobile pinch zoom handler
+    void handlePinchZoom(qreal scaleDelta) {
+        // Convert pinch scale delta to mouse wheel delta
+        mouse_angle_delta_ = static_cast<int>(scaleDelta);
+        update();
+    }
+
+    // Desktop zoom handler
+    void wheelEvent(QWheelEvent *event) override {
+        mouse_angle_delta_ = event->angleDelta().y();  // Update rendering
+        update();
+    }
+
+    // Mobile drag handler
+    // void handleTouchDrag(qreal deltaX, qreal deltaY) {
+    //     // Simulate mouse drag for camera rotation
+    //     delta_x_pos_ = 0.05*deltaX;
+    //     delta_y_pos_ = 0.05*deltaY;  // Invert Y for correct rotation
+    //     update();
+    // }
+    
+    // Mobile tap handler
+    void handleTouchTap(qreal x, qreal y) {
+        // Simulate right-click for selection (like mousePressEvent with RightButton)
+        mouse_x_ = x;
+        mouse_y_ = y;
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('TAP HANDLER EVENT CALLED');
+        });
+#endif
+        mouse_angle_delta_ = 0;  // Disable zooming when tapping
+        mouse_pressed_ = false;  // Disable moving when clicking
+        mouse_click_ = true;
+        screen_tapped_ = true;
+
+        // Convert to 3d normalised device coordinates
+        // https://antongerdelan.net/opengl/raycasting.html
+        qreal width_window = this->width();
+        qreal height_window = this->height();
+        float x_r = (2.0f * mouse_x_) / width_window - 1.0f;
+        float y_r = 1.0f - (2.0f * mouse_y_) / height_window;
+        float z_r = 1.0f;
+        ray_ndc_ = glm::vec3(x_r, y_r, z_r);
+        update();  // Update rendering (for some reason if its inside handleTouchTap it doesn't do anything)
+    }
 
 protected:
     void mousePressEvent(QMouseEvent *e) override {
@@ -58,9 +110,20 @@ protected:
         // Initial mouse coordinates:
         mouse_x_ = e->x();
         mouse_y_ = e->y();
-    
+
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MOUSE PRESS EVENT CALLED');
+        });
+#endif
+
         if (e->button() == Qt::RightButton) 
         {
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MOUSE PRESS EVENT CALLED WITH RIGHT BUTTON');
+        });
+#endif
             mouse_pressed_ = false;  // Disable moving when clicking
             mouse_click_ = true;
 
@@ -73,13 +136,26 @@ protected:
             float z = 1.0f;
             ray_ndc_ = glm::vec3(x, y, z);
         }
-
-        update();
+        
+        // if (!screen_tapped_) {
+        //     update();  
+        // }
     }
 
     void mouseMoveEvent(QMouseEvent *e) override {
-    
+
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MOUSE MOVE EVENT CALLED');
+        });
+#endif
         if (mouse_pressed_) {
+
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MOUSE MOVE EVENT CALLED WITH MOUSE PRESSED');
+        });
+#endif
             // std::cout << "Mouse moving" << std::endl;
 
             delta_x_pos_ = e->x() - mouse_x_;
@@ -101,16 +177,42 @@ protected:
         delta_x_pos_ = 0;
         delta_y_pos_ = 0;
 
-        if (e->button() == Qt::RightButton) 
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MOUSE RELEASE EVENT CALLED');
+        });
+#endif
+        // if (screen_tapped_) {   
+
+        //     #ifdef __EMSCRIPTEN__
+        //             EM_ASM_({
+        //                 console.log('CALLING UPDATE');
+        //             });
+        //     #endif
+        //     update();  // Update rendering (for some reason if its inside handleTouchTap it doesn't do anything)
+        // }
+
+        if (!screen_tapped_) {
+            update();  
+        }
+        
+        if (e->button() == Qt::RightButton || screen_tapped_) 
         {
             mouse_click_ = false;  // release mouse
-        }
-    }
+            screen_tapped_ = false; // reset tap
 
-    void wheelEvent(QWheelEvent *event) override {
-        mouse_wheel_activated_ = true;
-        mouse_angle_delta_ = event->angleDelta().y();  // Update rendering
-        update();
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MOUSE RELEASE EVENT CALLED with right button');
+        });
+#endif
+        }
+
+#ifdef __EMSCRIPTEN__
+        EM_ASM_({
+            console.log('MOUSE RELEASE EVENT CALLED END');
+        });
+#endif
     }
 
 private:
@@ -119,9 +221,9 @@ private:
     float m_distance;
     bool m_center_to_vehicle = false;
 
-    bool mouse_wheel_activated_ = false;
     bool mouse_pressed_ = false;
     bool mouse_click_ = false; // Mouse clicking (with right click)
+    bool screen_tapped_ = false; // Screen tapped (mobile)
     int mouse_x_ = 0;  // Current mouse x coordinate (relative to widget)
     int mouse_y_ = 0;  // Current mouse x coordinate (relative to widget)
     int mouse_angle_delta_ = 0;  // Current mouse scroll delta angle

@@ -117,7 +117,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
         -sALLOW_MEMORY_GROWTH=1
         -sASYNCIFY=1
         -sUSE_FREETYPE=1
-        --shell-file=${CMAKE_SOURCE_DIR}/wasm_shell.html
+        # --shell-file=${CMAKE_SOURCE_DIR}/wasm_shell.html
         -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']
         -sEXPORTED_FUNCTIONS=['_main']
         # Mobile-friendly memory settings: start small, grow as needed
