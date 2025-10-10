@@ -302,11 +302,9 @@ public:
         // Process (right) click input
         m_click_toggle = i->mouse_click();
 
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('m_click_toggle fetched with value: ' + $0);
-        }, m_click_toggle.first);
-#endif
+        if (m_click_toggle.first) {
+            i->set_mouse_click(false);  // Reset after fetching the value (one render cycle only) for mobile tap
+        };
 
         m_window_width = i->get_window_width();
         m_window_height = i->get_window_height();
@@ -322,13 +320,6 @@ public:
         // glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
-        if (m_click_toggle.first) {
-            #ifdef __EMSCRIPTEN__
-                    EM_ASM_({
-                        console.log('CLICK TOGGLE TRIGGERED');
-                    });
-            #endif
-        }
         // Rocket Center 
         float nMilliseconds = static_cast<float>(timer_.elapsed());
         float theta = nMilliseconds/100;  //  aol [deg]
@@ -603,6 +594,11 @@ void MyFrameBufferObject::set_line_visibility(bool visibility)
 std::pair<bool, glm::vec3> MyFrameBufferObject::mouse_click() const
 {
     return std::make_pair(mouse_click_, ray_ndc_);
+}
+
+void MyFrameBufferObject::set_mouse_click(bool state)
+{
+    mouse_click_ = state;
 }
 
 float MyFrameBufferObject::azimuth() const

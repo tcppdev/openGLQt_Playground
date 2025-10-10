@@ -50,10 +50,10 @@ ApplicationWindow {
                     
                     // Convert to mouse wheel delta (log scale for smooth zoom)
                     // Conservative multiplier for gentle mobile zoom
-                    var wheelDelta = Math.log(scaleChange) * 80
+                    var wheelDelta = Math.log(scaleChange) * 400
                     
                     // Clamp to prevent extreme values
-                    wheelDelta = Math.max(-30, Math.min(30, wheelDelta))
+                    wheelDelta = Math.max(-50, Math.min(50, wheelDelta))
                     
                     renderer.handlePinchZoom(wheelDelta)
                     console.log("Pinch scale:", scale.toFixed(3), "delta:", wheelDelta.toFixed(2))
@@ -67,12 +67,12 @@ ApplicationWindow {
         // Note: Drag is handled automatically by Qt's touch-to-mouse synthesis
         TapHandler {
             id: tapHandler
-            acceptedDevices: PointerDevice.TouchScreen  // Only touch, not mouse
+            acceptedDevices: PointerDevice.TouchScreen  // Only respond to touch, not mouse
             acceptedButtons: Qt.LeftButton
             gesturePolicy: TapHandler.DragThreshold  // Won't fire if drag distance exceeded
             
             onTapped: function(eventPoint) {
-                console.log("Tap detected at:", eventPoint.position.x, eventPoint.position.y)
+                console.log("Touch tap detected at:", eventPoint.position.x, eventPoint.position.y)
                 renderer.handleTouchTap(eventPoint.position.x, eventPoint.position.y)
             }
         }

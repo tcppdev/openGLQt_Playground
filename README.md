@@ -113,6 +113,11 @@ mkdir <build_dir_webassembly> && python3 -m http.server 8000 --bind 0.0.0.0
 # Open in your browser (tested on chrome)
 http://localhost:8000/openGLQt_Qt6_WebAssembly.html
 
+# Note (mobile only): To add a useful debugging console for mobile web browser add the following to the generated html file (openGLQt_Qt6_WebAssembly.html) under <title> 
+<!-- Mobile debugging console -->
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+
 # Open in other devices on your local network
  
 # First get your local host IP -> returns <YOUR_IP>

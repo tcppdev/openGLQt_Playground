@@ -36,6 +36,7 @@ public:
     bool line_visibility() const;
     void trigger_redraw();
     std::pair<bool, glm::vec3> mouse_click() const;
+    void set_mouse_click(bool state);
 
     qreal get_window_height();
     qreal get_window_width();
@@ -67,24 +68,12 @@ public slots:
         update();
     }
 
-    // Mobile drag handler
-    // void handleTouchDrag(qreal deltaX, qreal deltaY) {
-    //     // Simulate mouse drag for camera rotation
-    //     delta_x_pos_ = 0.05*deltaX;
-    //     delta_y_pos_ = 0.05*deltaY;  // Invert Y for correct rotation
-    //     update();
-    // }
-    
     // Mobile tap handler
     void handleTouchTap(qreal x, qreal y) {
         // Simulate right-click for selection (like mousePressEvent with RightButton)
         mouse_x_ = x;
         mouse_y_ = y;
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('TAP HANDLER EVENT CALLED');
-        });
-#endif
+
         mouse_angle_delta_ = 0;  // Disable zooming when tapping
         mouse_pressed_ = false;  // Disable moving when clicking
         mouse_click_ = true;
@@ -98,7 +87,6 @@ public slots:
         float y_r = 1.0f - (2.0f * mouse_y_) / height_window;
         float z_r = 1.0f;
         ray_ndc_ = glm::vec3(x_r, y_r, z_r);
-        update();  // Update rendering (for some reason if its inside handleTouchTap it doesn't do anything)
     }
 
 protected:
@@ -111,19 +99,8 @@ protected:
         mouse_x_ = e->x();
         mouse_y_ = e->y();
 
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MOUSE PRESS EVENT CALLED');
-        });
-#endif
-
         if (e->button() == Qt::RightButton) 
         {
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MOUSE PRESS EVENT CALLED WITH RIGHT BUTTON');
-        });
-#endif
             mouse_pressed_ = false;  // Disable moving when clicking
             mouse_click_ = true;
 
@@ -137,25 +114,10 @@ protected:
             ray_ndc_ = glm::vec3(x, y, z);
         }
         
-        // if (!screen_tapped_) {
-        //     update();  
-        // }
     }
 
     void mouseMoveEvent(QMouseEvent *e) override {
-
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MOUSE MOVE EVENT CALLED');
-        });
-#endif
         if (mouse_pressed_) {
-
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MOUSE MOVE EVENT CALLED WITH MOUSE PRESSED');
-        });
-#endif
             // std::cout << "Mouse moving" << std::endl;
 
             delta_x_pos_ = e->x() - mouse_x_;
@@ -176,43 +138,16 @@ protected:
         mouse_pressed_ = false; 
         delta_x_pos_ = 0;
         delta_y_pos_ = 0;
-
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MOUSE RELEASE EVENT CALLED');
-        });
-#endif
-        // if (screen_tapped_) {   
-
-        //     #ifdef __EMSCRIPTEN__
-        //             EM_ASM_({
-        //                 console.log('CALLING UPDATE');
-        //             });
-        //     #endif
-        //     update();  // Update rendering (for some reason if its inside handleTouchTap it doesn't do anything)
-        // }
-
-        if (!screen_tapped_) {
-            update();  
-        }
         
         if (e->button() == Qt::RightButton || screen_tapped_) 
         {
             mouse_click_ = false;  // release mouse
-            screen_tapped_ = false; // reset tap
-
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MOUSE RELEASE EVENT CALLED with right button');
-        });
-#endif
         }
 
-#ifdef __EMSCRIPTEN__
-        EM_ASM_({
-            console.log('MOUSE RELEASE EVENT CALLED END');
-        });
-#endif
+        if (screen_tapped_){
+            mouse_click_ = true; // keep mouse_click true for one render cycle
+            screen_tapped_ = false; // reset tap
+        }
     }
 
 private:
