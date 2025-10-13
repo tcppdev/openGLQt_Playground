@@ -68,9 +68,18 @@ ninja -C <build_dir>
 ```
 
 # Building for WebAssembly (tested on linux WSL2)
-Install Qt6 (in `$HOME`) via online installer and follow install steps (for Qt 6.9.3: https://download.qt.io/archive/qt/6.9/6.9.3/single/qt-everywhere-src-6.9.3.tar.xz).
+Install Qt6 (in `$HOME`) via online installer and follow install steps (for Qt 6.9.3 download Linux runner from https://www.qt.io/download-qt-installer to `~/Downloads`.
+). Then use 
 
-Install the dependencies provided in this screenshot (most important is to install WebAssembly single-threaded libraries):
+```bash 
+cd ~/Downloads
+chmod +x qt-online-installer-linux-x64-4.10.0.run
+sudo apt install libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-cursor0 libxkbcommon-x11-0
+sudo apt install libxcb-shape0 libxcb-randr0 libxcb-xfixes0 libxkbcommon-x11-0 libxcb1 libx11-xcb1
+./qt-online-installer-linux-x64-4.10.0.run
+``` 
+
+Install Qt 6.9 for desktop development (inside `$HOME/Qt`) and the dependencies provided in this screenshot (most important is to install WebAssembly single-threaded libraries):
 ![](screenshots/qt_install.png)
 
 You might also need the following libraries installed:
